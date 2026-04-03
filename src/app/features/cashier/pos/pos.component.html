@@ -1,0 +1,191 @@
+<div class="pos">
+  <!-- Top bar -->
+  <header class="pos-header">
+    <div class="pos-header__left">
+      <div class="logo-mark">P</div>
+      <span class="logo-label">Point of Sale</span>
+    </div>
+    <div class="pos-header__center">
+      <h1 class="pos-header__title">Cashier POS</h1>
+      @if (currentUser(); as user) {
+        <span class="pos-header__user">{{ user.name }}</span>
+      }
+    </div>
+    <div class="pos-header__right">
+      @if (currentUser()?.role === 'superAdmin') {
+        <button
+          mat-stroked-button
+          class="switch-btn"
+          (click)="goToManagement()"
+          matTooltip="Go to Management view"
+        >
+          <mat-icon>dashboard</mat-icon>
+          Management
+        </button>
+      }
+      <button mat-icon-button (click)="logout()" matTooltip="Sign out">
+        <mat-icon>logout</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main split layout -->
+  <div class="pos-body">
+    <!-- Left: Product grid -->
+    <div class="products-panel">
+      <!-- Search -->
+      <div class="search-wrap">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search products…</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input
+            matInput
+            [value]="searchQuery()"
+            (input)="onSearchChange($any($event.target).value)"
+            aria-label="Search products"
+          />
+        </mat-form-field>
+      </div>
+
+      <!-- Grid -->
+      <div class="product-grid">
+        @for (product of filteredProducts(); track product.id) {
+          <button
+            class="product-card"
+            (click)="addToCart(product)"
+            [class.product-card--in-cart]="getCartQuantity(product.id) > 0"
+            aria-label="Add {{ product.name }} to cart"
+          >
+            <div class="product-card__img-wrap">
+              <img
+                class="product-card__img"
+                [src]="product.imageUrl"
+                [alt]="product.name"
+                loading="lazy"
+              />
+              @if (getCartQuantity(product.id) > 0) {
+                <span class="product-card__qty-badge">
+                  {{ getCartQuantity(product.id) }}
+                </span>
+              }
+            </div>
+            <p class="product-card__name">{{ product.name }}</p>
+            <p class="product-card__price">{{ formatCurrency(product.sellingPrice) }}</p>
+            <span class="product-card__stock" [class.out]="product.currentStock === 0">
+              {{ product.currentStock > 0 ? 'In stock: ' + product.currentStock : 'Out of stock' }}
+            </span>
+          </button>
+        }
+
+        @if (filteredProducts().length === 0) {
+          <div class="no-results">
+            <mat-icon>search_off</mat-icon>
+            <p>No products found</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Right: Cart -->
+    <div class="cart-panel">
+      <div class="cart-header">
+        <h2 class="cart-header__title">
+          Current Order
+          @if (cartCount() > 0) {
+            <span class="cart-header__count">{{ cartCount() }}</span>
+          }
+        </h2>
+        @if (cartItems().length > 0) {
+          <button mat-button class="clear-btn" (click)="clearCart()">
+            <mat-icon>delete_sweep</mat-icon>
+            Clear
+          </button>
+        }
+      </div>
+
+      <!-- Items list -->
+      <div class="cart-items">
+        @if (cartItems().length === 0) {
+          <div class="cart-empty">
+            <mat-icon>shopping_cart</mat-icon>
+            <p>Cart is empty</p>
+            <span>Click a product to add it</span>
+          </div>
+        }
+
+        @for (item of cartItems(); track item.product.id) {
+          <div class="cart-item">
+            <img
+              class="cart-item__img"
+              [src]="item.product.imageUrl"
+              [alt]="item.product.name"
+            />
+            <div class="cart-item__info">
+              <p class="cart-item__name">{{ item.product.name }}</p>
+              <p class="cart-item__unit-price">
+                {{ formatCurrency(item.product.sellingPrice) }} each
+              </p>
+            </div>
+            <div class="cart-item__controls">
+              <button
+                mat-icon-button
+                class="qty-btn"
+                (click)="decrement(item.product.id)"
+                aria-label="Decrease quantity"
+              >
+                <mat-icon>{{ item.quantity === 1 ? 'delete_outline' : 'remove' }}</mat-icon>
+              </button>
+              <span class="qty-value">{{ item.quantity }}</span>
+              <button
+                mat-icon-button
+                class="qty-btn"
+                (click)="increment(item.product.id)"
+                aria-label="Increase quantity"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+            <p class="cart-item__subtotal">
+              {{ formatCurrency(item.product.sellingPrice * item.quantity) }}
+            </p>
+          </div>
+        }
+      </div>
+
+      <!-- Totals -->
+      @if (cartItems().length > 0) {
+        <div class="cart-summary">
+          <mat-divider />
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{ formatCurrency(cartTotal()) }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax (10%)</span>
+            <span>{{ formatCurrency(tax()) }}</span>
+          </div>
+          <div class="summary-row summary-row--total">
+            <span>Total</span>
+            <span>{{ formatCurrency(grandTotal()) }}</span>
+          </div>
+        </div>
+      }
+
+      <!-- Pay button -->
+      <div class="cart-footer">
+        <button
+          mat-flat-button
+          class="pay-btn"
+          [disabled]="cartItems().length === 0"
+          (click)="processPayment()"
+        >
+          <mat-icon>payments</mat-icon>
+          Process Payment
+          @if (cartItems().length > 0) {
+            — {{ formatCurrency(grandTotal()) }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

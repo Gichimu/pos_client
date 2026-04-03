@@ -1,0 +1,51 @@
+<div class="dashboard">
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <app-stat-card
+      title="Today's Sales Total"
+      [value]="'$' + salesToday().toFixed(2)"
+      icon="credit_card"
+      iconBgClass="icon-bg--blue"
+    />
+    <app-stat-card
+      title="Low Stock Items"
+      [value]="lowStockCount().toString()"
+      icon="warning_amber"
+      iconBgClass="icon-bg--red"
+    />
+    <app-stat-card
+      title="Active Cashiers"
+      [value]="activeCashiers().toString()"
+      icon="badge"
+      iconBgClass="icon-bg--green"
+    />
+  </div>
+
+  <!-- Product List -->
+  <div class="product-section">
+    <div class="product-section__header">
+      <h2 class="product-section__title">Product List</h2>
+      <div class="product-section__actions">
+        <button
+          mat-stroked-button
+          class="action-btn"
+          (click)="openGenerateReport()"
+          aria-label="Generate Sales Report"
+        >
+          <mat-icon>assessment</mat-icon>
+          Generate Report
+        </button>
+        <button
+          mat-stroked-button
+          class="action-btn"
+          aria-label="Filter products"
+        >
+          <mat-icon>tune</mat-icon>
+          Filter products
+        </button>
+      </div>
+    </div>
+
+    <app-product-table [products]="products()" />
+  </div>
+</div>

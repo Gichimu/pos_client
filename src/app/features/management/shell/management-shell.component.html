@@ -1,0 +1,106 @@
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <!-- Logo -->
+    <div class="sidebar__logo">
+      <div class="logo-mark">P</div>
+      <span class="logo-label">Point of Sale</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar__nav" aria-label="Main navigation">
+      @for (item of navItems; track item.path) {
+        <a
+          class="nav-item"
+          [routerLink]="item.path"
+          routerLinkActive="nav-item--active"
+          [matTooltip]="item.label"
+          matTooltipPosition="right"
+          [matTooltipDisabled]="true"
+          [attr.aria-label]="item.label"
+        >
+          <mat-icon class="nav-item__icon">{{ item.icon }}</mat-icon>
+          <span class="nav-item__label">{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <!-- Bottom: cashier switch -->
+    <div class="sidebar__footer">
+      <button
+        mat-button
+        class="switch-btn"
+        (click)="goToCashier()"
+        matTooltip="Switch to Cashier View"
+      >
+        <mat-icon>point_of_sale</mat-icon>
+        <span>Cashier View</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main">
+    <!-- Header -->
+    <header class="header">
+      <h1 class="header__title">{{ pageTitle() }}</h1>
+
+      <div class="header__actions">
+        <!-- Store selector -->
+        <button mat-stroked-button class="store-btn" [matMenuTriggerFor]="storeMenu">
+          {{ currentUser()?.store ?? 'Select store' }}
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+        <mat-menu #storeMenu="matMenu">
+          <button mat-menu-item>Delect</button>
+          <button mat-menu-item>Branch 2</button>
+        </mat-menu>
+
+        <!-- Help -->
+        <button mat-icon-button matTooltip="Help" aria-label="Help">
+          <mat-icon>help_outline</mat-icon>
+        </button>
+
+        <!-- Notifications -->
+        <button
+          mat-icon-button
+          matTooltip="Notifications"
+          aria-label="Notifications"
+          [matBadge]="notifications()"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+        >
+          <mat-icon>notifications_none</mat-icon>
+        </button>
+
+        <!-- User menu -->
+        <button mat-button class="user-btn" [matMenuTriggerFor]="userMenu">
+          <img
+            class="user-btn__avatar"
+            [src]="currentUser()?.avatar"
+            [alt]="currentUser()?.name"
+          />
+          <span class="user-btn__name">{{ currentUser()?.name }}</span>
+          <mat-icon>keyboard_arrow_down</mat-icon>
+        </button>
+        <mat-menu #userMenu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>person</mat-icon> Profile
+          </button>
+          <button mat-menu-item>
+            <mat-icon>settings</mat-icon> Settings
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon> Sign out
+          </button>
+        </mat-menu>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="content page-enter">
+      <router-outlet />
+    </main>
+  </div>
+</div>

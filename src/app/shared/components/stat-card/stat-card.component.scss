@@ -1,0 +1,65 @@
+.stat-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  flex: 1;
+  min-width: 0;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+  }
+
+  &__title {
+    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    margin: 0 0 12px 0;
+    font-weight: 500;
+  }
+
+  &__value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+    letter-spacing: -0.03em;
+  }
+
+  &__icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+}
+
+// Icon background variants
+.icon-bg--blue {
+  background-color: #dbeafe;
+  mat-icon { color: #2563eb; }
+}
+
+.icon-bg--red {
+  background-color: #fee2e2;
+  mat-icon { color: #ef4444; }
+}
+
+.icon-bg--green {
+  background-color: #dcfce7;
+  mat-icon { color: #22c55e; }
+}

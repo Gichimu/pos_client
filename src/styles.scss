@@ -1,0 +1,111 @@
+@use '@angular/material' as mat;
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// ──────────────────────────────────────────────
+// Angular Material Theme
+// ──────────────────────────────────────────────
+html {
+  @include mat.core();
+
+  $theme: mat.define-theme((
+    color: (
+      theme-type: light,
+      primary: mat.$azure-palette,
+    ),
+    typography: (
+      brand-family: 'Inter, system-ui, sans-serif',
+      plain-family: 'Inter, system-ui, sans-serif',
+    ),
+    density: (
+      scale: 0,
+    ),
+  ));
+
+  @include mat.all-component-themes($theme);
+}
+
+// ──────────────────────────────────────────────
+// CSS Design Tokens
+// ──────────────────────────────────────────────
+:root {
+  --color-primary: #2563eb;
+  --color-primary-light: #eff6ff;
+  --color-primary-hover: #1d4ed8;
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-text: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-light: #94a3b8;
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  --shadow-modal: 0 20px 60px -10px rgba(0, 0, 0, 0.15);
+  --radius-card: 12px;
+  --sidebar-width: 270px;
+  --header-height: 64px;
+}
+
+// ──────────────────────────────────────────────
+// Global Resets & Base
+// ──────────────────────────────────────────────
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+// ──────────────────────────────────────────────
+// Angular Material overrides
+// ──────────────────────────────────────────────
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+.mat-mdc-form-field {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+.mat-mdc-dialog-container {
+  border-radius: 16px !important;
+}
+
+.mat-mdc-table {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
+}
+
+// Page fade-in animation
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: fadeIn 0.25s ease-out;
+}

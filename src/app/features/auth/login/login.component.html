@@ -1,0 +1,67 @@
+<div class="login-page">
+  <!-- Background gradient -->
+  <div class="login-page__bg"></div>
+
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="login-card__logo">
+      <div class="logo-icon">P</div>
+      <span class="logo-text">Point of Sale</span>
+    </div>
+
+    <h1 class="login-card__title">Welcome back</h1>
+    <p class="login-card__subtitle">Select your role to continue</p>
+
+    <!-- Role selection -->
+    <div class="role-grid">
+      <!-- Super Admin -->
+      <button
+        matRipple
+        class="role-card"
+        [class.role-card--selected]="selectedRole() === 'superAdmin'"
+        (click)="selectRole('superAdmin')"
+        aria-label="Login as Super Admin"
+      >
+        <div class="role-card__icon role-card__icon--admin">
+          <mat-icon>admin_panel_settings</mat-icon>
+        </div>
+        <p class="role-card__name">Super Admin</p>
+        <p class="role-card__desc">Full system access</p>
+        <div class="role-card__check" *ngIf="selectedRole() === 'superAdmin'">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+      </button>
+
+      <!-- Cashier -->
+      <button
+        matRipple
+        class="role-card"
+        [class.role-card--selected]="selectedRole() === 'cashier'"
+        (click)="selectRole('cashier')"
+        aria-label="Login as Cashier"
+      >
+        <div class="role-card__icon role-card__icon--cashier">
+          <mat-icon>point_of_sale</mat-icon>
+        </div>
+        <p class="role-card__name">Cashier</p>
+        <p class="role-card__desc">Sales & checkout</p>
+        <div class="role-card__check" *ngIf="selectedRole() === 'cashier'">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+      </button>
+    </div>
+
+    <!-- Login button -->
+    <button
+      mat-flat-button
+      class="login-btn"
+      [disabled]="!selectedRole()"
+      (click)="login()"
+    >
+      <mat-icon>login</mat-icon>
+      Continue
+    </button>
+
+    <p class="login-card__hint">Demo app — no password required</p>
+  </div>
+</div>

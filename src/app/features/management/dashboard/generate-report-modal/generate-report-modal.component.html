@@ -1,0 +1,83 @@
+<div class="report-modal">
+  <!-- Header -->
+  <div class="report-modal__header">
+    <h2 class="report-modal__title">Generate Sales Report</h2>
+    <button
+      mat-icon-button
+      class="close-btn"
+      (click)="close()"
+      aria-label="Close dialog"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="report-modal__body">
+    <form [formGroup]="form">
+      <!-- Date range -->
+      <div class="field-group">
+        <label class="field-label">Date</label>
+        <div class="date-row">
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>Start date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="startPicker"
+              formControlName="startDate"
+              placeholder="Start date"
+            />
+            <mat-datepicker-toggle matIconPrefix [for]="startPicker">
+              <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #startPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="date-field">
+            <mat-label>End date</mat-label>
+            <input
+              matInput
+              [matDatepicker]="endPicker"
+              formControlName="endDate"
+              placeholder="End date"
+            />
+            <mat-datepicker-toggle matIconPrefix [for]="endPicker">
+              <mat-icon matDatepickerToggleIcon>calendar_today</mat-icon>
+            </mat-datepicker-toggle>
+            <mat-datepicker #endPicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Products multi-select -->
+      <div class="field-group">
+        <label class="field-label">Products</label>
+        <mat-form-field appearance="outline" class="full-field">
+          <mat-label>Select products</mat-label>
+          <mat-select formControlName="products" multiple>
+            @for (product of products(); track product.id) {
+              <mat-option [value]="product.id">{{ product.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="report-modal__footer">
+    <button mat-button class="cancel-btn" (click)="close()">Cancel</button>
+    <button
+      mat-flat-button
+      class="save-btn"
+      [disabled]="loading()"
+      (click)="save()"
+    >
+      @if (loading()) {
+        Generating…
+      } @else {
+        Save
+      }
+    </button>
+  </div>
+</div>
