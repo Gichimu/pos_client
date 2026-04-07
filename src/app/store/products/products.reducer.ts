@@ -19,6 +19,10 @@ export const productsFeature = createFeature({
       ...state,
       products,
     })),
+    on(ProductsActions.addProduct, (state, { product }) => ({
+      ...state,
+      products: [...state.products, product],
+    })),
     on(ProductsActions.deleteProduct, (state, { id }) => ({
       ...state,
       products: state.products.filter((p) => p.id !== id),

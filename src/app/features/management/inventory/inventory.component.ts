@@ -1,40 +1,128 @@
-import { Component } from '@angular/core';
+// Inventory CRUD component
+import { Component, inject, computed, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { Store } from '@ngrx/store';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { selectProducts } from '../../../store/products/products.selectors';
+import { ProductsActions } from '../../../store/products/products.actions';
+import { Product } from '../../../core/models/product.model';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import {
+  InventoryFormModalComponent,
+  ProductFormData,
+} from './inventory-form-modal/inventory-form-modal.component';
+import {
+  ConfirmDialogComponent,
+  ConfirmDialogData,
+} from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-inventory',
-  imports: [MatIconModule],
-  template: `
-    <div class="stub-page">
-      <div class="stub-page__icon">
-        <mat-icon>inventory_2</mat-icon>
-      </div>
-      <h2 class="stub-page__title">Inventory</h2>
-      <p class="stub-page__desc">Manage your products, categories, and stock levels here.</p>
-    </div>
-  `,
-  styles: [`
-    .stub-page {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 60vh;
-      text-align: center;
-      gap: 12px;
-    }
-    .stub-page__icon {
-      width: 80px;
-      height: 80px;
-      background: #dbeafe;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      mat-icon { font-size: 40px; width: 40px; height: 40px; color: #2563eb; }
-    }
-    .stub-page__title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin: 0; }
-    .stub-page__desc { color: #64748b; font-size: 0.9rem; max-width: 320px; margin: 0; }
-  `],
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    StatusBadgeComponent,
+  ],
+  templateUrl: './inventory.component.html',
+  styleUrl: './inventory.component.scss',
 })
-export class InventoryComponent {}
+export class InventoryComponent {
+  private readonly store = inject(Store);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+
+  readonly products = toSignal(this.store.select(selectProducts), { initialValue: [] });
+
+  readonly totalCount = computed(() => this.products().length);
+  readonly lowStockCount = computed(() => this.products().filter((p) => p.currentStock < 5).length);
+  readonly outOfStock = computed(() => this.products().filter((p) => p.currentStock === 0).length);
+
+  readonly displayedColumns = [
+    'image',
+    'name',
+    'category',
+    'buyingPrice',
+    'sellingPrice',
+    'currentStock',
+    'stockReorderStatus',
+    'actions',
+  ];
+
+  searchQuery = signal('');
+
+  readonly filteredProducts = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    return q
+      ? this.products().filter(
+          (p) =>
+            p.name.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            p.sku.toLowerCase().includes(q),
+        )
+      : this.products();
+  });
+
+  onSearch(value: string) {
+    this.searchQuery.set(value);
+  }
+
+  formatCurrency(v: number) {
+    return `$${v.toFixed(2)}`;
+  }
+
+  openAddDialog() {
+    const ref = this.dialog.open<InventoryFormModalComponent, ProductFormData, Product>(
+      InventoryFormModalComponent,
+      { data: {} },
+    );
+    ref.afterClosed().subscribe((product) => {
+      if (product) {
+        this.store.dispatch(ProductsActions.addProduct({ product }));
+        this.snackBar.open(`${product.name} added to inventory`, 'Dismiss', { duration: 3000 });
+      }
+    });
+  }
+
+  openEditDialog(product: Product) {
+    const ref = this.dialog.open<InventoryFormModalComponent, ProductFormData, Product>(
+      InventoryFormModalComponent,
+      { data: { product } },
+    );
+    ref.afterClosed().subscribe((updated) => {
+      if (updated) {
+        this.store.dispatch(ProductsActions.updateProduct({ product: updated }));
+        this.snackBar.open(`${updated.name} updated`, 'Dismiss', { duration: 3000 });
+      }
+    });
+  }
+
+  confirmDelete(product: Product) {
+    const ref = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(
+      ConfirmDialogComponent,
+      {
+        data: {
+          title: 'Delete Product',
+          message: `Are you sure you want to remove "${product.name}" from inventory? This cannot be undone.`,
+          confirmLabel: 'Delete',
+          danger: true,
+        },
+        width: '380px',
+      },
+    );
+    ref.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.store.dispatch(ProductsActions.deleteProduct({ id: product.id }));
+        this.snackBar.open(`${product.name} removed`, 'Dismiss', { duration: 3000 });
+      }
+    });
+  }
+}

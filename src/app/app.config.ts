@@ -31,7 +31,6 @@ export const appConfig: ApplicationConfig = {
       products: productsReducer,
       cart: cartReducer,
     }),
-    provideEffects([]),
     provideStoreDevtools({ maxAge: 25 }),
     {
       provide: APP_INITIALIZER,

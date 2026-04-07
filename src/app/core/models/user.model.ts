@@ -1,10 +1,14 @@
 export type UserRole = 'superAdmin' | 'cashier';
+export type UserStatus = 'active' | 'inactive';
 
 export interface User {
-  id: string;
-  name: string;
+  _id?: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  password: string;
   role: UserRole;
+  status: UserStatus;
   avatar?: string;
   store?: string;
 }

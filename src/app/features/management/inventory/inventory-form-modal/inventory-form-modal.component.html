@@ -1,0 +1,112 @@
+<div class="inv-modal">
+  <!-- Header -->
+  <div class="inv-modal__header">
+    <div class="inv-modal__header-left">
+      <div class="inv-modal__icon">
+        <mat-icon>{{ isEdit() ? 'edit' : 'add_box' }}</mat-icon>
+      </div>
+      <div>
+        <h2 class="inv-modal__title">
+          {{ isEdit() ? 'Edit Product' : 'Add Product' }}
+        </h2>
+        <p class="inv-modal__subtitle">
+          {{ isEdit() ? 'Update product details and stock info' : 'Fill in the details to add a new product' }}
+        </p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="inv-modal__body">
+    <form [formGroup]="form" class="inv-form">
+
+      <!-- Row 1: Name + Category -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Product Name</mat-label>
+          <mat-icon matPrefix>inventory_2</mat-icon>
+          <input matInput formControlName="name" placeholder="e.g. Coffee Bocat" />
+          @if (form.get('name')?.invalid && form.get('name')?.touched) {
+            <mat-error>Name is required (min 2 chars)</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Category</mat-label>
+          <mat-icon matPrefix>category</mat-icon>
+          <mat-select formControlName="category">
+            @for (cat of categories; track cat) {
+              <mat-option [value]="cat">{{ cat }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('category')?.invalid && form.get('category')?.touched) {
+            <mat-error>Category is required</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Row 2: Buying + Selling price -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Buying Price ($)</mat-label>
+          <mat-icon matPrefix>attach_money</mat-icon>
+          <input matInput type="number" min="0" step="0.01" formControlName="buyingPrice" placeholder="0.00" />
+          @if (form.get('buyingPrice')?.invalid && form.get('buyingPrice')?.touched) {
+            <mat-error>Enter a valid price</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Selling Price ($)</mat-label>
+          <mat-icon matPrefix>sell</mat-icon>
+          <input matInput type="number" min="0" step="0.01" formControlName="sellingPrice" placeholder="0.00" />
+          @if (form.get('sellingPrice')?.invalid && form.get('sellingPrice')?.touched) {
+            <mat-error>Enter a valid price</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Row 3: Stock + Reorder status -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Current Stock</mat-label>
+          <mat-icon matPrefix>warehouse</mat-icon>
+          <input matInput type="number" min="0" step="1" formControlName="currentStock" placeholder="0" />
+          @if (form.get('currentStock')?.invalid && form.get('currentStock')?.touched) {
+            <mat-error>Enter a valid stock quantity</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Stock Reorder Status</mat-label>
+          <mat-icon matPrefix>loop</mat-icon>
+          <mat-select formControlName="stockReorderStatus">
+            @for (opt of reorderOptions; track opt.value) {
+              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Image URL (optional) -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Image URL <span class="optional">(optional)</span></mat-label>
+        <mat-icon matPrefix>image</mat-icon>
+        <input matInput formControlName="imageUrl" placeholder="https://… or leave blank for auto" />
+      </mat-form-field>
+
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="inv-modal__footer">
+    <button mat-button class="cancel-btn" (click)="close()">Cancel</button>
+    <button mat-flat-button class="save-btn" (click)="save()">
+      <mat-icon>{{ isEdit() ? 'save' : 'add_box' }}</mat-icon>
+      {{ isEdit() ? 'Save Changes' : 'Add Product' }}
+    </button>
+  </div>
+</div>

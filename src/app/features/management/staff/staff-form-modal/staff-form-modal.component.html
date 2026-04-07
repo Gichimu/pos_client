@@ -1,0 +1,147 @@
+<div class="staff-modal">
+  <!-- Header -->
+  <div class="staff-modal__header">
+    <div class="staff-modal__header-left">
+      <div class="staff-modal__icon">
+        <mat-icon>{{ isEdit() ? 'edit' : 'person_add' }}</mat-icon>
+      </div>
+      <div>
+        <h2 class="staff-modal__title">
+          {{ isEdit() ? 'Edit Staff Member' : 'Add Staff Member' }}
+        </h2>
+        <p class="staff-modal__subtitle">
+          {{
+            isEdit()
+              ? "Update this member's details and role"
+              : 'Fill in the details to add a new team member'
+          }}
+        </p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="staff-modal__body">
+    <form [formGroup]="form" class="staff-form">
+      <!-- FirstName -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>First Name</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input
+          matInput
+          formControlName="firstName"
+          placeholder="e.g. John"
+          autocomplete="first-name"
+        />
+        @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+          <mat-error>First name is required (min 2 characters)</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Last Name -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Last Name</mat-label>
+        <mat-icon matPrefix>person</mat-icon>
+        <input
+          matInput
+          formControlName="lastName"
+          placeholder="e.g. Smith"
+          autocomplete="last-name"
+        />
+        @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+          <mat-error>Last name is required (min 2 characters)</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Email -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Email Address</mat-label>
+        <mat-icon matPrefix>email</mat-icon>
+        <input
+          matInput
+          formControlName="email"
+          type="email"
+          placeholder="e.g. john@store.com"
+          autocomplete="email"
+        />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <mat-error>Please enter a valid email address</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Password -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Password</mat-label>
+        <mat-icon matPrefix>lock</mat-icon>
+        <input
+          matInput
+          formControlName="password"
+          type="password"
+          placeholder="e.g. ********"
+          autocomplete="new-password"
+        />
+        @if (form.get('password')?.invalid && form.get('password')?.touched && !isEdit()) {
+          <mat-error>Password is required (min 8 characters)</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Role -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Role</mat-label>
+        <mat-icon matPrefix>badge</mat-icon>
+        <mat-select formControlName="role">
+          <mat-option value="superAdmin">
+            <span class="role-option">
+              <span class="role-dot role-dot--admin"></span>
+              Super Admin
+            </span>
+          </mat-option>
+          <mat-option value="cashier">
+            <span class="role-option">
+              <span class="role-dot role-dot--cashier"></span>
+              Cashier
+            </span>
+          </mat-option>
+        </mat-select>
+        @if (form.get('role')?.invalid && form.get('role')?.touched) {
+          <mat-error>Role is required</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Status -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Status</mat-label>
+        <mat-icon matPrefix>co_present</mat-icon>
+        <mat-select formControlName="status">
+          <mat-option value="active">
+            <span class="role-option">
+              <span class="role-dot role-dot--admin"></span>
+              Active
+            </span>
+          </mat-option>
+          <mat-option value="inactive">
+            <span class="role-option">
+              <span class="role-dot role-dot--cashier"></span>
+              Inactive
+            </span>
+          </mat-option>
+        </mat-select>
+        @if (form.get('status')?.invalid && form.get('status')?.touched) {
+          <mat-error>Status is required</mat-error>
+        }
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="staff-modal__footer">
+    <button mat-button class="cancel-btn" (click)="close()">Cancel</button>
+    <button mat-flat-button class="save-btn" (click)="save()">
+      <mat-icon>{{ isEdit() ? 'save' : 'person_add' }}</mat-icon>
+      {{ isEdit() ? 'Save Changes' : 'Add Member' }}
+    </button>
+  </div>
+</div>

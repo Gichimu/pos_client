@@ -1,0 +1,143 @@
+<div class="staff-page page-enter">
+  <!-- Page header -->
+  <div class="staff-page__header">
+    <div class="staff-page__header-left">
+      <h2 class="staff-page__title">Team Members</h2>
+      <!-- <div class="staff-stats">
+        <span class="stat-pill stat-pill--admin">
+          <span class="stat-dot stat-dot--admin"></span>
+          {{ adminCount() }} Admin{{ adminCount() !== 1 ? 's' : '' }}
+        </span>
+        <span class="stat-pill stat-pill--cashier">
+          <span class="stat-dot stat-dot--cashier"></span>
+          {{ cashierCount() }} Cashier{{ cashierCount() !== 1 ? 's' : '' }}
+        </span>
+      </div> -->
+      <div class="staff-stats">
+        <span class="stat-pill status-pill--active">
+          <span class="status-dot status-dot--active"></span>
+          Active: {{ activeCount() }} {{ activeCount() === 1 ? 'member' : 'members' }}
+        </span>
+        <span class="stat-pill status-pill--inactive">
+          <span class="status-dot status-dot--inactive"></span>
+          Inactive: {{ inactiveCount() }} {{ inactiveCount() === 1 ? 'member' : 'members' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="staff-page__header-right">
+      <!-- Search -->
+      <div class="search-box">
+        <span class="material-icons search-box__icon">search</span>
+        <input
+          class="search-box__input"
+          type="text"
+          placeholder="Search members…"
+          [value]="searchQuery()"
+          (input)="onSearch($any($event.target).value)"
+          aria-label="Search staff"
+        />
+      </div>
+
+      <!-- Add button -->
+      <button class="add-btn" (click)="openAddDialog()" aria-label="Add staff member">
+        <span class="material-icons">person_add</span>
+        Add Staff Member
+      </button>
+    </div>
+  </div>
+
+  <!-- Staff table -->
+  <div class="staff-table-wrap">
+    @if (filteredStaff().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <span class="material-icons">group_off</span>
+        </div>
+        <p class="empty-state__title">No members found</p>
+        <p class="empty-state__desc">Try a different search or add a new member.</p>
+      </div>
+    } @else {
+      <table mat-table [dataSource]="filteredStaff()" class="staff-table">
+        <!-- Avatar -->
+        <ng-container matColumnDef="avatar">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let user">
+            <img
+              class="avatar"
+              [src]="user.avatar || 'https://i.pravatar.cc/40?u=' + user.email"
+              [alt]="user.firstName + ' ' + user.lastName"
+              loading="lazy"
+            />
+          </td>
+        </ng-container>
+
+        <!-- Name -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let user">
+            <p class="user-name">{{ user.firstName }} {{ user.lastName }}</p>
+          </td>
+        </ng-container>
+
+        <!-- Email -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>Email</th>
+          <td mat-cell *matCellDef="let user">
+            <p class="user-email">{{ user.email }}</p>
+          </td>
+        </ng-container>
+
+        <!-- Role -->
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef>Role</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="role-badge" [class]="getRoleBadgeClass(user.role)">
+              {{ getRoleLabel(user.role) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Status -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let user">
+            <span class="status-badge" [class]="getStatusBadgeClass(user.status)">
+              {{ getStatusLabel(user.status) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let user">
+            <div class="row-actions">
+              <button
+                mat-icon-button
+                class="action-icon action-icon--edit"
+                (click)="openEditDialog(user)"
+                matTooltip="Edit member"
+                aria-label="Edit member"
+              >
+                <span class="material-icons">edit</span>
+              </button>
+              <button
+                mat-icon-button
+                class="action-icon action-icon--delete"
+                (click)="confirmDelete(user)"
+                matTooltip="Remove member"
+                aria-label="Remove member"
+              >
+                <span class="material-icons">delete_outline</span>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="staff-row"></tr>
+      </table>
+    }
+  </div>
+</div>
