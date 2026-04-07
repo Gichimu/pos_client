@@ -1,5 +1,11 @@
 import { UserRole } from '../models/user.model';
 
+/** Mock credentials used for demo authentication. */
+export const MOCK_CREDENTIALS = {
+  superAdmin: 'admin123',
+  cashier: '12345',
+} as const;
+
 export const ROLES: Record<string, UserRole> = {
   SUPER_ADMIN: 'superAdmin',
   CASHIER: 'cashier',

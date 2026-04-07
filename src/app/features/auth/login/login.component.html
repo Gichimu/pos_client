@@ -3,65 +3,253 @@
   <div class="login-page__bg"></div>
 
   <div class="login-card">
-    <!-- Logo -->
+    <!-- Logo (always visible) -->
     <div class="login-card__logo">
       <div class="logo-icon">P</div>
       <span class="logo-text">Point of Sale</span>
     </div>
 
-    <h1 class="login-card__title">Welcome back</h1>
-    <p class="login-card__subtitle">Select your role to continue</p>
+    <!-- ─── Step 1: Role Selection ─── -->
+    @if (step() === 'role') {
+      <h1 class="login-card__title">Welcome back</h1>
+      <p class="login-card__subtitle">Select your role to continue</p>
 
-    <!-- Role selection -->
-    <div class="role-grid">
-      <!-- Super Admin -->
-      <button
-        matRipple
-        class="role-card"
-        [class.role-card--selected]="selectedRole() === 'superAdmin'"
-        (click)="selectRole('superAdmin')"
-        aria-label="Login as Super Admin"
-      >
-        <div class="role-card__icon role-card__icon--admin">
-          <mat-icon>admin_panel_settings</mat-icon>
-        </div>
-        <p class="role-card__name">Super Admin</p>
-        <p class="role-card__desc">Full system access</p>
-        <div class="role-card__check" *ngIf="selectedRole() === 'superAdmin'">
-          <mat-icon>check_circle</mat-icon>
-        </div>
+      <div class="role-grid">
+        <!-- Super Admin -->
+        <button
+          matRipple
+          class="role-card"
+          [class.role-card--selected]="selectedRole() === 'superAdmin'"
+          (click)="selectRole('superAdmin')"
+          aria-label="Login as Super Admin"
+        >
+          <div class="role-card__icon role-card__icon--admin">
+            <mat-icon>admin_panel_settings</mat-icon>
+          </div>
+          <p class="role-card__name">Super Admin</p>
+          <p class="role-card__desc">Full system access</p>
+          @if (selectedRole() === 'superAdmin') {
+            <div class="role-card__check"><mat-icon>check_circle</mat-icon></div>
+          }
+        </button>
+
+        <!-- Cashier -->
+        <button
+          matRipple
+          class="role-card"
+          [class.role-card--selected]="selectedRole() === 'cashier'"
+          (click)="selectRole('cashier')"
+          aria-label="Login as Cashier"
+        >
+          <div class="role-card__icon role-card__icon--cashier">
+            <mat-icon>point_of_sale</mat-icon>
+          </div>
+          <p class="role-card__name">Cashier</p>
+          <p class="role-card__desc">Sales & checkout</p>
+          @if (selectedRole() === 'cashier') {
+            <div class="role-card__check"><mat-icon>check_circle</mat-icon></div>
+          }
+        </button>
+      </div>
+
+      <button mat-flat-button class="login-btn" [disabled]="!selectedRole()" (click)="proceed()">
+        <mat-icon>arrow_forward</mat-icon>
+        Continue
       </button>
 
-      <!-- Cashier -->
-      <button
-        matRipple
-        class="role-card"
-        [class.role-card--selected]="selectedRole() === 'cashier'"
-        (click)="selectRole('cashier')"
-        aria-label="Login as Cashier"
-      >
-        <div class="role-card__icon role-card__icon--cashier">
-          <mat-icon>point_of_sale</mat-icon>
-        </div>
-        <p class="role-card__name">Cashier</p>
-        <p class="role-card__desc">Sales & checkout</p>
-        <div class="role-card__check" *ngIf="selectedRole() === 'cashier'">
-          <mat-icon>check_circle</mat-icon>
-        </div>
-      </button>
-    </div>
+      <p class="login-card__hint">Demo app — select your role to continue</p>
+    }
 
-    <!-- Login button -->
-    <button
-      mat-flat-button
-      class="login-btn"
-      [disabled]="!selectedRole()"
-      (click)="login()"
-    >
-      <mat-icon>login</mat-icon>
-      Continue
-    </button>
+    <!-- ─── Step 2: Credential Entry ─── -->
+    @if (step() === 'credential') {
+      <div class="cred-step">
+        <!-- Header: back + title -->
+        <div class="cred-header">
+          <button class="cred-back" (click)="back()" aria-label="Go back">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div>
+            <h1 class="login-card__title">
+              {{ selectedRole() === 'superAdmin' ? 'Enter Password' : 'Enter PIN' }}
+            </h1>
+            <p class="login-card__subtitle">
+              {{
+                selectedRole() === 'superAdmin'
+                  ? 'Authenticate with your password'
+                  : 'Enter your 5-digit PIN code'
+              }}
+            </p>
+          </div>
+        </div>
 
-    <p class="login-card__hint">Demo app — no password required</p>
+        <!-- User preview chip -->
+        @if (selectedUser(); as user) {
+          <div class="user-preview">
+            <img
+              [src]="user.avatar || 'https://i.pravatar.cc/40'"
+              [alt]="user.name"
+              class="user-preview__avatar"
+            />
+            <div>
+              <p class="user-preview__name">{{ user.name }}</p>
+              <p class="user-preview__role">
+                {{ selectedRole() === 'superAdmin' ? 'Super Admin' : 'Cashier' }}
+              </p>
+            </div>
+          </div>
+        }
+
+        <!-- ── SuperAdmin: Reactive Form (Email + Password) ── -->
+        @if (selectedRole() === 'superAdmin') {
+          <form [formGroup]="adminForm" (ngSubmit)="authenticate()" novalidate>
+            <!-- Email field -->
+            <div
+              class="password-field"
+              [class.field--error]="emailCtrl.invalid && emailCtrl.touched"
+            >
+              <mat-icon class="password-field__icon">email</mat-icon>
+              <input
+                type="email"
+                formControlName="email"
+                class="password-field__input"
+                placeholder="Enter your email"
+                autocomplete="email"
+                aria-label="Email address"
+                aria-describedby="email-error"
+              />
+            </div>
+
+            <!-- Inline email validation errors -->
+            @if (emailCtrl.invalid && emailCtrl.touched) {
+              <div class="field-error" id="email-error" role="alert">
+                <mat-icon>error_outline</mat-icon>
+                @if (emailCtrl.errors?.['required']) {
+                  Email is required
+                } @else if (emailCtrl.errors?.['email']) {
+                  Enter a valid email address
+                }
+              </div>
+            }
+
+            <!-- Password field -->
+            <div
+              class="password-field"
+              style="margin-top: 12px"
+              [class.field--error]="passwordCtrl.invalid && passwordCtrl.touched"
+            >
+              <mat-icon class="password-field__icon">lock_outline</mat-icon>
+              <input
+                [type]="showPassword() ? 'text' : 'password'"
+                formControlName="password"
+                class="password-field__input"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                aria-label="Password"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+              >
+                <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+            </div>
+
+            <!-- Inline password validation errors -->
+            @if (passwordCtrl.invalid && passwordCtrl.touched) {
+              <div class="field-error" role="alert">
+                <mat-icon>error_outline</mat-icon>
+                @if (passwordCtrl.errors?.['required']) {
+                  Password is required
+                } @else if (passwordCtrl.errors?.['minlength']) {
+                  Password must be at least
+                  {{ passwordCtrl.errors?.['minlength']?.requiredLength }} characters
+                }
+              </div>
+            }
+
+            <!-- Global auth error (wrong credentials / no account) -->
+            @if (error()) {
+              <div class="auth-error" role="alert">
+                <mat-icon>error_outline</mat-icon>
+                {{ error() }}
+              </div>
+            }
+
+            <button
+              mat-flat-button
+              type="submit"
+              class="login-btn"
+              [disabled]="adminForm.invalid"
+            >
+              <mat-icon>login</mat-icon>
+              Sign In
+            </button>
+          </form>
+        }
+
+        <!-- ── Cashier: PIN Pad ── -->
+        @if (selectedRole() === 'cashier') {
+          <!-- PIN dots -->
+          <div class="pin-dots" aria-label="PIN entry" role="group">
+            @for (filled of pinFilled(); track $index) {
+              <div
+                class="pin-dot"
+                [class.pin-dot--filled]="filled"
+                [attr.aria-label]="'Digit ' + ($index + 1) + (filled ? ' entered' : ' empty')"
+              ></div>
+            }
+          </div>
+
+          <!-- Numeric keypad -->
+          <div class="pin-pad-wrap">
+            <div class="pin-pad">
+              @for (key of PIN_PAD_KEYS; track $index) {
+                @if (key === 'back') {
+                  <button
+                    class="pin-key pin-key--action"
+                    matRipple
+                    (click)="onPinBackspace()"
+                    aria-label="Backspace"
+                  >
+                    <mat-icon>backspace</mat-icon>
+                  </button>
+                } @else if (key === '') {
+                  <span class="pin-key--spacer" aria-hidden="true"></span>
+                } @else {
+                  <button
+                    class="pin-key"
+                    matRipple
+                    (click)="onPinKey(key)"
+                    [attr.aria-label]="'Digit ' + key"
+                  >
+                    {{ key }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Error -->
+          @if (error()) {
+            <div class="auth-error" role="alert">
+              <mat-icon>error_outline</mat-icon>
+              {{ error() }}
+            </div>
+          }
+
+          <button
+            mat-flat-button
+            class="login-btn"
+            [disabled]="pin().length < 5"
+            (click)="authenticate()"
+          >
+            <mat-icon>login</mat-icon>
+            Sign In
+          </button>
+        }
+      </div>
+    }
   </div>
 </div>

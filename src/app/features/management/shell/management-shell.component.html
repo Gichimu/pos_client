@@ -78,22 +78,18 @@
           <img
             class="user-btn__avatar"
             [src]="currentUser()?.avatar"
-            [alt]="currentUser()?.name"
+            [alt]="currentUser()?.firstName + ' ' + currentUser()?.lastName"
           />
-          <span class="user-btn__name">{{ currentUser()?.name }}</span>
+          <span class="user-btn__name"
+            >{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span
+          >
           <mat-icon>keyboard_arrow_down</mat-icon>
         </button>
         <mat-menu #userMenu="matMenu">
-          <button mat-menu-item>
-            <mat-icon>person</mat-icon> Profile
-          </button>
-          <button mat-menu-item>
-            <mat-icon>settings</mat-icon> Settings
-          </button>
+          <button mat-menu-item><mat-icon>person</mat-icon> Profile</button>
+          <button mat-menu-item><mat-icon>settings</mat-icon> Settings</button>
           <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon> Sign out
-          </button>
+          <button mat-menu-item (click)="logout()"><mat-icon>logout</mat-icon> Sign out</button>
         </mat-menu>
       </div>
     </header>

@@ -8,7 +8,7 @@
     <div class="pos-header__center">
       <h1 class="pos-header__title">Cashier POS</h1>
       @if (currentUser(); as user) {
-        <span class="pos-header__user">{{ user.name }}</span>
+        <span class="pos-header__user">{{ user.firstName }} {{ user.lastName }}</span>
       }
     </div>
     <div class="pos-header__right">
@@ -115,11 +115,7 @@
 
         @for (item of cartItems(); track item.product.id) {
           <div class="cart-item">
-            <img
-              class="cart-item__img"
-              [src]="item.product.imageUrl"
-              [alt]="item.product.name"
-            />
+            <img class="cart-item__img" [src]="item.product.imageUrl" [alt]="item.product.name" />
             <div class="cart-item__info">
               <p class="cart-item__name">{{ item.product.name }}</p>
               <p class="cart-item__unit-price">

@@ -1,9 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
-import { User } from '../core/models/user.model';
-import { MOCK_USERS } from '../core/constants/roles.constants';
-import { environment } from '../../environments/environment.development';
+import { User } from '../models/user.model';
+import { MOCK_USERS } from '../constants/roles.constants';
+import { environment } from '../../../environments/environment.development';
 
 @Injectable({
   providedIn: 'root',
