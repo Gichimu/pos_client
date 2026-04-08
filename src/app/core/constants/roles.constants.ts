@@ -2,7 +2,7 @@ import { UserRole } from '../models/user.model';
 
 /** Mock credentials used for demo authentication. */
 export const MOCK_CREDENTIALS = {
-  superAdmin: 'admin123',
+  superAdmin: 'eric@123',
   cashier: '12345',
 } as const;
 
@@ -63,6 +63,15 @@ export const MOCK_USERS: Array<{
     role: 'superAdmin',
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=lisak',
+    store: 'Delect',
+  },
+  {
+    id: '6',
+    name: 'Eric A.',
+    email: 'eric@user.com',
+    role: 'superAdmin',
+    status: 'active',
+    avatar: 'https://i.pravatar.cc/40?u=erica',
     store: 'Delect',
   },
 ];

@@ -8,12 +8,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { Product, StockReorderStatus } from '../../../../core/models/product.model';
+import { CategoryStore } from '../../../../store/categories/category.store';
 
 export interface ProductFormData {
   product?: Product;
 }
 
-const CATEGORIES = ['Beverages', 'Food', 'Pastries', 'Snacks', 'Desserts', 'Other'];
 const REORDER_OPTIONS: { value: StockReorderStatus; label: string }[] = [
   { value: 'good',        label: 'Good' },
   { value: 'pastry',      label: 'Pastry' },
@@ -40,9 +40,10 @@ export class InventoryFormModalComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<InventoryFormModalComponent>);
   readonly data = inject<ProductFormData>(MAT_DIALOG_DATA);
+  private readonly categoryStore = inject(CategoryStore);
 
   readonly isEdit = computed(() => !!this.data?.product);
-  readonly categories = CATEGORIES;
+  readonly categories = this.categoryStore.categories;
   readonly reorderOptions = REORDER_OPTIONS;
 
   readonly form = this.fb.group({

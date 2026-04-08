@@ -169,8 +169,15 @@ export class LoginComponent {
       //   return;
       // }
 
-      this.authStore.login({ email, password } as User);
-      this.authStore.user() && this.router.navigate(['/management']);
+      this.authStore.login({ email, password } as User).subscribe({
+        next: () => {
+          console.log('auth user after login', this.authStore.user());
+          this.authStore.isAuthenticated() && this.router.navigate(['/management']);
+        },
+        error: (error) => {
+          this.error.set('Login failed. Please check your credentials.');
+        },
+      });
       return;
     }
 

@@ -1,0 +1,129 @@
+<div class="cat-modal">
+  <!-- Header -->
+  <div class="cat-modal__header">
+    <div class="cat-modal__header-left">
+      <div class="cat-modal__icon">
+        <mat-icon>category</mat-icon>
+      </div>
+      <div>
+        <h2 class="cat-modal__title">Manage Categories</h2>
+        <p class="cat-modal__subtitle">Add, rename or remove product categories</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="cat-modal__body">
+    <!-- Category list -->
+    <div class="cat-list" role="list">
+      @if (categories().length === 0) {
+        <div class="cat-empty">
+          <mat-icon>inbox</mat-icon>
+          <span>No categories yet</span>
+        </div>
+      }
+
+      @for (cat of categories(); track cat) {
+        <div class="cat-row" role="listitem">
+          @if (editingCategory() === cat) {
+            <!-- Inline rename -->
+            <div class="cat-row__edit">
+              <mat-icon class="cat-row__icon">edit</mat-icon>
+              <input
+                class="cat-row__rename-input"
+                type="text"
+                [ngModel]="editValue()"
+                (ngModelChange)="editValue.set($event)"
+                (keydown.enter)="confirmEdit(cat)"
+                (keydown.escape)="cancelEdit()"
+                autofocus
+                aria-label="Rename category"
+              />
+              <div class="cat-row__edit-actions">
+                <button
+                  mat-icon-button
+                  class="edit-action edit-action--save"
+                  (click)="confirmEdit(cat)"
+                  matTooltip="Save"
+                >
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  class="edit-action edit-action--cancel"
+                  (click)="cancelEdit()"
+                  matTooltip="Cancel"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            </div>
+          } @else {
+            <!-- Display row -->
+            <div class="cat-row__display">
+              <mat-icon class="cat-row__icon">label_outline</mat-icon>
+              <span class="cat-row__name">{{ cat }}</span>
+              <div class="cat-row__actions">
+                <button
+                  mat-icon-button
+                  class="cat-action cat-action--edit"
+                  (click)="startEdit(cat)"
+                  [matTooltip]="'Rename ' + cat"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  class="cat-action cat-action--delete"
+                  (click)="remove(cat)"
+                  [matTooltip]="'Remove ' + cat"
+                >
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Add new category -->
+    <div class="add-section">
+      <p class="add-section__label">Add new category</p>
+      <div class="add-input-row" [class.add-input-row--error]="addError()">
+        <mat-icon class="add-input-row__icon">add_circle_outline</mat-icon>
+        <input
+          class="add-input-row__input"
+          type="text"
+          placeholder="e.g. Drinks, Combos…"
+          [ngModel]="newCategoryName()"
+          (ngModelChange)="newCategoryName.set($event); addError.set(null)"
+          (keydown)="onAddKeydown($event)"
+          aria-label="New category name"
+        />
+        <button class="add-category-btn" (click)="add()" [disabled]="!newCategoryName().trim()">
+          <mat-icon>add</mat-icon>
+          Add
+        </button>
+      </div>
+      @if (addError()) {
+        <p class="add-error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          {{ addError() }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="cat-modal__footer">
+    <span class="cat-count">{{ categories().length }} categories total</span>
+    <button mat-flat-button class="done-btn" (click)="close()">
+      <mat-icon>check</mat-icon>
+      Done
+    </button>
+  </div>
+</div>

@@ -21,6 +21,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ManageCategoriesModalComponent } from './manage-categories-modal/manage-categories-modal.component';
 
 @Component({
   selector: 'app-inventory',
@@ -77,6 +78,10 @@ export class InventoryComponent {
 
   formatCurrency(v: number) {
     return `$${v.toFixed(2)}`;
+  }
+
+  openManageCategoriesDialog() {
+    this.dialog.open(ManageCategoriesModalComponent, { width: '460px' });
   }
 
   openAddDialog() {

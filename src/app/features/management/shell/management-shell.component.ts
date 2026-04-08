@@ -67,6 +67,7 @@ export class ManagementShellComponent {
     { label: 'Overview', icon: 'home', path: '/management/dashboard' },
     { label: 'Inventory', icon: 'inventory_2', path: '/management/inventory' },
     { label: 'Staff Management', icon: 'people', path: '/management/staff' },
+    { label: 'Sales', icon: 'receipt_long', path: '/management/sales' },
     { label: 'Reports', icon: 'bar_chart', path: '/management/reports' },
   ];
 

@@ -77,7 +77,7 @@
         <button mat-button class="user-btn" [matMenuTriggerFor]="userMenu">
           <img
             class="user-btn__avatar"
-            [src]="currentUser()?.avatar"
+            [src]="currentUser()?.avatar || 'https://i.pravatar.cc/40?u=' + currentUser()?.email"
             [alt]="currentUser()?.firstName + ' ' + currentUser()?.lastName"
           />
           <span class="user-btn__name"

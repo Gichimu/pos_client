@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,11 +12,17 @@ import { MatDividerModule } from '@angular/material/divider';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectProducts } from '../../../store/products/products.selectors';
-import { selectCartItems, selectCartTotal, selectCartCount } from '../../../store/cart/cart.selectors';
+import {
+  selectCartItems,
+  selectCartTotal,
+  selectCartCount,
+} from '../../../store/cart/cart.selectors';
 import { selectCurrentUser } from '../../../store/auth/auth.selectors';
 import { CartActions } from '../../../store/cart/cart.actions';
 import { AuthService } from '../../../core/services/auth.service';
 import { Product } from '../../../core/models/product.model';
+import { authStore } from '../../../store/auth/auth.store';
+import { User } from '../../../core/models/user.model';
 
 @Component({
   selector: 'app-pos',
@@ -35,6 +41,7 @@ import { Product } from '../../../core/models/product.model';
 })
 export class PosComponent {
   private readonly store = inject(Store);
+  private readonly authStore = inject(authStore);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
@@ -43,7 +50,7 @@ export class PosComponent {
   readonly cartItems = toSignal(this.store.select(selectCartItems), { initialValue: [] });
   readonly cartTotal = toSignal(this.store.select(selectCartTotal), { initialValue: 0 });
   readonly cartCount = toSignal(this.store.select(selectCartCount), { initialValue: 0 });
-  readonly currentUser = toSignal(this.store.select(selectCurrentUser));
+  readonly currentUser = this.authStore.user as Signal<User | null>;
 
   searchQuery = signal('');
 
@@ -85,11 +92,9 @@ export class PosComponent {
     if (this.cartItems().length === 0) return;
     const total = this.grandTotal();
     this.store.dispatch(CartActions.clearCart());
-    this.snackBar.open(
-      `Payment of $${total.toFixed(2)} processed successfully!`,
-      'Done',
-      { duration: 4000 }
-    );
+    this.snackBar.open(`Payment of $${total.toFixed(2)} processed successfully!`, 'Done', {
+      duration: 4000,
+    });
   }
 
   goToManagement() {

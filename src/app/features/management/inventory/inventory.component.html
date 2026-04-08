@@ -35,6 +35,14 @@
           aria-label="Search inventory"
         />
       </div>
+      <button
+        class="categories-btn"
+        (click)="openManageCategoriesDialog()"
+        aria-label="Manage categories"
+      >
+        <span class="material-icons">category</span>
+        Categories
+      </button>
       <button class="add-btn" (click)="openAddDialog()" aria-label="Add product">
         <span class="material-icons">add_box</span>
         Add Product

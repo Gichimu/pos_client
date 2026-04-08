@@ -86,7 +86,7 @@
         @if (selectedUser(); as user) {
           <div class="user-preview">
             <img
-              [src]="user.avatar || 'https://i.pravatar.cc/40'"
+              [src]="user.avatar || 'https://i.pravatar.cc/40?u=' + user.email"
               [alt]="user.name"
               class="user-preview__avatar"
             />
@@ -177,12 +177,7 @@
               </div>
             }
 
-            <button
-              mat-flat-button
-              type="submit"
-              class="login-btn"
-              [disabled]="adminForm.invalid"
-            >
+            <button mat-flat-button type="submit" class="login-btn" [disabled]="adminForm.invalid">
               <mat-icon>login</mat-icon>
               Sign In
             </button>
