@@ -1,6 +1,5 @@
 <div class="table-wrapper">
   <table mat-table [dataSource]="products" class="product-table">
-
     <!-- Select column -->
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef class="col-select">
@@ -27,7 +26,7 @@
         <div class="product-cell">
           <img
             class="product-cell__img"
-            [src]="row.imageUrl"
+            [src]="'https://picsum.photos/seed/' + row.sku + '/200/300'"
             [alt]="row.name"
             loading="lazy"
           />
@@ -97,9 +96,7 @@
     <button mat-menu-item (click)="onView(row)">
       <mat-icon>visibility</mat-icon> View details
     </button>
-    <button mat-menu-item (click)="onEdit(row)">
-      <mat-icon>edit</mat-icon> Edit
-    </button>
+    <button mat-menu-item (click)="onEdit(row)"><mat-icon>edit</mat-icon> Edit</button>
     <button mat-menu-item class="delete-item" (click)="onDelete(row)">
       <mat-icon>delete_outline</mat-icon> Delete
     </button>

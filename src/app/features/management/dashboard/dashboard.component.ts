@@ -23,7 +23,10 @@ export class DashboardComponent {
   readonly products = this.productStore.products as Signal<any[]>;
 
   readonly lowStockCount = computed(
-    () => this.productStore.products().filter((p) => p.currentStock < 5).length,
+    () => this.productStore.products().filter((p) => p.stockReorderStatus === 'low').length,
+  );
+  readonly criticalStockCount = computed(
+    () => this.productStore.products().filter((p) => p.stockReorderStatus === 'critical').length,
   );
 
   readonly activeCashiers = signal(3);

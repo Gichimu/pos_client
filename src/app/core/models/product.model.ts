@@ -1,4 +1,5 @@
-export type StockReorderStatus = 'good' | 'pastry' | 'not-reorder' | 'pasout';
+export type StockReorderStatus = 'good' | 'low' | 'critical';
+export type ReorderLevel = 3 | 5 | 10 | 20;
 
 export interface Product {
   _id?: string;
@@ -8,6 +9,7 @@ export interface Product {
   buyingPrice: number;
   sellingPrice: number;
   currentStock: number;
-  stockReorderStatus: StockReorderStatus;
+  stockReorderLevel: ReorderLevel;
+  stockReorderStatus?: StockReorderStatus;
   category: string;
 }

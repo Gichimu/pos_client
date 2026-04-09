@@ -32,10 +32,19 @@ export class ProductTableComponent implements OnChanges {
 
   private readonly snackBar = inject(MatSnackBar);
 
-  displayedColumns = ['select', 'sku', 'buyingPrice', 'sellingPrice', 'currentStock', 'stockReorderStatus', 'actions'];
+  displayedColumns = [
+    'select',
+    'sku',
+    'buyingPrice',
+    'sellingPrice',
+    'currentStock',
+    'stockReorderStatus',
+    'actions',
+  ];
   selection = new SelectionModel<Product>(true, []);
 
   ngOnChanges() {
+    console.log('Products updated:', this.products);
     this.selection.clear();
   }
 
@@ -52,7 +61,7 @@ export class ProductTableComponent implements OnChanges {
   }
 
   formatCurrency(value: number): string {
-    return `$${value.toFixed(2)}`;
+    return `Ksh.${value.toFixed(2)}`;
   }
 
   onEdit(product: Product) {

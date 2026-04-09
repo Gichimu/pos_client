@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Product, StockReorderStatus } from '../../../../core/models/product.model';
+import { Product, ReorderLevel, StockReorderStatus } from '../../../../core/models/product.model';
 import { CategoryStore } from '../../../../store/categories/category.store';
 import { Category } from '../../../../core/models/category.model';
 
@@ -17,9 +17,15 @@ export interface ProductFormData {
 
 const REORDER_OPTIONS: { value: StockReorderStatus; label: string }[] = [
   { value: 'good', label: 'Good' },
-  { value: 'pastry', label: 'Pastry' },
-  { value: 'not-reorder', label: 'Not Reorder' },
-  { value: 'pasout', label: 'Pasout' },
+  { value: 'low', label: 'Low' },
+  { value: 'critical', label: 'Critical' },
+];
+
+const REORDER_LEVEL_OPTIONS: { value: ReorderLevel; label: string }[] = [
+  { value: 3, label: '3' },
+  { value: 5, label: '5' },
+  { value: 10, label: '10' },
+  { value: 20, label: '20' },
 ];
 
 @Component({
@@ -46,6 +52,7 @@ export class InventoryFormModalComponent {
   readonly isEdit = computed(() => !!this.data?.product);
   readonly categories = this.categoryStore.categories as Signal<Category[]>;
   readonly reorderOptions = REORDER_OPTIONS;
+  readonly reorderLevelOptions = REORDER_LEVEL_OPTIONS;
 
   readonly form = this.fb.group({
     name: [this.data?.product?.name ?? '', [Validators.required, Validators.minLength(2)]],
@@ -62,10 +69,7 @@ export class InventoryFormModalComponent {
       this.data?.product?.currentStock ?? null,
       [Validators.required, Validators.min(0)],
     ],
-    stockReorderStatus: [
-      this.data?.product?.stockReorderStatus ?? ('good' as StockReorderStatus),
-      Validators.required,
-    ],
+    stockReorderLevel: [this.data?.product?.stockReorderLevel ?? 5, Validators.required],
     imageUrl: [this.data?.product?.imageUrl ?? ''],
   });
 
@@ -82,13 +86,14 @@ export class InventoryFormModalComponent {
     const v = this.form.value;
     const name = v.name!.trim();
     const product: Product = {
+      _id: this.data?.product?._id,
       sku: name,
       name,
       category: v.category!,
       buyingPrice: Number(v.buyingPrice),
       sellingPrice: Number(v.sellingPrice),
       currentStock: Number(v.currentStock),
-      stockReorderStatus: v.stockReorderStatus as StockReorderStatus,
+      stockReorderLevel: v.stockReorderLevel as ReorderLevel,
       imageUrl:
         v.imageUrl?.trim() || `https://picsum.photos/seed/${encodeURIComponent(name)}/60/60`,
     };

@@ -59,7 +59,7 @@
             <div class="product-card__img-wrap">
               <img
                 class="product-card__img"
-                [src]="product.imageUrl"
+                [src]="'https://picsum.photos/seed/' + product.sku + '/200/300'"
                 [alt]="product.name"
                 loading="lazy"
               />
@@ -115,7 +115,11 @@
 
         @for (item of cartItems(); track item.product._id) {
           <div class="cart-item">
-            <img class="cart-item__img" [src]="item.product.imageUrl" [alt]="item.product.name" />
+            <img
+              class="cart-item__img"
+              [src]="'https://picsum.photos/seed/' + item.product.sku + '/200/300'"
+              [alt]="item.product.name"
+            />
             <div class="cart-item__info">
               <p class="cart-item__name">{{ item.product.name }}</p>
               <p class="cart-item__unit-price">
@@ -157,7 +161,7 @@
             <span>{{ formatCurrency(cartTotal()) }}</span>
           </div>
           <div class="summary-row">
-            <span>Tax (10%)</span>
+            <span>Tax (16% VAT)</span>
             <span>{{ formatCurrency(tax()) }}</span>
           </div>
           <div class="summary-row summary-row--total">

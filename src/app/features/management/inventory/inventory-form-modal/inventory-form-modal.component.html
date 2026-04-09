@@ -105,10 +105,10 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Stock Reorder Status</mat-label>
+          <mat-label>Stock Reorder Level</mat-label>
           <mat-icon matPrefix>loop</mat-icon>
-          <mat-select formControlName="stockReorderStatus">
-            @for (opt of reorderOptions; track opt.value) {
+          <mat-select formControlName="stockReorderLevel">
+            @for (opt of reorderLevelOptions; track opt.value) {
               <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
             }
           </mat-select>

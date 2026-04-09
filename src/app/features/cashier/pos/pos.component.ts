@@ -55,7 +55,7 @@ export class PosComponent {
       : this.productStore.products();
   });
 
-  readonly tax = computed(() => this.store.total() * 0.1);
+  readonly tax = computed(() => this.store.total() * 0.16);
   readonly grandTotal = computed(() => this.store.total() + this.tax());
 
   onSearchChange(value: string) {
@@ -97,12 +97,12 @@ export class PosComponent {
   }
 
   logout() {
-    this.authService.logout();
+    this.authStore.logout();
     this.router.navigate(['/login']);
   }
 
   formatCurrency(value: number): string {
-    return `$${value.toFixed(2)}`;
+    return `Ksh.${value.toFixed(2)}`;
   }
 
   getCartQuantity(productId: string): number {

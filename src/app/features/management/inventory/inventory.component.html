@@ -66,7 +66,12 @@
         <ng-container matColumnDef="image">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let p">
-            <img class="product-thumb" [src]="p.imageUrl" [alt]="p.name" loading="lazy" />
+            <img
+              class="product-thumb"
+              [src]="'https://picsum.photos/seed/' + p.sku + '/200/300'"
+              [alt]="p.name"
+              loading="lazy"
+            />
           </td>
         </ng-container>
 
@@ -83,7 +88,7 @@
         <ng-container matColumnDef="category">
           <th mat-header-cell *matHeaderCellDef>Category</th>
           <td mat-cell *matCellDef="let p">
-            <span class="category-tag">{{ p.category }}</span>
+            <span class="category-tag">{{ getCategoryName(p.category) }}</span>
           </td>
         </ng-container>
 

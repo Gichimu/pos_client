@@ -3,7 +3,7 @@
   <div class="stats-row">
     <app-stat-card
       title="Today's Sales Total"
-      [value]="'$' + salesToday().toFixed(2)"
+      [value]="'Ksh.' + salesToday().toFixed(2)"
       icon="credit_card"
       iconBgClass="icon-bg--blue"
     />
@@ -11,6 +11,12 @@
       title="Low Stock Items"
       [value]="lowStockCount().toString()"
       icon="warning_amber"
+      iconBgClass="icon-bg--red"
+    />
+    <app-stat-card
+      title="Critical Stock Items"
+      [value]="criticalStockCount().toString()"
+      icon="dangerous"
       iconBgClass="icon-bg--red"
     />
     <app-stat-card
@@ -35,11 +41,7 @@
           <mat-icon>assessment</mat-icon>
           Generate Report
         </button>
-        <button
-          mat-stroked-button
-          class="action-btn"
-          aria-label="Filter products"
-        >
+        <button mat-stroked-button class="action-btn" aria-label="Filter products">
           <mat-icon>tune</mat-icon>
           Filter products
         </button>

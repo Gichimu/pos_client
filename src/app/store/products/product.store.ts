@@ -1,12 +1,25 @@
 import { inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withHooks } from '@ngrx/signals';
 import { ProductService } from '../../core/services/product-service';
-import { Product } from '../../core/models/product.model';
+import { Product, StockReorderStatus } from '../../core/models/product.model';
 
 export type ProductState = {
   products: Product[];
   loading: boolean;
   error: string | null;
+};
+
+export const calculateReorderStatusValue = (
+  currentStock: number,
+  reorderLevel: number,
+): StockReorderStatus => {
+  if (currentStock <= reorderLevel * 0.2) {
+    return 'critical';
+  } else if (currentStock <= reorderLevel) {
+    return 'low';
+  } else {
+    return 'good';
+  }
 };
 
 const initialState: ProductState = {
@@ -24,8 +37,12 @@ export const productStore = signalStore(
     },
     addProduct(product: Product) {
       productService.addProduct(product).subscribe({
-        next: (newProduct: any) => {
+        next: (newProduct: Product) => {
           const currentProducts = store.products() as Product[];
+          newProduct.stockReorderStatus = calculateReorderStatusValue(
+            newProduct.currentStock,
+            newProduct.stockReorderLevel,
+          );
           patchState(store, { products: [...currentProducts, newProduct] });
         },
         error: (error) => {
@@ -35,8 +52,12 @@ export const productStore = signalStore(
     },
     updateProduct(product: Product) {
       productService.updateProduct(product).subscribe({
-        next: (updatedProduct: any) => {
+        next: (updatedProduct: Product) => {
           const currentProducts = store.products() as Product[];
+          updatedProduct.stockReorderStatus = calculateReorderStatusValue(
+            updatedProduct.currentStock,
+            updatedProduct.stockReorderLevel,
+          );
           patchState(store, {
             products: currentProducts.map((p) =>
               p._id === updatedProduct._id ? updatedProduct : p,
@@ -63,7 +84,11 @@ export const productStore = signalStore(
   withHooks({
     onInit(store, productService = inject(ProductService)) {
       productService.getAll().subscribe({
-        next: (products) => {
+        next: (products: Product[]) => {
+          products = products.map((p) => ({
+            ...p,
+            stockReorderStatus: calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
+          }));
           patchState(store, { products: products as Product[] });
         },
         error: (error) => {

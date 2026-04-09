@@ -85,6 +85,11 @@ export class InventoryComponent {
     return `Ksh.${v.toFixed(2)}`;
   }
 
+  getCategoryName(categoryId: string) {
+    const category = this.categoryStore.categories().find((c) => c._id === categoryId);
+    return category ? category.name : 'Unknown';
+  }
+
   openManageCategoriesDialog() {
     this.dialog.open(ManageCategoriesModalComponent, { width: '460px' });
   }

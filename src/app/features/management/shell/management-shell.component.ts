@@ -47,6 +47,7 @@ interface NavItem {
 })
 export class ManagementShellComponent {
   private readonly store = inject(authStore);
+  private readonly authStore = inject(authStore);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
@@ -76,7 +77,7 @@ export class ManagementShellComponent {
   notifications = signal(3);
 
   logout() {
-    this.authService.logout();
+    this.authStore.logout();
     this.router.navigate(['/login']);
   }
 
