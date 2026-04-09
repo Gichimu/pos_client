@@ -1,6 +1,9 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withHooks, withMethods, withState } from '@ngrx/signals';
 import { CartItem } from '../../core/models/cart.model';
 import { Product } from '../../core/models/product.model';
+import { SaleItem } from '../../core/models/sale.model';
+import { SalesService } from '../../core/services/sales-service';
+import { inject } from '@angular/core';
 
 export type CartState = {
   items: CartItem[];
@@ -18,7 +21,7 @@ const calculateTotal = (items: CartItem[]) =>
 export const cartStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withMethods((store) => ({
+  withMethods((store, salesService = inject(SalesService)) => ({
     addToCart(product: Product, quantity: number = 1) {
       const currentItems = store.items() as CartItem[];
       const existingItemIndex = currentItems.findIndex((item) => item.product._id === product._id);

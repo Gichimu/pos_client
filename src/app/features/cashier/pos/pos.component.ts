@@ -18,6 +18,8 @@ import { User } from '../../../core/models/user.model';
 import { productStore } from '../../../store/products/product.store';
 import { cartStore } from '../../../store/cart/cart.store';
 import { CartItem } from '../../../core/models/cart.model';
+import { LineItem, SaleItem } from '../../../core/models/sale.model';
+import { saleStore } from '../../../store/sales/sale.store';
 
 @Component({
   selector: 'app-pos',
@@ -36,6 +38,7 @@ import { CartItem } from '../../../core/models/cart.model';
 })
 export class PosComponent {
   readonly store = inject(cartStore);
+  readonly saleStore = inject(saleStore);
   readonly productStore = inject(productStore);
   cartItems = this.store.items as Signal<any[]>;
   cartTotal = this.store.total as Signal<number>;
@@ -85,8 +88,28 @@ export class PosComponent {
   processPayment() {
     if (this.store.items().length === 0) return;
     const total = this.grandTotal();
-    this.store.clearCart();
+    // this.store.clearCart();
     // send to receipt printer or backend API here
+    const lineItems = this.cartItems().map((item: CartItem) => {
+      const subTotal = item.quantity * item.product.sellingPrice;
+      return {
+        productId: item.product._id!,
+        productName: item.product.name,
+        quantity: item.quantity,
+        unitPrice: item.product.sellingPrice,
+        subTotal,
+        confirmed: false,
+      } as LineItem;
+    });
+
+    const saleTotalAmount = lineItems.reduce((sum, line) => sum + line.subTotal, 0);
+    const sale: SaleItem = {
+      items: lineItems,
+      totalAmount: saleTotalAmount,
+    };
+    console.log('check cartItems', sale);
+    this.saleStore.addSale(sale);
+    this.store.clearCart();
     this.snackBar.open(`Payment of $${total.toFixed(2)} processed successfully!`, 'Done', {
       duration: 4000,
     });
