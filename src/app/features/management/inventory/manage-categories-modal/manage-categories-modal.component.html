@@ -37,7 +37,7 @@
                 type="text"
                 [ngModel]="editValue()"
                 (ngModelChange)="editValue.set($event)"
-                (keydown.enter)="confirmEdit(cat)"
+                (keydown.enter)="confirmEdit(cat.name)"
                 (keydown.escape)="cancelEdit()"
                 autofocus
                 aria-label="Rename category"
@@ -46,7 +46,7 @@
                 <button
                   mat-icon-button
                   class="edit-action edit-action--save"
-                  (click)="confirmEdit(cat)"
+                  (click)="confirmEdit(cat.name)"
                   matTooltip="Save"
                 >
                   <mat-icon>check</mat-icon>
@@ -65,13 +65,13 @@
             <!-- Display row -->
             <div class="cat-row__display">
               <mat-icon class="cat-row__icon">label_outline</mat-icon>
-              <span class="cat-row__name">{{ cat }}</span>
+              <span class="cat-row__name">{{ cat.name }}</span>
               <div class="cat-row__actions">
                 <button
                   mat-icon-button
                   class="cat-action cat-action--edit"
                   (click)="startEdit(cat)"
-                  [matTooltip]="'Rename ' + cat"
+                  [matTooltip]="'Rename ' + cat.name"
                 >
                   <mat-icon>edit</mat-icon>
                 </button>
@@ -79,7 +79,7 @@
                   mat-icon-button
                   class="cat-action cat-action--delete"
                   (click)="remove(cat)"
-                  [matTooltip]="'Remove ' + cat"
+                  [matTooltip]="'Remove ' + cat.name"
                 >
                   <mat-icon>delete_outline</mat-icon>
                 </button>

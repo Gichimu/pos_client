@@ -22,6 +22,7 @@ import {
   ConfirmDialogData,
 } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ManageCategoriesModalComponent } from './manage-categories-modal/manage-categories-modal.component';
+import { CategoryStore } from '../../../store/categories/category.store';
 
 @Component({
   selector: 'app-inventory',
@@ -38,6 +39,7 @@ import { ManageCategoriesModalComponent } from './manage-categories-modal/manage
 })
 export class InventoryComponent {
   private readonly store = inject(Store);
+  private readonly categoryStore = inject(CategoryStore);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 

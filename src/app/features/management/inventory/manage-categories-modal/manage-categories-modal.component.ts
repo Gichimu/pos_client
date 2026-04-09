@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, Signal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoryStore } from '../../../../store/categories/category.store';
+import { Category } from '../../../../core/models/category.model';
 
 @Component({
   selector: 'app-manage-categories-modal',
@@ -27,7 +28,7 @@ export class ManageCategoriesModalComponent {
   readonly categoryStore = inject(CategoryStore);
 
   /** Name of the category being edited inline (null = not editing). */
-  editingCategory = signal<string | null>(null);
+  editingCategory = signal<Category | null>(null);
   editValue = signal('');
 
   /** New category input */
@@ -36,7 +37,7 @@ export class ManageCategoriesModalComponent {
   /** Error message for the add input */
   addError = signal<string | null>(null);
 
-  get categories() {
+  get categories(): Signal<Category[]> {
     return this.categoryStore.categories;
   }
 
@@ -46,7 +47,7 @@ export class ManageCategoriesModalComponent {
       this.addError.set('Category name is required');
       return;
     }
-    if (this.categories().some((c) => c.toLowerCase() === name.toLowerCase())) {
+    if (this.categories().some((c) => c.name.toLowerCase() === name.toLowerCase())) {
       this.addError.set(`"${name}" already exists`);
       return;
     }
@@ -56,9 +57,9 @@ export class ManageCategoriesModalComponent {
     this.addError.set(null);
   }
 
-  startEdit(category: string) {
+  startEdit(category: Category) {
     this.editingCategory.set(category);
-    this.editValue.set(category);
+    this.editValue.set(category.name);
   }
 
   confirmEdit(oldName: string) {
@@ -67,7 +68,7 @@ export class ManageCategoriesModalComponent {
       this.cancelEdit();
       return;
     }
-    if (this.categories().some((c) => c.toLowerCase() === newName.toLowerCase())) {
+    if (this.categories().some((c) => c.name.toLowerCase() === newName.toLowerCase())) {
       this.cancelEdit();
       return;
     }
@@ -81,7 +82,7 @@ export class ManageCategoriesModalComponent {
     this.editValue.set('');
   }
 
-  remove(category: string) {
+  remove(category: Category) {
     this.categoryStore.removeCategory(category);
     this.snackBar.open(`"${category}" removed`, 'Dismiss', { duration: 2000 });
   }
