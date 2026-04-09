@@ -7,10 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { selectProducts } from '../../../store/products/products.selectors';
-import { ProductsActions } from '../../../store/products/products.actions';
 import { Product } from '../../../core/models/product.model';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import {
@@ -23,6 +19,7 @@ import {
 } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ManageCategoriesModalComponent } from './manage-categories-modal/manage-categories-modal.component';
 import { CategoryStore } from '../../../store/categories/category.store';
+import { productStore } from '../../../store/products/product.store';
 
 @Component({
   selector: 'app-inventory',
@@ -38,16 +35,20 @@ import { CategoryStore } from '../../../store/categories/category.store';
   styleUrl: './inventory.component.scss',
 })
 export class InventoryComponent {
-  private readonly store = inject(Store);
+  private readonly store = inject(productStore);
   private readonly categoryStore = inject(CategoryStore);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly products = toSignal(this.store.select(selectProducts), { initialValue: [] });
+  // readonly products = toSignal(this.store.select(selectProducts), { initialValue: [] });
 
-  readonly totalCount = computed(() => this.products().length);
-  readonly lowStockCount = computed(() => this.products().filter((p) => p.currentStock < 5).length);
-  readonly outOfStock = computed(() => this.products().filter((p) => p.currentStock === 0).length);
+  readonly totalCount = computed(() => this.store.products().length);
+  readonly lowStockCount = computed(
+    () => this.store.products().filter((p) => p.currentStock < 5).length,
+  );
+  readonly outOfStock = computed(
+    () => this.store.products().filter((p) => p.currentStock === 0).length,
+  );
 
   readonly displayedColumns = [
     'image',
@@ -65,13 +66,15 @@ export class InventoryComponent {
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
     return q
-      ? this.products().filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
-            p.sku.toLowerCase().includes(q),
-        )
-      : this.products();
+      ? this.store
+          .products()
+          .filter(
+            (p) =>
+              p.name.toLowerCase().includes(q) ||
+              p.category.toLowerCase().includes(q) ||
+              p.sku.toLowerCase().includes(q),
+          )
+      : this.store.products();
   });
 
   onSearch(value: string) {
@@ -79,7 +82,7 @@ export class InventoryComponent {
   }
 
   formatCurrency(v: number) {
-    return `$${v.toFixed(2)}`;
+    return `Ksh.${v.toFixed(2)}`;
   }
 
   openManageCategoriesDialog() {
@@ -93,7 +96,8 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((product) => {
       if (product) {
-        this.store.dispatch(ProductsActions.addProduct({ product }));
+        // this.store.dispatch(ProductsActions.addProduct({ product }));
+        this.store.addProduct(product);
         this.snackBar.open(`${product.name} added to inventory`, 'Dismiss', { duration: 3000 });
       }
     });
@@ -106,7 +110,8 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((updated) => {
       if (updated) {
-        this.store.dispatch(ProductsActions.updateProduct({ product: updated }));
+        // this.store.dispatch(ProductsActions.updateProduct({ product: updated }));
+        this.store.updateProduct(updated);
         this.snackBar.open(`${updated.name} updated`, 'Dismiss', { duration: 3000 });
       }
     });
@@ -127,7 +132,8 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        this.store.dispatch(ProductsActions.deleteProduct({ id: product.id }));
+        // this.store.dispatch(ProductsActions.deleteProduct({ id: product._id }));
+        this.store.deleteProduct(product._id!);
         this.snackBar.open(`${product.name} removed`, 'Dismiss', { duration: 3000 });
       }
     });

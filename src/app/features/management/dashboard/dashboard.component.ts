@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,30 +8,22 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 import { ProductTableComponent } from './product-table/product-table.component';
 import { GenerateReportModalComponent } from './generate-report-modal/generate-report-modal.component';
-import { selectProducts } from '../../../store/products/products.selectors';
+import { productStore } from '../../../store/products/product.store';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    StatCardComponent,
-    ProductTableComponent,
-  ],
+  imports: [CommonModule, MatButtonModule, MatIconModule, StatCardComponent, ProductTableComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
-  private readonly store = inject(Store);
+  private readonly productStore = inject(productStore);
   private readonly dialog = inject(MatDialog);
 
-  readonly products = toSignal(this.store.select(selectProducts), {
-    initialValue: [],
-  });
+  readonly products = this.productStore.products as Signal<any[]>;
 
   readonly lowStockCount = computed(
-    () => this.products().filter((p) => p.currentStock < 5).length
+    () => this.productStore.products().filter((p) => p.currentStock < 5).length,
   );
 
   readonly activeCashiers = signal(3);

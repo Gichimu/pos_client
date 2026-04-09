@@ -2,7 +2,7 @@ import { Product } from '../core/models/product.model';
 
 export const MOCK_PRODUCTS: Product[] = [
   {
-    id: '1',
+    _id: '1',
     sku: 'Coffee Bocat',
     name: 'Coffee Bocat',
     imageUrl: 'https://picsum.photos/seed/coffee1/60/60',
@@ -13,7 +13,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Beverages',
   },
   {
-    id: '2',
+    _id: '2',
     sku: 'Switch Sandwich',
     name: 'Switch Sandwich',
     imageUrl: 'https://picsum.photos/seed/sandwich1/60/60',
@@ -24,7 +24,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Food',
   },
   {
-    id: '3',
+    _id: '3',
     sku: 'Flowny Pastry',
     name: 'Flowny Pastry',
     imageUrl: 'https://picsum.photos/seed/pastry1/60/60',
@@ -35,7 +35,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Pastries',
   },
   {
-    id: '4',
+    _id: '4',
     sku: 'Pastry',
     name: 'Pastry',
     imageUrl: 'https://picsum.photos/seed/pastry2/60/60',
@@ -46,7 +46,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Pastries',
   },
   {
-    id: '5',
+    _id: '5',
     sku: 'Beat Buffein',
     name: 'Beat Buffein',
     imageUrl: 'https://picsum.photos/seed/beat1/60/60',
@@ -57,7 +57,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Beverages',
   },
   {
-    id: '6',
+    _id: '6',
     sku: 'Pastry Iclt',
     name: 'Pastry Iclt',
     imageUrl: 'https://picsum.photos/seed/pastry3/60/60',
@@ -68,7 +68,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Pastries',
   },
   {
-    id: '7',
+    _id: '7',
     sku: 'Sandwicies',
     name: 'Sandwicies',
     imageUrl: 'https://picsum.photos/seed/sandwich2/60/60',
@@ -79,7 +79,7 @@ export const MOCK_PRODUCTS: Product[] = [
     category: 'Food',
   },
   {
-    id: '8',
+    _id: '8',
     sku: 'Latte Special',
     name: 'Latte Special',
     imageUrl: 'https://picsum.photos/seed/latte1/60/60',

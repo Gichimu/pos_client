@@ -8,7 +8,6 @@ import { authStore } from '../../store/auth/auth.store';
 
 export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
   return () => {
-    const store = inject(Store);
     const router = inject(Router);
     const authstore = inject(authStore);
 

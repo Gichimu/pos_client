@@ -11,18 +11,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { selectProducts } from '../../../store/products/products.selectors';
-import {
-  selectCartItems,
-  selectCartTotal,
-  selectCartCount,
-} from '../../../store/cart/cart.selectors';
-import { selectCurrentUser } from '../../../store/auth/auth.selectors';
-import { CartActions } from '../../../store/cart/cart.actions';
 import { AuthService } from '../../../core/services/auth.service';
 import { Product } from '../../../core/models/product.model';
 import { authStore } from '../../../store/auth/auth.store';
 import { User } from '../../../core/models/user.model';
+import { productStore } from '../../../store/products/product.store';
+import { cartStore } from '../../../store/cart/cart.store';
+import { CartItem } from '../../../core/models/cart.model';
 
 @Component({
   selector: 'app-pos',
@@ -40,16 +35,15 @@ import { User } from '../../../core/models/user.model';
   styleUrl: './pos.component.scss',
 })
 export class PosComponent {
-  private readonly store = inject(Store);
+  readonly store = inject(cartStore);
+  readonly productStore = inject(productStore);
+  cartItems = this.store.items as Signal<any[]>;
+  cartTotal = this.store.total as Signal<number>;
   private readonly authStore = inject(authStore);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly allProducts = toSignal(this.store.select(selectProducts), { initialValue: [] });
-  readonly cartItems = toSignal(this.store.select(selectCartItems), { initialValue: [] });
-  readonly cartTotal = toSignal(this.store.select(selectCartTotal), { initialValue: 0 });
-  readonly cartCount = toSignal(this.store.select(selectCartCount), { initialValue: 0 });
   readonly currentUser = this.authStore.user as Signal<User | null>;
 
   searchQuery = signal('');
@@ -57,41 +51,42 @@ export class PosComponent {
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
     return q
-      ? this.allProducts().filter((p) => p.name.toLowerCase().includes(q))
-      : this.allProducts();
+      ? this.productStore.products().filter((p) => p.name.toLowerCase().includes(q))
+      : this.productStore.products();
   });
 
-  readonly tax = computed(() => this.cartTotal() * 0.1);
-  readonly grandTotal = computed(() => this.cartTotal() + this.tax());
+  readonly tax = computed(() => this.store.total() * 0.1);
+  readonly grandTotal = computed(() => this.store.total() + this.tax());
 
   onSearchChange(value: string) {
     this.searchQuery.set(value);
   }
 
   addToCart(product: Product) {
-    this.store.dispatch(CartActions.addItem({ product }));
+    this.store.addToCart(product);
   }
 
   increment(productId: string) {
-    this.store.dispatch(CartActions.incrementQuantity({ productId }));
+    this.store.incrementItem(productId);
   }
 
   decrement(productId: string) {
-    this.store.dispatch(CartActions.decrementQuantity({ productId }));
+    this.store.decrementItem(productId);
   }
 
   removeItem(productId: string) {
-    this.store.dispatch(CartActions.removeItem({ productId }));
+    this.store.removeFromCart(productId);
   }
 
   clearCart() {
-    this.store.dispatch(CartActions.clearCart());
+    this.store.clearCart();
   }
 
   processPayment() {
-    if (this.cartItems().length === 0) return;
+    if (this.store.items().length === 0) return;
     const total = this.grandTotal();
-    this.store.dispatch(CartActions.clearCart());
+    this.store.clearCart();
+    // send to receipt printer or backend API here
     this.snackBar.open(`Payment of $${total.toFixed(2)} processed successfully!`, 'Done', {
       duration: 4000,
     });
@@ -111,6 +106,6 @@ export class PosComponent {
   }
 
   getCartQuantity(productId: string): number {
-    return this.cartItems().find((i) => i.product.id === productId)?.quantity ?? 0;
+    return this.store.items().find((i) => i.product._id === productId)?.quantity ?? 0;
   }
 }

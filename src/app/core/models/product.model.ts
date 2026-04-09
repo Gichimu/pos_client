@@ -1,7 +1,7 @@
 export type StockReorderStatus = 'good' | 'pastry' | 'not-reorder' | 'pasout';
 
 export interface Product {
-  id: string;
+  _id?: string;
   sku: string;
   name: string;
   imageUrl: string;

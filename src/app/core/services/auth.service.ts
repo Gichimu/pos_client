@@ -10,20 +10,20 @@ const AUTH_STORAGE_KEY = 'pos_auth_user';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly store = inject(Store);
+  // private readonly store = inject(Store);
   http = inject(HttpClient);
 
-  initializeAuth(): void {
-    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (stored) {
-      try {
-        const user: User = JSON.parse(stored);
-        this.store.dispatch(AuthActions.loginSuccess({ user }));
-      } catch {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      }
-    }
-  }
+  // initializeAuth(): void {
+  //   const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+  //   if (stored) {
+  //     try {
+  //       const user: User = JSON.parse(stored);
+  //       this.store.dispatch(AuthActions.loginSuccess({ user }));
+  //     } catch {
+  //       localStorage.removeItem(AUTH_STORAGE_KEY);
+  //     }
+  //   }
+  // }
 
   login(user: User): Observable<any> {
     // localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));

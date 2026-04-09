@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, Signal } from '@angular/core';
 import {
   RouterOutlet,
   RouterLink,
@@ -19,6 +19,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { selectCurrentUser } from '../../../store/auth/auth.selectors';
 import { AuthService } from '../../../core/services/auth.service';
 import { MatDividerModule } from '@angular/material/divider';
+import { authStore } from '../../../store/auth/auth.store';
+import { User } from '../../../core/models/user.model';
 
 interface NavItem {
   label: string;
@@ -44,12 +46,12 @@ interface NavItem {
   styleUrl: './management-shell.component.scss',
 })
 export class ManagementShellComponent {
-  private readonly store = inject(Store);
+  private readonly store = inject(authStore);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
-  readonly currentUser = toSignal(this.store.select(selectCurrentUser));
+  readonly currentUser = this.store.user as Signal<User | null>;
 
   readonly pageTitle = toSignal(
     this.router.events.pipe(

@@ -49,11 +49,11 @@
 
       <!-- Grid -->
       <div class="product-grid">
-        @for (product of filteredProducts(); track product.id) {
+        @for (product of filteredProducts(); track product._id) {
           <button
             class="product-card"
             (click)="addToCart(product)"
-            [class.product-card--in-cart]="getCartQuantity(product.id) > 0"
+            [class.product-card--in-cart]="getCartQuantity(product._id!) > 0"
             aria-label="Add {{ product.name }} to cart"
           >
             <div class="product-card__img-wrap">
@@ -63,9 +63,9 @@
                 [alt]="product.name"
                 loading="lazy"
               />
-              @if (getCartQuantity(product.id) > 0) {
+              @if (getCartQuantity(product._id!) > 0) {
                 <span class="product-card__qty-badge">
-                  {{ getCartQuantity(product.id) }}
+                  {{ getCartQuantity(product._id!) }}
                 </span>
               }
             </div>
@@ -91,8 +91,8 @@
       <div class="cart-header">
         <h2 class="cart-header__title">
           Current Order
-          @if (cartCount() > 0) {
-            <span class="cart-header__count">{{ cartCount() }}</span>
+          @if (cartItems().length > 0) {
+            <span class="cart-header__count">{{ cartItems().length }}</span>
           }
         </h2>
         @if (cartItems().length > 0) {
@@ -113,7 +113,7 @@
           </div>
         }
 
-        @for (item of cartItems(); track item.product.id) {
+        @for (item of cartItems(); track item.product._id) {
           <div class="cart-item">
             <img class="cart-item__img" [src]="item.product.imageUrl" [alt]="item.product.name" />
             <div class="cart-item__info">
@@ -126,7 +126,7 @@
               <button
                 mat-icon-button
                 class="qty-btn"
-                (click)="decrement(item.product.id)"
+                (click)="decrement(item.product._id!)"
                 aria-label="Decrease quantity"
               >
                 <mat-icon>{{ item.quantity === 1 ? 'delete_outline' : 'remove' }}</mat-icon>
@@ -135,7 +135,7 @@
               <button
                 mat-icon-button
                 class="qty-btn"
-                (click)="increment(item.product.id)"
+                (click)="increment(item.product._id!)"
                 aria-label="Increase quantity"
               >
                 <mat-icon>add</mat-icon>

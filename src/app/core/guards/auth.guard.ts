@@ -6,7 +6,6 @@ import { selectIsAuthenticated } from '../../store/auth/auth.selectors';
 import { authStore } from '../../store/auth/auth.store';
 
 export const authGuard: CanActivateFn = () => {
-  const store = inject(Store);
   const router = inject(Router);
   const authstore = inject(authStore);
 

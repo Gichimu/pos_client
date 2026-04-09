@@ -2,12 +2,7 @@
   <!-- Header -->
   <div class="report-modal__header">
     <h2 class="report-modal__title">Generate Sales Report</h2>
-    <button
-      mat-icon-button
-      class="close-btn"
-      (click)="close()"
-      aria-label="Close dialog"
-    >
+    <button mat-icon-button class="close-btn" (click)="close()" aria-label="Close dialog">
       <mat-icon>close</mat-icon>
     </button>
   </div>
@@ -55,8 +50,8 @@
         <mat-form-field appearance="outline" class="full-field">
           <mat-label>Select products</mat-label>
           <mat-select formControlName="products" multiple>
-            @for (product of products(); track product.id) {
-              <mat-option [value]="product.id">{{ product.name }}</mat-option>
+            @for (product of products(); track product._id) {
+              <mat-option [value]="product._id">{{ product.name }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -67,12 +62,7 @@
   <!-- Footer -->
   <div class="report-modal__footer">
     <button mat-button class="cancel-btn" (click)="close()">Cancel</button>
-    <button
-      mat-flat-button
-      class="save-btn"
-      [disabled]="loading()"
-      (click)="save()"
-    >
+    <button mat-flat-button class="save-btn" [disabled]="loading()" (click)="save()">
       @if (loading()) {
         Generating…
       } @else {

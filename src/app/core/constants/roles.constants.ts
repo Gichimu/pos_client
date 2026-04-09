@@ -15,6 +15,7 @@ export const MOCK_USERS: Array<{
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRole;
   status: 'active' | 'inactive';
   avatar: string;
@@ -34,7 +35,7 @@ export const MOCK_USERS: Array<{
     name: 'John D.',
     email: 'john@pos.com',
     role: 'cashier',
-    status: 'active',
+    status: 'inactive',
     avatar: 'https://i.pravatar.cc/40?u=johnd',
     store: 'Delect',
   },
@@ -52,7 +53,7 @@ export const MOCK_USERS: Array<{
     name: 'Mike T.',
     email: 'mike@pos.com',
     role: 'cashier',
-    status: 'active',
+    status: 'inactive',
     avatar: 'https://i.pravatar.cc/40?u=miket',
     store: 'Delect',
   },
@@ -70,6 +71,16 @@ export const MOCK_USERS: Array<{
     name: 'Eric A.',
     email: 'eric@user.com',
     role: 'superAdmin',
+    status: 'active',
+    avatar: 'https://i.pravatar.cc/40?u=erica',
+    store: 'Delect',
+  },
+  {
+    id: '7',
+    name: 'Esther U.',
+    email: 'esther@user.com',
+    password: 'useruser',
+    role: 'cashier',
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=erica',
     store: 'Delect',

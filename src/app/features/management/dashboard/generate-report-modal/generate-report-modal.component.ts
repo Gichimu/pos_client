@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, Signal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -11,7 +11,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { selectProducts } from '../../../../store/products/products.selectors';
+import { productStore } from '../../../../store/products/product.store';
+import { Product } from '../../../../core/models/product.model';
 
 @Component({
   selector: 'app-generate-report-modal',
@@ -33,11 +34,10 @@ export class GenerateReportModalComponent {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<GenerateReportModalComponent>);
   private readonly store = inject(Store);
+  private readonly productStore = inject(productStore);
   private readonly snackBar = inject(MatSnackBar);
 
-  readonly products = toSignal(this.store.select(selectProducts), {
-    initialValue: [],
-  });
+  readonly products = this.productStore.products as Signal<Product[]>;
 
   readonly loading = signal(false);
 

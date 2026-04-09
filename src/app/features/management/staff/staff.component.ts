@@ -34,7 +34,6 @@ import {
   styleUrl: './staff.component.scss',
 })
 export class StaffComponent {
-  private readonly store = inject(Store);
   userstore = inject(userStore);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);

@@ -94,7 +94,8 @@ export class LoginComponent {
       );
     }
 
-    const fromApi = this.users().find((u) => u.role === role && u.status === 'active');
+    // const fromApi = this.users().find((u) => u.role === role && u.status === 'active');
+    const fromApi = null; // Disable API lookup for cashiers to avoid confusion during development when API is unavailable.
     return fromApi ?? MOCK_USERS.find((u) => u.role === role && u.status === 'active') ?? null;
   });
 
@@ -189,9 +190,17 @@ export class LoginComponent {
     }
 
     const user = this.selectedUser();
+    console.log('authenticating user', user);
     if (user) {
-      this.authService.login(user);
-      this.router.navigate(['/cashier']);
+      this.authStore.login(user).subscribe({
+        next: () => {
+          console.log('auth user after login', this.authStore.user());
+          this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
+        },
+        error: (error) => {
+          this.error.set('Login failed. Please check your credentials.');
+        },
+      });
     }
   }
 }
