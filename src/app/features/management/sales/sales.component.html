@@ -10,6 +10,25 @@
     </div>
 
     <div class="sales-page__header-right">
+      <!-- Cashier filter -->
+      <div class="cashier-filter-wrap">
+        <span class="material-icons cashier-filter-wrap__icon">person</span>
+        <mat-select
+          class="cashier-filter-select"
+          [value]="filterCashierId()"
+          (selectionChange)="setCashierFilter($event.value)"
+          panelClass="cashier-filter-panel"
+          aria-label="Filter by cashier"
+        >
+          <mat-option [value]="null">All Cashiers</mat-option>
+          @for (cashier of cashierOptions(); track cashier.id) {
+            <mat-option [value]="cashier.id">
+              {{ cashier.name }}
+            </mat-option>
+          }
+        </mat-select>
+      </div>
+
       <!-- Status filter tabs -->
       <div class="filter-tabs" role="group" aria-label="Filter by status">
         <button
@@ -18,7 +37,7 @@
           (click)="setFilter('all')"
         >
           All
-          <span class="filter-tab__count">{{ items().length }}</span>
+          <span class="filter-tab__count">{{ items()?.length || 0 }}</span>
         </button>
         <button
           class="filter-tab"
@@ -78,7 +97,7 @@
       </div>
       <div class="stat-card__body">
         <p class="stat-card__label">Confirmed</p>
-        <p class="stat-card__value">{{ confirmedCount() }} / {{ items().length }}</p>
+        <p class="stat-card__value">{{ confirmedCount() }} / {{ items()?.length || 0 }}</p>
       </div>
     </div>
     <div class="stat-card">
@@ -93,149 +112,181 @@
   </div>
 
   <!-- Table -->
-  <div class="sales-table-wrap">
-    @if (filteredItems().length === 0) {
-      <div class="empty-state">
-        <div class="empty-state__icon">
-          <span class="material-icons">receipt_long</span>
-        </div>
-        <p class="empty-state__title">No items found</p>
-        <p class="empty-state__desc">
-          @if (filterStatus() === 'confirmed') {
-            No confirmed items yet.
-          } @else if (filterStatus() === 'pending') {
-            All items have been confirmed.
-          } @else {
-            No sales recorded today.
-          }
-        </p>
+  <div class="sales-table-wrap" [class.sales-table-wrap--loading]="isLoading()">
+    <!-- Loading overlay -->
+    @if (isLoading()) {
+      <div class="table-loading-overlay">
+        <mat-spinner diameter="36"></mat-spinner>
       </div>
-    } @else {
-      <table mat-table [dataSource]="filteredItems()" class="sales-table">
-        <!-- Product image -->
-        <ng-container matColumnDef="image">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let item">
-            <img
-              class="product-thumb"
-              [src]="item.productImage"
-              [alt]="item.productName"
-              loading="lazy"
-            />
-          </td>
-        </ng-container>
+    }
 
-        <!-- Product name + SKU -->
-        <ng-container matColumnDef="product">
-          <th mat-header-cell *matHeaderCellDef>Product</th>
-          <td mat-cell *matCellDef="let item">
-            <p class="product-name">{{ item.productName }}</p>
-            <p class="product-sku">SKU: {{ item.productSku }}</p>
-          </td>
-        </ng-container>
-
-        <!-- Cashier -->
-        <ng-container matColumnDef="cashier">
-          <th mat-header-cell *matHeaderCellDef>Cashier</th>
-          <td mat-cell *matCellDef="let item">
-            <div class="cashier-cell">
+    <!-- Scrollable area: table or empty state -->
+    <div class="sales-table-scroll">
+      @if (filteredItems().length === 0 && !isLoading()) {
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <span class="material-icons">receipt_long</span>
+          </div>
+          <p class="empty-state__title">No items found</p>
+          <p class="empty-state__desc">
+            @if (filterStatus() === 'confirmed') {
+              No confirmed items yet.
+            } @else if (filterStatus() === 'pending') {
+              All items have been confirmed.
+            } @else {
+              No sales recorded today.
+            }
+          </p>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="filteredItems()" class="sales-table">
+          <!-- Product image -->
+          <ng-container matColumnDef="image">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
               <img
-                class="cashier-avatar"
-                [src]="item.cashierAvatar"
-                [alt]="item.cashierName"
+                class="product-thumb"
+                [src]="item.productImage"
+                [alt]="item.productName"
                 loading="lazy"
               />
-              <span class="cashier-name">{{ item.cashierName }}</span>
-            </div>
-          </td>
-        </ng-container>
+            </td>
+          </ng-container>
 
-        <!-- Qty Sold -->
-        <ng-container matColumnDef="qty">
-          <th mat-header-cell *matHeaderCellDef>Qty Sold</th>
-          <td mat-cell *matCellDef="let item">
-            <span class="qty-badge">{{ item.quantity }}</span>
-          </td>
-        </ng-container>
+          <!-- Product name + SKU -->
+          <ng-container matColumnDef="product">
+            <th mat-header-cell *matHeaderCellDef>Product</th>
+            <td mat-cell *matCellDef="let item">
+              <p class="product-name">{{ item.productName }}</p>
+              <p class="product-sku">SKU: {{ item.productSku }}</p>
+            </td>
+          </ng-container>
 
-        <!-- Unit Price -->
-        <ng-container matColumnDef="unitPrice">
-          <th mat-header-cell *matHeaderCellDef>Unit Price</th>
-          <td mat-cell *matCellDef="let item">{{ formatCurrency(item.unitPrice) }}</td>
-        </ng-container>
+          <!-- Cashier -->
+          <ng-container matColumnDef="cashier">
+            <th mat-header-cell *matHeaderCellDef>Cashier</th>
+            <td mat-cell *matCellDef="let item">
+              <div class="cashier-cell">
+                <img
+                  class="cashier-avatar"
+                  [src]="item.cashierAvatar"
+                  [alt]="item.cashierName"
+                  loading="lazy"
+                />
+                <span class="cashier-name">{{ item.cashierName }}</span>
+              </div>
+            </td>
+          </ng-container>
 
-        <!-- Total -->
-        <ng-container matColumnDef="total">
-          <th mat-header-cell *matHeaderCellDef>Total</th>
-          <td mat-cell *matCellDef="let item">
-            <span class="total-value">{{ formatCurrency(item.subTotal) }}</span>
-          </td>
-        </ng-container>
+          <!-- Qty Sold -->
+          <ng-container matColumnDef="qty">
+            <th mat-header-cell *matHeaderCellDef>Qty Sold</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="qty-badge">{{ item.quantity }}</span>
+            </td>
+          </ng-container>
 
-        <!-- Time -->
-        <ng-container matColumnDef="time">
-          <th mat-header-cell *matHeaderCellDef>Time</th>
-          <td mat-cell *matCellDef="let item">
-            <span class="time-value">{{ formatTime(item.transactionDate) }}</span>
-          </td>
-        </ng-container>
+          <!-- Unit Price -->
+          <ng-container matColumnDef="unitPrice">
+            <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+            <td mat-cell *matCellDef="let item">{{ formatCurrency(item.unitPrice) }}</td>
+          </ng-container>
 
-        <!-- Status -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let item">
-            @if (item.confirmed) {
-              <span class="status-pill status-pill--confirmed">
-                <span class="material-icons">check_circle</span>
-                Confirmed
-              </span>
-            } @else {
-              <span class="status-pill status-pill--pending">
-                <span class="material-icons">schedule</span>
-                Pending
-              </span>
-            }
-          </td>
-        </ng-container>
+          <!-- Total -->
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef>Total</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="total-value">{{ formatCurrency(item.subTotal) }}</span>
+            </td>
+          </ng-container>
 
-        <!-- Actions -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let item">
-            <div class="row-actions">
-              @if (!item.confirmed) {
-                <button
-                  mat-stroked-button
-                  class="confirm-btn"
-                  (click)="toggleConfirm(item)"
-                  matTooltip="Confirm this line item"
-                >
-                  <span class="material-icons">check</span>
-                  Confirm
-                </button>
+          <!-- Time -->
+          <ng-container matColumnDef="time">
+            <th mat-header-cell *matHeaderCellDef>Time</th>
+            <td mat-cell *matCellDef="let item">
+              <span class="time-value">{{ formatTime(item.transactionDate) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let item">
+              @if (item.confirmed) {
+                <div class="status-cell">
+                  <span class="status-pill status-pill--confirmed">
+                    <span class="material-icons">check_circle</span>
+                    Confirmed
+                  </span>
+                  @if (item.paymentMethod) {
+                    <span class="payment-badge payment-badge--{{ item.paymentMethod | lowercase }}">
+                      {{ item.paymentMethod }}
+                    </span>
+                  }
+                </div>
               } @else {
-                <button
-                  mat-button
-                  class="undo-btn"
-                  (click)="toggleConfirm(item)"
-                  matTooltip="Mark as pending"
-                >
-                  <span class="material-icons">undo</span>
-                  Undo
-                </button>
+                <span class="status-pill status-pill--pending">
+                  <span class="material-icons">schedule</span>
+                  Pending
+                </span>
               }
-            </div>
-          </td>
-        </ng-container>
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr
-          mat-row
-          *matRowDef="let row; columns: displayedColumns"
-          class="sales-row"
-          [class.sales-row--confirmed]="row.confirmed"
-        ></tr>
-      </table>
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <div class="row-actions">
+                @if (!item.confirmed) {
+                  <button
+                    mat-stroked-button
+                    class="confirm-btn"
+                    (click)="toggleConfirm(item)"
+                    matTooltip="Confirm this line item"
+                  >
+                    <span class="material-icons">check</span>
+                    Confirm
+                  </button>
+                } @else {
+                  <button
+                    mat-button
+                    class="undo-btn"
+                    (click)="toggleConfirm(item)"
+                    matTooltip="Mark as pending"
+                  >
+                    <span class="material-icons">undo</span>
+                    Undo
+                  </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            class="sales-row"
+            [class.sales-row--confirmed]="row.confirmed"
+          ></tr>
+        </table>
+      }
+    </div>
+    <!-- /.sales-table-scroll -->
+
+    <!-- Paginator — pinned at the bottom of the card, never scrolls -->
+    @if (totalItems() > 0) {
+      <mat-paginator
+        class="sales-paginator"
+        [length]="totalItems()"
+        [pageSize]="pageSize()"
+        [pageIndex]="currentPage() - 1"
+        [pageSizeOptions]="[10, 20, 50]"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange($event)"
+        aria-label="Select sales page"
+      ></mat-paginator>
     }
   </div>
 </div>

@@ -1,5 +1,7 @@
 export type SaleConfirmStatus = 'pending' | 'confirmed';
 
+export type PaymentMethod = 'Cash' | 'M-Pesa' | 'PDQ';
+
 export interface LineItem {
   _id?: string;
   productId?: string;
@@ -13,6 +15,7 @@ export interface LineItem {
   unitPrice: number;
   subTotal: number;
   confirmed: boolean;
+  paymentMethod?: PaymentMethod;
   transactionDate?: Date;
 }
 
@@ -20,4 +23,12 @@ export interface SaleItem {
   _id?: string;
   items: LineItem[];
   totalAmount: number;
+}
+
+export interface PaginatedSalesResponse {
+  data: SaleItem[];
+  total: number;
+  page: number;
+  totalPages: number;
+  limit: number;
 }

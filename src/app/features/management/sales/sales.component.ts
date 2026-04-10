@@ -1,15 +1,24 @@
-import { Component, computed, OnInit, Signal, signal } from '@angular/core';
+import { Component, computed, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { inject } from '@angular/core';
-import { SaleItem } from '../../../core/models/sale.model';
 import { saleStore } from '../../../store/sales/sale.store';
 import { userStore } from '../../../store/users/user.store';
 import { productStore } from '../../../store/products/product.store';
+import {
+  PaymentMethodDialogComponent,
+  PaymentMethodDialogData,
+  PaymentMethodDialogResult,
+} from './payment-method-dialog.component';
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
 
@@ -182,7 +191,17 @@ const MOCK_SALES: any[] = [
 
 @Component({
   selector: 'app-sales',
-  imports: [CommonModule, MatTableModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatSelectModule,
+    MatFormFieldModule,
+    MatPaginatorModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './sales.component.html',
   styleUrl: './sales.component.scss',
 })
@@ -191,6 +210,7 @@ export class SalesComponent implements OnInit {
   readonly userStore = inject(userStore);
   readonly productStore = inject(productStore);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   readonly today = new Date();
 
@@ -198,55 +218,93 @@ export class SalesComponent implements OnInit {
   // items = signal<any[]>(MOCK_SALES);
 
   // Assuming 'allSales' is your array of nested objects from Screenshot 1
-  items = computed(() =>
-    this.salesStore.items().flatMap((sale: any) =>
-      sale.items.map((item: any) => ({
-        _id: item._id, // Using the sub-item ID
-        productId: item.productId,
-        productName: this.getProduct(item.productId)?.name || 'Unknown Product', // Assuming you have this or need to look it up
-        productSku: this.getProduct(item.productId)?.name || 'N/A',
-        productImage: `https://picsum.photos/seed/${item.productId}/60/60`,
-        cashierId: sale.cashierId._id,
-        cashierName:
-          this.getUser(sale.cashierId._id)?.firstName +
-            ' ' +
-            this.getUser(sale.cashierId._id)?.lastName || 'Unknown',
-        cashierAvatar: `https://i.pravatar.cc/32?u=${sale.cashierId._id}`,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        totalAmount: item.subTotal,
-        subTotal: item.subTotal,
-        transactionDate: new Date(sale.createdAt),
-        confirmed: item.confirmed,
-      })),
-    ),
+  items = computed(
+    () =>
+      this.salesStore.items()?.flatMap((sale: any) =>
+        sale.items.map((item: any) => ({
+          _id: item._id, // Using the sub-item ID
+          parentSaleId: sale._id, // Reference to the parent sale
+          productId: item.productId,
+          productName: this.getProduct(item.productId)?.name || 'Unknown Product', // Assuming you have this or need to look it up
+          productSku: this.getProduct(item.productId)?.name || 'N/A',
+          productImage: `https://picsum.photos/seed/${item.productId}/60/60`,
+          cashierId: sale.cashierId._id,
+          cashierName:
+            this.getUser(sale.cashierId._id)?.firstName +
+              ' ' +
+              this.getUser(sale.cashierId._id)?.lastName || 'Unknown',
+          cashierAvatar: `https://i.pravatar.cc/32?u=${sale.cashierId._id}`,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalAmount: item.subTotal,
+          subTotal: item.subTotal,
+          transactionDate: new Date(sale.createdAt),
+          confirmed: item.confirmed,
+        })),
+      ) || [],
   );
 
   /** Active status filter. */
   filterStatus = signal<FilterStatus>('all');
 
+  /** Active cashier filter — null means "All Cashiers". */
+  filterCashierId = signal<string | null>(null);
+
+  /** Cashier list sourced from the full user store — stable across page changes. */
+  readonly cashierOptions = computed(() =>
+    this.userStore
+      .users()
+      // .filter((u) => u.role === 'cashier') --- IGNORE ---
+      .map((u) => ({
+        id: u._id!,
+        name: `${u.firstName} ${u.lastName}`,
+        avatar: u.avatar ?? '',
+      })),
+  );
+
+  // ── Pagination (read from store) ─────────────────────────────────────────
+
+  readonly currentPage = computed(() => this.salesStore.currentPage());
+  readonly totalPages = computed(() => this.salesStore.totalPages());
+  readonly totalItems = computed(() => this.salesStore.totalItems());
+  readonly pageSize = computed(() => this.salesStore.pageSize());
+  readonly isLoading = computed(() => this.salesStore.isLoading());
+
   // ── Computed summary stats ───────────────────────────────────────────────
 
-  readonly totalRevenue = computed(() => this.items().reduce((sum, i) => sum + i.totalAmount, 0));
+  readonly totalRevenue = computed(
+    () => this.items()?.reduce((sum, i) => sum + i.totalAmount, 0) || 0,
+  );
 
-  readonly totalQty = computed(() => this.items().reduce((sum, i) => sum + i.quantity, 0));
+  readonly totalQty = computed(() => this.items()?.reduce((sum, i) => sum + i.quantity, 0) || 0);
 
-  readonly confirmedCount = computed(() => this.items().filter((i) => i.confirmed).length);
-  readonly pendingCount = computed(() => this.items().filter((i) => !i.confirmed).length);
+  readonly confirmedCount = computed(() => this.items()?.filter((i) => i.confirmed).length || 0);
+  readonly pendingCount = computed(() => this.items()?.filter((i) => !i.confirmed).length || 0);
 
-  readonly allConfirmed = computed(() => this.items().every((i) => i.confirmed));
+  readonly allConfirmed = computed(() => {
+    const list = this.items();
+    return list?.length > 0 && list.every((i) => i.confirmed);
+  });
 
   // ── Filtered list for table ──────────────────────────────────────────────
 
   ngOnInit(): void {
-    console.log('view items', this.items());
+    // Reset local filters and reload page 1 every time this route is entered.
+    // The store is a root singleton so its own onInit only fires once at app startup;
+    // this is the correct place to trigger a fresh fetch on each navigation.
+    this.filterStatus.set('all');
+    this.filterCashierId.set(null);
+    this.salesStore.loadPage(1, null);
   }
 
   readonly filteredItems = computed(() => {
     const status = this.filterStatus();
-    if (status === 'confirmed') return this.items().filter((i) => i.confirmed);
-    if (status === 'pending') return this.items().filter((i) => !i.confirmed);
-    return this.items();
+    const cashierId = this.filterCashierId();
+    let result = this.items();
+    if (cashierId) result = result.filter((i) => i.cashierId === cashierId);
+    if (status === 'confirmed') return result.filter((i) => i.confirmed);
+    if (status === 'pending') return result.filter((i) => !i.confirmed);
+    return result;
   });
 
   readonly displayedColumns = [
@@ -267,6 +325,16 @@ export class SalesComponent implements OnInit {
     this.filterStatus.set(status);
   }
 
+  setCashierFilter(cashierId: string | null) {
+    this.filterCashierId.set(cashierId);
+    this.salesStore.loadPage(1, cashierId);
+  }
+
+  onPageChange(event: PageEvent) {
+    // pageIndex is 0-based in Material Paginator
+    this.salesStore.loadPage(event.pageIndex + 1, this.filterCashierId());
+  }
+
   getUser(userId: String) {
     return this.userStore.users().find((user) => user._id === userId);
   }
@@ -276,17 +344,46 @@ export class SalesComponent implements OnInit {
   }
 
   toggleConfirm(item: any) {
-    const wasConfirmed = item.confirmed;
-    // this.items.update((list) =>
-    //   list.map((i) => (i._id === item._id ? { ...i, confirmed: !i.confirmed } : i)),
-    // );
-    this.items().map((sale) => {
-      sale._id === item._id ? { ...sale, confirmed: !sale.confirmed } : sale;
+    if (item.confirmed) {
+      // Undo is not gated — could be extended later
+      this.snackBar.open(`${item.productName} marked as pending`, 'Dismiss', { duration: 2500 });
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      PaymentMethodDialogComponent,
+      PaymentMethodDialogData,
+      PaymentMethodDialogResult
+    >(PaymentMethodDialogComponent, {
+      data: {
+        itemId: item._id,
+        productName: item.productName,
+        totalAmount: item.totalAmount,
+      },
+      width: '520px',
+      disableClose: true,
     });
-    const msg = wasConfirmed
-      ? `${item.productName} marked as pending`
-      : `${item.productName} confirmed`;
-    this.snackBar.open(msg, 'Dismiss', { duration: 2500 });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+      console.log('payment method result', result, item._id, item.parentSaleId);
+      this.salesStore.confirmItem(item._id, item.parentSaleId, result.paymentMethod).subscribe({
+        next: () => {
+          this.snackBar.open(
+            `${item.productName} confirmed via ${result.paymentMethod}`,
+            'Dismiss',
+            { duration: 2500 },
+          );
+        },
+        error: () => {
+          this.snackBar.open(
+            `Failed to confirm ${item.productName}. Please try again.`,
+            'Dismiss',
+            { duration: 3000 },
+          );
+        },
+      });
+    });
   }
 
   confirmAll() {

@@ -48,6 +48,49 @@
   .material-icons { font-size: 14px; }
 }
 
+// ─── Cashier filter ───────────────────────────
+.cashier-filter-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 4px 10px 4px 10px;
+  height: 34px;
+  box-sizing: border-box;
+
+  &__icon {
+    font-size: 16px;
+    color: #64748b;
+    flex-shrink: 0;
+  }
+}
+
+.cashier-filter-select {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text);
+  min-width: 130px;
+
+  // Strip Material's default form-field chrome
+  &.mat-mdc-select {
+    .mat-mdc-select-trigger {
+      height: auto;
+    }
+
+    .mat-mdc-select-value {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--color-text);
+    }
+
+    .mat-mdc-select-arrow {
+      color: #64748b;
+    }
+  }
+}
+
 // ─── Filter tabs ─────────────────────────────
 .filter-tabs {
   display: flex;
@@ -198,8 +241,52 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   overflow: hidden;
-  max-height: calc(100vh - 320px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 300px);
+
+  &--loading {
+    pointer-events: none;
+  }
+}
+
+// ─── Scrollable table area ────────────────────
+.sales-table-scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+}
+
+// ─── Loading overlay ──────────────────────────
+.table-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  z-index: 10;
+  border-radius: var(--radius-card);
+}
+
+// ─── Paginator ────────────────────────────────
+.sales-paginator {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-family: 'Inter', sans-serif;
+
+  .mat-mdc-paginator-container {
+    padding: 8px 14px;
+    min-height: 52px;
+  }
+
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-select-value {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-family: 'Inter', sans-serif;
+  }
 }
 
 .sales-table {
@@ -313,6 +400,30 @@
   font-size: 0.82rem;
   color: var(--color-text-muted);
   white-space: nowrap;
+}
+
+// ─── Status cell (pill + payment badge) ───────
+.status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+// ─── Payment method badge ─────────────────────
+.payment-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+
+  &--cash  { background: #dbeafe; color: #1d4ed8; }
+  &--mpesa { background: #dcfce7; color: #15803d; }
+  &--pdq   { background: #f3e8ff; color: #7c3aed; }
 }
 
 // ─── Status pill ──────────────────────────────

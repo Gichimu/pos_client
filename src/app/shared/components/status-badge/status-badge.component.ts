@@ -28,9 +28,6 @@ import { StockReorderStatus } from '../../../core/models/product.model';
       .badge--good {
         background-color: #22c55e;
       }
-      // .badge--pasout {
-      //   background-color: #8b5cf6;
-      // }
     `,
   ],
 })

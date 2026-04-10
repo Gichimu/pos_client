@@ -1,11 +1,28 @@
 import { inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withHooks } from '@ngrx/signals';
-import { SaleItem } from '../../core/models/sale.model';
+import { PaymentMethod, SaleItem } from '../../core/models/sale.model';
 import { SalesService } from '../../core/services/sales-service';
+import { Observable } from 'rxjs';
 
 export type SaleConfirmStatus = 'pending' | 'confirmed';
 
-const initialState: { items: SaleItem[] } = { items: [] };
+interface SaleStoreState {
+  items: SaleItem[];
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  pageSize: number;
+  isLoading: boolean;
+}
+
+const initialState: SaleStoreState = {
+  items: [],
+  currentPage: 1,
+  totalPages: 1,
+  totalItems: 0,
+  pageSize: 10,
+  isLoading: false,
+};
 
 export const saleStore = signalStore(
   { providedIn: 'root' },
@@ -19,24 +36,52 @@ export const saleStore = signalStore(
         next: (newSale) => {
           patchState(store, { items: [...store.items(), newSale] });
         },
-        error: (error) => {
-          patchState(store, { items: [...store.items()] }); // Optionally handle error state
+        error: () => {
+          patchState(store, { items: [...store.items()] });
         },
+      });
+    },
+    loadPage(page: number, cashierId?: string | null): void {
+      patchState(store, { isLoading: true });
+      salesService.getPage(page, store.pageSize(), cashierId).subscribe({
+        next: (response) => {
+          console.log('Sales page loaded:', response);
+          patchState(store, {
+            items: response.data,
+            currentPage: response.page,
+            totalPages: response.totalPages,
+            totalItems: response.total,
+            isLoading: false,
+          });
+        },
+        error: () => {
+          patchState(store, { isLoading: false });
+        },
+      });
+    },
+    confirmItem(itemId: string, saleId: string, paymentMethod: PaymentMethod): Observable<void> {
+      return new Observable((observer) => {
+        salesService.confirmItem(itemId, saleId, paymentMethod).subscribe({
+          next: () => {
+            patchState(store, {
+              items: store.items().map((sale) => ({
+                ...sale,
+                items: sale.items.map((item) =>
+                  item._id === itemId ? { ...item, confirmed: true, paymentMethod } : item,
+                ),
+              })),
+            });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
       });
     },
   })),
   withHooks({
-    onInit(store, salesService = inject(SalesService)) {
-      salesService.getAll().subscribe({
-        next: (sales: SaleItem[]) => {
-          console.log('fetched sales', sales);
-          patchState(store, { items: sales });
-        },
-        error: (error) => {
-          // Handle error as needed, e.g., patchState to set an error message
-          patchState(store, { items: [] }); // Clear items on error or set an error state
-        },
-      });
+    onInit(store) {
+      store.loadPage(1);
     },
   }),
 );
