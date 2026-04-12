@@ -79,10 +79,10 @@ export const MOCK_USERS: Array<{
     id: '7',
     name: 'Esther U.',
     email: 'esther@user.com',
-    password: 'useruser',
+    password: 'esther@123',
     role: 'cashier',
     status: 'active',
-    avatar: 'https://i.pravatar.cc/40?u=erica',
+    avatar: 'https://i.pravatar.cc/40?u=esther',
     store: 'Delect',
   },
 ];

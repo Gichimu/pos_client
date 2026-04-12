@@ -88,15 +88,21 @@
         }
       </mat-form-field>
 
-      <!-- Role -->
+      <!-- Roles -->
       <mat-form-field appearance="outline" class="full-field">
-        <mat-label>Role</mat-label>
+        <mat-label>Roles</mat-label>
         <mat-icon matPrefix>badge</mat-icon>
-        <mat-select formControlName="role">
+        <mat-select formControlName="roles" multiple>
           <mat-option value="superAdmin">
             <span class="role-option">
               <span class="role-dot role-dot--admin"></span>
               Super Admin
+            </span>
+          </mat-option>
+          <mat-option value="manager">
+            <span class="role-option">
+              <span class="role-dot role-dot--manager"></span>
+              Manager
             </span>
           </mat-option>
           <mat-option value="cashier">
@@ -106,7 +112,7 @@
             </span>
           </mat-option>
         </mat-select>
-        @if (form.get('role')?.invalid && form.get('role')?.touched) {
+        @if (form.get('roles')?.invalid && form.get('roles')?.touched) {
           <mat-error>Role is required</mat-error>
         }
       </mat-form-field>

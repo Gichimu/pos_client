@@ -12,7 +12,7 @@
       }
     </div>
     <div class="pos-header__right">
-      @if (currentUser()?.role === 'superAdmin') {
+      @if (currentUser()?.roles?.includes('superAdmin')) {
         <button
           mat-stroked-button
           class="switch-btn"

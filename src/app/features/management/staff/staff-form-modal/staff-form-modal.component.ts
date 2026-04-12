@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { User } from '../../../../core/models/user.model';
+import { User, UserRole } from '../../../../core/models/user.model';
 
 export interface StaffFormData {
   user?: User;
@@ -28,7 +28,7 @@ export interface StaffFormData {
   templateUrl: './staff-form-modal.component.html',
   styleUrl: './staff-form-modal.component.scss',
 })
-export class StaffFormModalComponent {
+export class StaffFormModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly dialogRef = inject(MatDialogRef<StaffFormModalComponent>);
   readonly data = inject<StaffFormData>(MAT_DIALOG_DATA);
@@ -39,10 +39,14 @@ export class StaffFormModalComponent {
     firstName: [this.data?.user?.firstName ?? '', [Validators.required, Validators.minLength(2)]],
     lastName: [this.data?.user?.lastName ?? '', [Validators.required, Validators.minLength(2)]],
     email: [this.data?.user?.email ?? '', [Validators.required, Validators.email]],
-    password: ['', this.data?.user ? [] : [Validators.required, Validators.minLength(8)]],
-    role: [this.data?.user?.role ?? 'cashier', Validators.required],
+    password: [this.data?.user?.password ? '' : [Validators.required, Validators.minLength(8)]],
+    roles: [this.data?.user?.roles ?? [], Validators.required],
     status: [this.data?.user?.status ?? 'active', Validators.required],
   }) as FormGroup;
+
+  ngOnInit() {
+    console.log('check dialog data', this.data);
+  }
 
   close() {
     this.dialogRef.close();
@@ -54,14 +58,14 @@ export class StaffFormModalComponent {
       return;
     }
 
-    const { firstName, lastName, email, password, role, status }: any = this.form.value;
+    const { firstName, lastName, email, password, roles, status }: any = this.form.value;
     const user: User = {
       _id: this.data?.user?._id,
       firstName: firstName!,
       lastName: lastName!,
       email: email!,
       password: password!,
-      role: role as User['role'],
+      roles: roles as UserRole[],
       status: status as User['status'],
 
       avatar:

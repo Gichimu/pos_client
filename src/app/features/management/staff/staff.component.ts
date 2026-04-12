@@ -39,11 +39,15 @@ export class StaffComponent {
   private readonly snackBar = inject(MatSnackBar);
 
   readonly adminCount = computed(
-    () => this.userstore.users().filter((u) => u.role === 'superAdmin').length,
+    () => this.userstore.users().filter((u) => u.roles.includes('superAdmin')).length,
+  );
+
+  readonly managerCount = computed(
+    () => this.userstore.users().filter((u) => u.roles.includes('manager')).length,
   );
 
   readonly cashierCount = computed(
-    () => this.userstore.users().filter((u) => u.role === 'cashier').length,
+    () => this.userstore.users().filter((u) => u.roles.includes('cashier')).length,
   );
 
   readonly activeCount = computed(
@@ -54,7 +58,7 @@ export class StaffComponent {
     () => this.userstore.users().filter((u) => u.status === 'inactive').length,
   );
 
-  readonly displayedColumns = ['avatar', 'name', 'email', 'role', 'status', 'actions'];
+  readonly displayedColumns = ['avatar', 'name', 'email', 'roles', 'status', 'actions'];
 
   searchQuery = signal('');
 
@@ -68,7 +72,7 @@ export class StaffComponent {
               u.firstName.toLowerCase().includes(q) ||
               u.lastName.toLowerCase().includes(q) ||
               u.email.toLowerCase().includes(q) ||
-              u.role.toLowerCase().includes(q),
+              u.roles.some((role) => role.toLowerCase().includes(q)),
           )
       : this.userstore.users();
   });
@@ -131,7 +135,11 @@ export class StaffComponent {
   }
 
   getRoleBadgeClass(role: string): string {
-    return role === 'superAdmin' ? 'role-badge--admin' : 'role-badge--cashier';
+    return role === 'superAdmin'
+      ? 'role-badge--admin'
+      : role === 'manager'
+        ? 'role-badge--manager'
+        : 'role-badge--cashier';
   }
 
   getStatusBadgeClass(status: string): string {
@@ -139,7 +147,7 @@ export class StaffComponent {
   }
 
   getRoleLabel(role: string): string {
-    return role === 'superAdmin' ? 'Super Admin' : 'Cashier';
+    return role === 'superAdmin' ? 'Super Admin' : role === 'manager' ? 'Manager' : 'Cashier';
   }
 
   getStatusLabel(status: string): string {

@@ -33,6 +33,24 @@
           }
         </button>
 
+        <!-- Manager -->
+        <button
+          matRipple
+          class="role-card"
+          [class.role-card--selected]="selectedRole() === 'manager'"
+          (click)="selectRole('manager')"
+          aria-label="Login as Manager"
+        >
+          <div class="role-card__icon role-card__icon--manager">
+            <mat-icon>man</mat-icon>
+          </div>
+          <p class="role-card__name">Manager</p>
+          <p class="role-card__desc">Managerial access</p>
+          @if (selectedRole() === 'manager') {
+            <div class="role-card__check"><mat-icon>check_circle</mat-icon></div>
+          }
+        </button>
+
         <!-- Cashier -->
         <button
           matRipple
@@ -70,11 +88,15 @@
           </button>
           <div>
             <h1 class="login-card__title">
-              {{ selectedRole() === 'superAdmin' ? 'Enter Password' : 'Enter PIN' }}
+              {{
+                selectedRole() === 'superAdmin' || selectedRole() === 'manager'
+                  ? 'Enter Password'
+                  : 'Enter PIN'
+              }}
             </h1>
             <p class="login-card__subtitle">
               {{
-                selectedRole() === 'superAdmin'
+                selectedRole() === 'superAdmin' || selectedRole() === 'manager'
                   ? 'Authenticate with your password'
                   : 'Enter your 5-digit PIN code'
               }}
@@ -93,14 +115,20 @@
             <div>
               <p class="user-preview__name">{{ user.name }}</p>
               <p class="user-preview__role">
-                {{ selectedRole() === 'superAdmin' ? 'Super Admin' : 'Cashier' }}
+                {{
+                  selectedRole() === 'superAdmin'
+                    ? 'Super Admin'
+                    : selectedRole() === 'manager'
+                      ? 'Manager'
+                      : 'Cashier'
+                }}
               </p>
             </div>
           </div>
         }
 
         <!-- ── SuperAdmin: Reactive Form (Email + Password) ── -->
-        @if (selectedRole() === 'superAdmin') {
+        @if (selectedRole() === 'superAdmin' || selectedRole() === 'manager') {
           <form [formGroup]="adminForm" (ngSubmit)="authenticate()" novalidate>
             <!-- Email field -->
             <div

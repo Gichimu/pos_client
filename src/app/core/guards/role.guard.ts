@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { map, take } from 'rxjs/operators';
+import * as _ from 'lodash';
 import { selectCurrentUser } from '../../store/auth/auth.selectors';
 import { UserRole } from '../models/user.model';
 import { authStore } from '../../store/auth/auth.store';
@@ -19,7 +20,12 @@ export const roleGuard = (allowedRoles: UserRole[]): CanActivateFn => {
     //   })
     // );
 
-    return authstore.isAuthenticated() && allowedRoles.includes(authstore.user()?.role as UserRole)
+    // return authstore.isAuthenticated() && allowedRoles.includes(authstore.user()?.role as UserRole)
+    //   ? true
+    //   : router.createUrlTree(['/login']);
+
+    return authstore.isAuthenticated() &&
+      allowedRoles.some((role) => authstore.user()?.roles.includes(role))
       ? true
       : router.createUrlTree(['/login']);
   };

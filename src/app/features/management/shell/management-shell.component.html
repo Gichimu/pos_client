@@ -15,6 +15,7 @@
           [routerLink]="item.path"
           routerLinkActive="nav-item--active"
           [matTooltip]="item.label"
+          *rbacAllow="item.roles ?? []"
           matTooltipPosition="right"
           [matTooltipDisabled]="true"
           [attr.aria-label]="item.label"
@@ -26,7 +27,7 @@
     </nav>
 
     <!-- Bottom: cashier switch -->
-    <div class="sidebar__footer">
+    <div *rbacAllow="['superAdmin']" class="sidebar__footer">
       <button
         mat-button
         class="switch-btn"

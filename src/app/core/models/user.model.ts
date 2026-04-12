@@ -1,4 +1,4 @@
-export type UserRole = 'superAdmin' | 'cashier';
+export type UserRole = 'superAdmin' | 'cashier' | 'manager';
 export type UserStatus = 'active' | 'inactive';
 
 export interface User {
@@ -7,7 +7,7 @@ export interface User {
   lastName: string;
   email: string;
   password: string;
-  role: UserRole;
+  roles: UserRole[];
   status: UserStatus;
   avatar?: string;
   store?: string;

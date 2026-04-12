@@ -152,7 +152,7 @@ export class LoginComponent {
     const role = this.selectedRole();
     if (!role) return;
 
-    if (role === 'superAdmin') {
+    if (role === 'superAdmin' || role === 'manager') {
       // Surface all validation errors immediately
       this.adminForm.markAllAsTouched();
       if (this.adminForm.invalid) return;
@@ -172,7 +172,11 @@ export class LoginComponent {
 
       this.authStore.login({ email, password } as User).subscribe({
         next: () => {
-          console.log('auth user after login', this.authStore.user());
+          console.log(
+            'auth user after login',
+            this.authStore.user(),
+            this.authStore.isAuthenticated(),
+          );
           this.authStore.isAuthenticated() && this.router.navigate(['/management']);
         },
         error: (error) => {

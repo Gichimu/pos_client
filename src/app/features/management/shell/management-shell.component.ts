@@ -20,12 +20,14 @@ import { selectCurrentUser } from '../../../store/auth/auth.selectors';
 import { AuthService } from '../../../core/services/auth.service';
 import { MatDividerModule } from '@angular/material/divider';
 import { authStore } from '../../../store/auth/auth.store';
-import { User } from '../../../core/models/user.model';
+import { User, UserRole } from '../../../core/models/user.model';
+import { RbacAllow } from '../../../core/directives/rbac-allow';
 
 interface NavItem {
   label: string;
   icon: string;
   path: string;
+  roles?: UserRole[];
 }
 
 @Component({
@@ -41,6 +43,7 @@ interface NavItem {
     MatTooltipModule,
     MatBadgeModule,
     MatDividerModule,
+    RbacAllow,
   ],
   templateUrl: './management-shell.component.html',
   styleUrl: './management-shell.component.scss',
@@ -67,11 +70,36 @@ export class ManagementShellComponent {
   );
 
   readonly navItems: NavItem[] = [
-    { label: 'Overview', icon: 'home', path: '/management/dashboard' },
-    { label: 'Inventory', icon: 'inventory_2', path: '/management/inventory' },
-    { label: 'Staff Management', icon: 'people', path: '/management/staff' },
-    { label: 'Sales', icon: 'receipt_long', path: '/management/sales' },
-    { label: 'Reports', icon: 'bar_chart', path: '/management/reports' },
+    {
+      label: 'Overview',
+      icon: 'home',
+      roles: ['superAdmin', 'manager'] as UserRole[],
+      path: '/management/dashboard',
+    },
+    {
+      label: 'Inventory',
+      icon: 'inventory_2',
+      roles: ['superAdmin', 'manager'] as UserRole[],
+      path: '/management/inventory',
+    },
+    {
+      label: 'Staff Management',
+      icon: 'people',
+      roles: ['superAdmin'] as UserRole[],
+      path: '/management/staff',
+    },
+    {
+      label: 'Sales',
+      icon: 'receipt_long',
+      roles: ['superAdmin', 'manager'] as UserRole[],
+      path: '/management/sales',
+    },
+    {
+      label: 'Reports',
+      icon: 'bar_chart',
+      roles: ['superAdmin'] as UserRole[],
+      path: '/management/reports',
+    },
   ];
 
   notifications = signal(3);

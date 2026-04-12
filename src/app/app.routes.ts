@@ -15,7 +15,7 @@ export const routes: Routes = [
   },
   {
     path: 'management',
-    canActivate: [authGuard, roleGuard(['superAdmin'])],
+    canActivate: [authGuard, roleGuard(['superAdmin', 'manager'])],
     loadComponent: () =>
       import('./features/management/shell/management-shell.component').then(
         (m) => m.ManagementShellComponent,
@@ -60,7 +60,7 @@ export const routes: Routes = [
   },
   {
     path: 'cashier',
-    canActivate: [authGuard, roleGuard(['cashier', 'superAdmin'])],
+    canActivate: [authGuard, roleGuard(['cashier', 'superAdmin', 'manager'])],
     loadComponent: () => import('./features/cashier/pos/pos.component').then((m) => m.PosComponent),
   },
   {
