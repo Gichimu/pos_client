@@ -23,6 +23,7 @@ export interface SaleItem {
   _id?: string;
   items: LineItem[];
   totalAmount: number;
+  createdAt?: Date;
 }
 
 export interface PaginatedSalesResponse {

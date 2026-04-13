@@ -8,6 +8,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { User, UserRole } from '../../../../core/models/user.model';
+import { roleGuard } from '../../../../core/guards/role.guard';
+import { authStore } from '../../../../store/auth/auth.store';
+import { userStore } from '../../../../store/users/user.store';
 
 export interface StaffFormData {
   user?: User;
@@ -35,11 +38,13 @@ export class StaffFormModalComponent implements OnInit {
 
   readonly isEdit = computed(() => !!this.data?.user);
 
+  readonly userAllowed = computed(() => this.data?.user?.roles.includes('superAdmin'));
+
   form: FormGroup = this.fb.group({
     firstName: [this.data?.user?.firstName ?? '', [Validators.required, Validators.minLength(2)]],
     lastName: [this.data?.user?.lastName ?? '', [Validators.required, Validators.minLength(2)]],
     email: [this.data?.user?.email ?? '', [Validators.required, Validators.email]],
-    password: [this.data?.user?.password ? '' : [Validators.required, Validators.minLength(8)]],
+    password: ['', this.data?.user ? [] : [Validators.required, Validators.minLength(8)]],
     roles: [this.data?.user?.roles ?? [], Validators.required],
     status: [this.data?.user?.status ?? 'active', Validators.required],
   }) as FormGroup;

@@ -93,7 +93,7 @@
         <mat-label>Roles</mat-label>
         <mat-icon matPrefix>badge</mat-icon>
         <mat-select formControlName="roles" multiple>
-          <mat-option value="superAdmin">
+          <mat-option value="superAdmin" [disabled]="!userAllowed()">
             <span class="role-option">
               <span class="role-dot role-dot--admin"></span>
               Super Admin

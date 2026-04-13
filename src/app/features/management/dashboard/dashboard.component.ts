@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, Signal } from '@angular/core';
+import { Component, inject, computed, signal, Signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,8 @@ import { StatCardComponent } from '../../../shared/components/stat-card/stat-car
 import { ProductTableComponent } from './product-table/product-table.component';
 import { GenerateReportModalComponent } from './generate-report-modal/generate-report-modal.component';
 import { productStore } from '../../../store/products/product.store';
+import { userStore } from '../../../store/users/user.store';
+import { saleStore } from '../../../store/sales/sale.store';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,6 +21,8 @@ import { productStore } from '../../../store/products/product.store';
 export class DashboardComponent {
   private readonly productStore = inject(productStore);
   private readonly dialog = inject(MatDialog);
+  readonly userStore = inject(userStore);
+  readonly salesStore = inject(saleStore);
 
   readonly products = this.productStore.products as Signal<any[]>;
 
@@ -29,8 +33,22 @@ export class DashboardComponent {
     () => this.productStore.products().filter((p) => p.stockReorderStatus === 'critical').length,
   );
 
-  readonly activeCashiers = signal(3);
-  readonly salesToday = signal(2450.0);
+  readonly activeCashiers = computed(
+    () =>
+      this.userStore
+        .users()
+        .filter((u) => u.roles.includes('cashier'))
+        .filter((cashier) => cashier.status === 'active').length,
+  );
+  readonly salesToday = computed(() => {
+    const today = new Date().toISOString().split('T')[0];
+    return this.salesStore
+      .items()
+      .filter((s) => new Date(s.createdAt ?? '').toISOString().split('T')[0] === today)
+      .flatMap((s) => s.items)
+      .filter((item) => item.confirmed)
+      .reduce((sum, item) => sum + item.subTotal, 0);
+  });
 
   openGenerateReport() {
     this.dialog.open(GenerateReportModalComponent, {
