@@ -9,8 +9,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
-import { Store } from '@ngrx/store';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { Product } from '../../../core/models/product.model';
 import { authStore } from '../../../store/auth/auth.store';
@@ -20,6 +18,7 @@ import { cartStore } from '../../../store/cart/cart.store';
 import { CartItem } from '../../../core/models/cart.model';
 import { LineItem, SaleItem } from '../../../core/models/sale.model';
 import { saleStore } from '../../../store/sales/sale.store';
+import { CategoryStore } from '../../../store/categories/category.store';
 
 @Component({
   selector: 'app-pos',
@@ -40,6 +39,7 @@ export class PosComponent {
   readonly store = inject(cartStore);
   readonly saleStore = inject(saleStore);
   readonly productStore = inject(productStore);
+  readonly categoryStore = inject(CategoryStore);
   cartItems = this.store.items as Signal<any[]>;
   cartTotal = this.store.total as Signal<number>;
   private readonly authStore = inject(authStore);
@@ -51,11 +51,16 @@ export class PosComponent {
 
   searchQuery = signal('');
 
+  /** The currently selected category _id, or null for "All". */
+  selectedCategory = signal<string | null>(null);
+
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
-    return q
-      ? this.productStore.products().filter((p) => p.name.toLowerCase().includes(q))
-      : this.productStore.products();
+    const catId = this.selectedCategory();
+    let products = this.productStore.products();
+    if (catId) products = products.filter((p) => p.category === catId);
+    if (q) products = products.filter((p) => p.name.toLowerCase().includes(q));
+    return products;
   });
 
   readonly tax = computed(() => this.store.total() * 0.16);
@@ -63,6 +68,10 @@ export class PosComponent {
 
   onSearchChange(value: string) {
     this.searchQuery.set(value);
+  }
+
+  setCategory(categoryId: string | null) {
+    this.selectedCategory.set(categoryId);
   }
 
   addToCart(product: Product) {

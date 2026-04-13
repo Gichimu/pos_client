@@ -47,6 +47,26 @@
         </mat-form-field>
       </div>
 
+      <!-- Category tabs -->
+      <div class="category-tabs" role="group" aria-label="Filter by category">
+        <button
+          class="category-tab"
+          [class.category-tab--active]="selectedCategory() === null"
+          (click)="setCategory(null)"
+        >
+          All
+        </button>
+        @for (cat of categoryStore.categories(); track cat._id) {
+          <button
+            class="category-tab"
+            [class.category-tab--active]="selectedCategory() === cat._id"
+            (click)="setCategory(cat._id!)"
+          >
+            {{ cat.name }}
+          </button>
+        }
+      </div>
+
       <!-- Grid -->
       <div class="product-grid">
         @for (product of filteredProducts(); track product._id) {
