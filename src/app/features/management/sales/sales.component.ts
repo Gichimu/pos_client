@@ -224,16 +224,17 @@ export class SalesComponent implements OnInit {
         sale.items.map((item: any) => ({
           _id: item._id, // Using the sub-item ID
           parentSaleId: sale._id, // Reference to the parent sale
+          saleId: sale.saleId,
           productId: item.productId,
           productName: this.getProduct(item.productId)?.name || 'Unknown Product', // Assuming you have this or need to look it up
           productSku: this.getProduct(item.productId)?.name || 'N/A',
           productImage: `https://picsum.photos/seed/${item.productId}/60/60`,
-          cashierId: sale.cashierId._id,
+          cashierId: sale.cashierId?._id,
           cashierName:
-            this.getUser(sale.cashierId._id)?.firstName +
+            this.getUser(sale.cashierId?._id)?.firstName +
               ' ' +
-              this.getUser(sale.cashierId._id)?.lastName || 'Unknown',
-          cashierAvatar: `https://i.pravatar.cc/32?u=${sale.cashierId._id}`,
+              this.getUser(sale.cashierId?._id)?.lastName || 'Unknown',
+          cashierAvatar: `https://i.pravatar.cc/32?u=${sale.cashierId?._id}`,
           quantity: item.quantity,
           unitPrice: item.unitPrice,
           totalAmount: item.subTotal,
@@ -246,6 +247,9 @@ export class SalesComponent implements OnInit {
 
   /** Active status filter. */
   filterStatus = signal<FilterStatus>('all');
+
+  /** Line-item _id currently awaiting delete confirmation (two-step inline confirm). */
+  pendingDeleteItemId = signal<string | null>(null);
 
   /** Active cashier filter — null means "All Cashiers". */
   filterCashierId = signal<string | null>(null);
@@ -309,6 +313,7 @@ export class SalesComponent implements OnInit {
 
   readonly displayedColumns = [
     'image',
+    'saleId',
     'product',
     'cashier',
     'qty',
@@ -346,7 +351,20 @@ export class SalesComponent implements OnInit {
   toggleConfirm(item: any) {
     if (item.confirmed) {
       // Undo is not gated — could be extended later
-      this.snackBar.open(`${item.productName} marked as pending`, 'Dismiss', { duration: 2500 });
+      this.salesStore.unconfirmItem(item._id, item.parentSaleId).subscribe({
+        next: () => {
+          this.snackBar.open(`${item.productName} marked as pending`, 'Dismiss', {
+            duration: 2500,
+          });
+        },
+        error: () => {
+          this.snackBar.open(
+            `Failed to unconfirm ${item.productName}. Please try again.`,
+            'Dismiss',
+            { duration: 3000 },
+          );
+        },
+      });
       return;
     }
 
@@ -387,8 +405,35 @@ export class SalesComponent implements OnInit {
   }
 
   confirmAll() {
-    // this.items.update((list) => list.map((i) => ({ ...i, confirmed: true })));
     this.snackBar.open('All line items confirmed', 'Dismiss', { duration: 2500 });
+  }
+
+  deleteItem(item: any) {
+    if (this.pendingDeleteItemId() === item._id) {
+      // Second click — confirmed, proceed with deletion
+      this.pendingDeleteItemId.set(null);
+      this.salesStore.deleteLineItem(item._id, item.parentSaleId).subscribe({
+        next: () => {
+          // Restore inventory for the removed line item
+          if (item.productId && item.quantity) {
+            this.productStore.adjustStock(item.productId, item.quantity);
+          }
+          this.snackBar.open(`${item.productName} removed`, 'Dismiss', { duration: 2500 });
+        },
+        error: () => {
+          this.snackBar.open('Failed to delete item. Please try again.', 'Dismiss', {
+            duration: 3000,
+          });
+        },
+      });
+    } else {
+      // First click — enter confirmation state for this item
+      this.pendingDeleteItemId.set(item._id);
+    }
+  }
+
+  cancelDelete() {
+    this.pendingDeleteItemId.set(null);
   }
 
   // ── Formatters ───────────────────────────────────────────────────────────

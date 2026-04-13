@@ -17,10 +17,12 @@ export class SalesService {
   }
 
   /** GET /sales?page=&limit=&cashierId= – returns a paginated page of sales. */
-  getPage(page: number, limit: number, cashierId?: string | null): Observable<PaginatedSalesResponse> {
-    let params = new HttpParams()
-      .set('page', page.toString())
-      .set('limit', limit.toString());
+  getPage(
+    page: number,
+    limit: number,
+    cashierId?: string | null,
+  ): Observable<PaginatedSalesResponse> {
+    let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
     if (cashierId) {
       params = params.set('cashierId', cashierId);
     }
@@ -38,5 +40,17 @@ export class SalesService {
       paymentMethod,
       confirmed: true,
     });
+  }
+
+  unconfirmItem(itemId: string, saleId: string): Observable<LineItem> {
+    return this.http.patch<LineItem>(`${this.url}/sales/${saleId}/items/${itemId}/unconfirm`, {
+      paymentMethod: null,
+      confirmed: false,
+    });
+  }
+
+  /** DELETE /sales/:saleId/items/:itemId – removes a single line item from a sale. */
+  deleteLineItem(saleId: string, itemId: string): Observable<void> {
+    return this.http.delete<void>(`${this.url}/sales/${saleId}/items/${itemId}`);
   }
 }

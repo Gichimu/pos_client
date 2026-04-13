@@ -50,6 +50,23 @@ export const productStore = signalStore(
         },
       });
     },
+
+    loadProducts() {
+      patchState(store, { loading: true });
+      productService.getAll().subscribe({
+        next: (products: Product[]) => {
+          products = products.map((p) => ({
+            ...p,
+            stockReorderStatus: calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
+          }));
+          patchState(store, { products: products as Product[], loading: false });
+        },
+        error: (error) => {
+          patchState(store, { error: error.message, loading: false });
+        },
+      });
+    },
+
     updateProduct(product: Product) {
       productService.updateProduct(product).subscribe({
         next: (updatedProduct: Product) => {
@@ -69,6 +86,24 @@ export const productStore = signalStore(
         },
       });
     },
+    /**
+     * Optimistically adjusts the currentStock of a product by `delta`.
+     * Pass a negative delta for sales (stock consumed) and a positive delta
+     * for deletions / reversals (stock restored).
+     */
+    adjustStock(productId: string, delta: number) {
+      patchState(store, {
+        products: store.products().map((p) => {
+          if (p._id !== productId) return p;
+          const newStock = Math.max(0, p.currentStock + delta);
+          return {
+            ...p,
+            currentStock: newStock,
+            stockReorderStatus: calculateReorderStatusValue(newStock, p.stockReorderLevel),
+          };
+        }),
+      });
+    },
     deleteProduct(id: string) {
       productService.deleteProduct(id).subscribe({
         next: () => {
@@ -83,18 +118,19 @@ export const productStore = signalStore(
   })),
   withHooks({
     onInit(store, productService = inject(ProductService)) {
-      productService.getAll().subscribe({
-        next: (products: Product[]) => {
-          products = products.map((p) => ({
-            ...p,
-            stockReorderStatus: calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
-          }));
-          patchState(store, { products: products as Product[] });
-        },
-        error: (error) => {
-          patchState(store, { error: error.message });
-        },
-      });
+      // productService.getAll().subscribe({
+      //   next: (products: Product[]) => {
+      //     products = products.map((p) => ({
+      //       ...p,
+      //       stockReorderStatus: calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
+      //     }));
+      //     patchState(store, { products: products as Product[] });
+      //   },
+      //   error: (error) => {
+      //     patchState(store, { error: error.message });
+      //   },
+      // });
+      store.loadProducts();
     },
   }),
 );

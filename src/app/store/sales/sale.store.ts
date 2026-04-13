@@ -31,14 +31,16 @@ export const saleStore = signalStore(
     setSales(sales: SaleItem[]) {
       patchState(store, { items: sales });
     },
-    addSale(sale: SaleItem) {
-      salesService.addSale(sale).subscribe({
-        next: (newSale) => {
-          patchState(store, { items: [...store.items(), newSale] });
-        },
-        error: () => {
-          patchState(store, { items: [...store.items()] });
-        },
+    addSale(sale: SaleItem): Observable<SaleItem> {
+      return new Observable((observer) => {
+        salesService.addSale(sale).subscribe({
+          next: (newSale) => {
+            patchState(store, { items: [...store.items(), newSale] });
+            observer.next(newSale);
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
       });
     },
     loadPage(page: number, cashierId?: string | null): void {
@@ -70,6 +72,47 @@ export const saleStore = signalStore(
                   item._id === itemId ? { ...item, confirmed: true, paymentMethod } : item,
                 ),
               })),
+            });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+    unconfirmItem(itemId: string, saleId: string): Observable<void> {
+      return new Observable((observer) => {
+        salesService.unconfirmItem(itemId, saleId).subscribe({
+          next: () => {
+            patchState(store, {
+              items: store.items().map((sale) => ({
+                ...sale,
+                items: sale.items.map((item) =>
+                  item._id === itemId ? { ...item, confirmed: false, paymentMethod: null } : item,
+                ),
+              })),
+            });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+    deleteLineItem(itemId: string, saleId: string): Observable<void> {
+      return new Observable((observer) => {
+        salesService.deleteLineItem(saleId, itemId).subscribe({
+          next: () => {
+            patchState(store, {
+              items: store
+                .items()
+                .map((sale) =>
+                  sale._id === saleId
+                    ? { ...sale, items: sale.items.filter((i) => i._id !== itemId) }
+                    : sale,
+                )
+                // Remove the parent sale from the list if it has no items left
+                .filter((sale) => sale.items.length > 0),
             });
             observer.next();
             observer.complete();

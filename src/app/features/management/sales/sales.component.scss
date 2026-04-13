@@ -446,7 +446,74 @@
 // ─── Row action buttons ───────────────────────
 .row-actions {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 4px;
+}
+
+// ─── Delete button ────────────────────────────
+.delete-btn {
+  width: 32px !important;
+  height: 32px !important;
+  color: #94a3b8 !important;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s !important;
+
+  .material-icons { font-size: 18px; }
+
+  &:hover {
+    color: #ef4444 !important;
+    background: #fee2e2 !important;
+  }
+}
+
+// ─── Inline delete confirm ────────────────────
+.delete-confirm-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+  padding: 4px 10px 4px 8px;
+  animation: fadeIn 0.15s ease;
+
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #9a3412;
+    white-space: nowrap;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.delete-confirm-btn {
+  height: 26px !important;
+  padding: 0 10px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  font-family: 'Inter', sans-serif !important;
+  background: #ef4444 !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+
+  .material-icons { font-size: 14px; }
+}
+
+.delete-cancel-btn {
+  height: 26px !important;
+  padding: 0 8px !important;
+  font-size: 0.75rem !important;
+  font-family: 'Inter', sans-serif !important;
+  color: #64748b !important;
+  border-radius: 6px !important;
 }
 
 .confirm-btn {

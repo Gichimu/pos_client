@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, Signal } from '@angular/core';
+import { Component, inject, signal, computed, Signal, OnInit } from '@angular/core';
 import {
   RouterOutlet,
   RouterLink,
@@ -22,6 +22,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { authStore } from '../../../store/auth/auth.store';
 import { User, UserRole } from '../../../core/models/user.model';
 import { RbacAllow } from '../../../core/directives/rbac-allow';
+import { productStore } from '../../../store/products/product.store';
 
 interface NavItem {
   label: string;
@@ -48,10 +49,11 @@ interface NavItem {
   templateUrl: './management-shell.component.html',
   styleUrl: './management-shell.component.scss',
 })
-export class ManagementShellComponent {
+export class ManagementShellComponent implements OnInit {
   private readonly store = inject(authStore);
   private readonly authStore = inject(authStore);
   private readonly authService = inject(AuthService);
+  private readonly productStore = inject(productStore);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
@@ -111,5 +113,9 @@ export class ManagementShellComponent {
 
   goToCashier() {
     this.router.navigate(['/cashier']);
+  }
+
+  ngOnInit() {
+    this.productStore.loadProducts();
   }
 }

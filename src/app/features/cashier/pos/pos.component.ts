@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal, Signal } from '@angular/core';
+import { Component, inject, computed, signal, Signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -35,7 +35,7 @@ import { CategoryStore } from '../../../store/categories/category.store';
   templateUrl: './pos.component.html',
   styleUrl: './pos.component.scss',
 })
-export class PosComponent {
+export class PosComponent implements OnInit {
   readonly store = inject(cartStore);
   readonly saleStore = inject(saleStore);
   readonly productStore = inject(productStore);
@@ -64,8 +64,12 @@ export class PosComponent {
   });
 
   readonly tax = computed(() => this.store.total() * 0.16);
-  readonly grandTotal = computed(() => this.store.total() + this.tax());
+  // readonly grandTotal = computed(() => this.store.total() + this.tax());
+  readonly grandTotal = computed(() => this.store.total()); // Assuming tax is included in the product prices, so grand total is just the cart total
 
+  ngOnInit() {
+    this.productStore.setProducts(this.productStore.products());
+  }
   onSearchChange(value: string) {
     this.searchQuery.set(value);
   }
@@ -97,9 +101,11 @@ export class PosComponent {
   processPayment() {
     if (this.store.items().length === 0) return;
     const total = this.grandTotal();
-    // this.store.clearCart();
-    // send to receipt printer or backend API here
-    const lineItems = this.cartItems().map((item: CartItem) => {
+
+    // Snapshot the cart before clearing — needed for stock adjustment after async success
+    const cartSnapshot = [...this.cartItems()];
+
+    const lineItems = cartSnapshot.map((item: CartItem) => {
       const subTotal = item.quantity * item.product.sellingPrice;
       return {
         productId: item.product._id!,
@@ -112,15 +118,22 @@ export class PosComponent {
     });
 
     const saleTotalAmount = lineItems.reduce((sum, line) => sum + line.subTotal, 0);
-    const sale: SaleItem = {
-      items: lineItems,
-      totalAmount: saleTotalAmount,
-    };
-    console.log('check cartItems', sale);
-    this.saleStore.addSale(sale);
-    this.store.clearCart();
-    this.snackBar.open(`Payment of $${total.toFixed(2)} processed successfully!`, 'Done', {
-      duration: 4000,
+    const sale: SaleItem = { items: lineItems, totalAmount: saleTotalAmount };
+
+    this.saleStore.addSale(sale).subscribe({
+      next: () => {
+        // Decrement inventory for every item in the completed sale
+        cartSnapshot.forEach((item: CartItem) => {
+          this.productStore.adjustStock(item.product._id!, -item.quantity);
+        });
+        this.store.clearCart();
+        this.snackBar.open(`Payment of Ksh.${total.toFixed(2)} processed!`, 'Done', {
+          duration: 4000,
+        });
+      },
+      error: () => {
+        this.snackBar.open('Payment failed. Please try again.', 'Dismiss', { duration: 3000 });
+      },
     });
   }
 

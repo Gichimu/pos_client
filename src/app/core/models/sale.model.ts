@@ -15,7 +15,7 @@ export interface LineItem {
   unitPrice: number;
   subTotal: number;
   confirmed: boolean;
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: PaymentMethod | null;
   transactionDate?: Date;
 }
 

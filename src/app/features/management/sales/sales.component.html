@@ -153,6 +153,12 @@
             </td>
           </ng-container>
 
+          <!-- Sale ID -->
+          <ng-container matColumnDef="saleId">
+            <th mat-header-cell *matHeaderCellDef>Sale #</th>
+            <td mat-cell *matCellDef="let item">{{ item.saleId }}</td>
+          </ng-container>
+
           <!-- Product name + SKU -->
           <ng-container matColumnDef="product">
             <th mat-header-cell *matHeaderCellDef>Product</th>
@@ -257,6 +263,40 @@
                   >
                     <span class="material-icons">undo</span>
                     Undo
+                  </button>
+                }
+
+                <!-- Delete line item (two-step inline confirm) -->
+                @if (pendingDeleteItemId() === item._id) {
+                  <div class="delete-confirm-inline">
+                    <span class="delete-confirm-inline__label">Remove item?</span>
+                    <button
+                      mat-flat-button
+                      class="delete-confirm-btn"
+                      (click)="deleteItem(item)"
+                      matTooltip="Yes, remove this item permanently"
+                    >
+                      <span class="material-icons">delete_forever</span>
+                      Yes, remove
+                    </button>
+                    <button
+                      mat-button
+                      class="delete-cancel-btn"
+                      (click)="cancelDelete()"
+                      matTooltip="Cancel"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                } @else {
+                  <button
+                    mat-icon-button
+                    class="delete-btn"
+                    (click)="deleteItem(item)"
+                    matTooltip="Remove this item"
+                    aria-label="Remove item"
+                  >
+                    <span class="material-icons">delete_outline</span>
                   </button>
                 }
               </div>
