@@ -91,6 +91,12 @@ export class ManagementShellComponent implements OnInit {
       path: '/management/staff',
     },
     {
+      label: 'Shifts',
+      icon: 'schedule',
+      roles: ['superAdmin', 'manager'] as UserRole[],
+      path: '/management/shifts',
+    },
+    {
       label: 'Sales',
       icon: 'receipt_long',
       roles: ['superAdmin', 'manager'] as UserRole[],

@@ -130,8 +130,28 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   overflow: hidden;
-  max-height: calc(100vh - 220px);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.inv-table-scroll {
+  overflow: hidden;
+}
+
+.inv-paginator {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+
+  .mat-mdc-paginator-container { padding: 8px 14px; min-height: 52px; }
+
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-select-value {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-family: 'Inter', sans-serif;
+  }
 }
 
 .inv-table {

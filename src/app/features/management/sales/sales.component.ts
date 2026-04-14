@@ -14,6 +14,7 @@ import { inject } from '@angular/core';
 import { saleStore } from '../../../store/sales/sale.store';
 import { userStore } from '../../../store/users/user.store';
 import { productStore } from '../../../store/products/product.store';
+import { shiftStore } from '../../../store/shifts/shift.store';
 import {
   PaymentMethodDialogComponent,
   PaymentMethodDialogData,
@@ -209,8 +210,12 @@ export class SalesComponent implements OnInit {
   readonly salesStore = inject(saleStore);
   readonly userStore = inject(userStore);
   readonly productStore = inject(productStore);
+  readonly shiftStore = inject(shiftStore);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+
+  /** The currently open shift, or null. */
+  readonly activeShift = computed(() => this.shiftStore.activeShift());
 
   readonly today = new Date();
 
@@ -224,6 +229,7 @@ export class SalesComponent implements OnInit {
         sale.items.map((item: any) => ({
           _id: item._id, // Using the sub-item ID
           parentSaleId: sale._id, // Reference to the parent sale
+          shiftId: sale.shiftId ?? null, // Forward shift id for lock checks
           saleId: sale.saleId,
           productId: item.productId,
           productName: this.getProduct(item.productId)?.name || 'Unknown Product', // Assuming you have this or need to look it up
@@ -325,6 +331,16 @@ export class SalesComponent implements OnInit {
   ];
 
   // ── Actions ─────────────────────────────────────────────────────────────
+
+  /**
+   * Returns true when the shift that owns this item is Closed.
+   * Items with no shiftId are considered unlocked (backward compat).
+   */
+  isShiftClosed(item: any): boolean {
+    if (!item.shiftId) return false;
+    const shift = this.shiftStore.shifts().find((s) => s._id === item.shiftId);
+    return shift?.status === 'Closed';
+  }
 
   setFilter(status: FilterStatus) {
     this.filterStatus.set(status);

@@ -1,7 +1,27 @@
 .table-wrapper {
-  overflow-x: auto;
-  max-height: 480px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.table-scroll {
+  overflow: hidden;
+}
+
+.table-paginator {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+
+  .mat-mdc-paginator-container { padding: 8px 14px; min-height: 52px; }
+
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-select-value {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-family: 'Inter', sans-serif;
+  }
 }
 
 .product-table {

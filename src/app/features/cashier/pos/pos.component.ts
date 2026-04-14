@@ -18,6 +18,7 @@ import { cartStore } from '../../../store/cart/cart.store';
 import { CartItem } from '../../../core/models/cart.model';
 import { LineItem, SaleItem } from '../../../core/models/sale.model';
 import { saleStore } from '../../../store/sales/sale.store';
+import { shiftStore } from '../../../store/shifts/shift.store';
 import { CategoryStore } from '../../../store/categories/category.store';
 
 @Component({
@@ -40,6 +41,10 @@ export class PosComponent implements OnInit {
   readonly saleStore = inject(saleStore);
   readonly productStore = inject(productStore);
   readonly categoryStore = inject(CategoryStore);
+  readonly shiftStore = inject(shiftStore);
+
+  /** Reactive: the current open shift (null if store is closed). */
+  readonly activeShift = computed(() => this.shiftStore.activeShift());
   cartItems = this.store.items as Signal<any[]>;
   cartTotal = this.store.total as Signal<number>;
   private readonly authStore = inject(authStore);
@@ -100,6 +105,16 @@ export class PosComponent implements OnInit {
 
   processPayment() {
     if (this.store.items().length === 0) return;
+
+    // Guard: no payment allowed without an active shift
+    const shift = this.activeShift();
+    if (!shift) {
+      this.snackBar.open('Cannot process payment — no active shift. Please open a shift first.', 'Dismiss', {
+        duration: 5000,
+      });
+      return;
+    }
+
     const total = this.grandTotal();
 
     // Snapshot the cart before clearing — needed for stock adjustment after async success
@@ -118,7 +133,7 @@ export class PosComponent implements OnInit {
     });
 
     const saleTotalAmount = lineItems.reduce((sum, line) => sum + line.subTotal, 0);
-    const sale: SaleItem = { items: lineItems, totalAmount: saleTotalAmount };
+    const sale: SaleItem = { items: lineItems, totalAmount: saleTotalAmount, shiftId: shift._id };
 
     this.saleStore.addSale(sale).subscribe({
       next: () => {

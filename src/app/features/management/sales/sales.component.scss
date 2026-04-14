@@ -181,6 +181,26 @@
   .material-icons { font-size: 17px; }
 }
 
+// ─── Shift-lock banner ────────────────────────
+.shift-lock-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #9a3412;
+  line-height: 1.4;
+
+  .material-icons {
+    font-size: 18px;
+    color: #ea580c;
+    flex-shrink: 0;
+  }
+}
+
 // ─── Summary stat cards ───────────────────────
 .sales-stats {
   display: grid;
@@ -244,7 +264,6 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 300px);
 
   &--loading {
     pointer-events: none;
@@ -253,9 +272,7 @@
 
 // ─── Scrollable table area ────────────────────
 .sales-table-scroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 // ─── Loading overlay ──────────────────────────
@@ -426,6 +443,22 @@
   &--pdq   { background: #f3e8ff; color: #7c3aed; }
 }
 
+// ─── Shift-closed badge (inside status cell) ──
+.shift-closed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  .material-icons { font-size: 11px; }
+}
+
 // ─── Status pill ──────────────────────────────
 .status-pill {
   display: inline-flex;
@@ -535,6 +568,15 @@
   &:hover {
     background: var(--color-primary-light) !important;
   }
+
+  &--locked,
+  &:disabled {
+    color: #94a3b8 !important;
+    border-color: #cbd5e1 !important;
+    background: transparent !important;
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+  }
 }
 
 .undo-btn {
@@ -550,6 +592,12 @@
   gap: 4px !important;
 
   .material-icons { font-size: 15px; }
+
+  &--locked,
+  &:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+  }
 }
 
 // ─── Empty state ──────────────────────────────

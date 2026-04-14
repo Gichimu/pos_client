@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
@@ -29,6 +30,7 @@ import {
     MatIconModule,
     MatTooltipModule,
     MatMenuModule,
+    MatPaginatorModule,
   ],
   templateUrl: './staff.component.html',
   styleUrl: './staff.component.scss',
@@ -77,8 +79,22 @@ export class StaffComponent {
       : this.userstore.users();
   });
 
+  // ── Pagination ────────────────────────────────────────────
+  readonly pageIndex = signal(0);
+  readonly PAGE_SIZE = 10;
+
+  readonly pagedStaff = computed(() => {
+    const start = this.pageIndex() * this.PAGE_SIZE;
+    return this.filteredStaff().slice(start, start + this.PAGE_SIZE);
+  });
+
   onSearch(value: string) {
     this.searchQuery.set(value);
+    this.pageIndex.set(0);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
   }
 
   openAddDialog() {

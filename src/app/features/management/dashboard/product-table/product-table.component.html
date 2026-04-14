@@ -1,5 +1,6 @@
 <div class="table-wrapper">
-  <table mat-table [dataSource]="products" class="product-table">
+  <div class="table-scroll">
+  <table mat-table [dataSource]="pagedProducts()" class="product-table">
     <!-- Select column -->
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef class="col-select">
@@ -88,6 +89,20 @@
       [class.table-row--selected]="selection.isSelected(row)"
     ></tr>
   </table>
+  </div>
+
+  @if (products.length > PAGE_SIZE) {
+    <mat-paginator
+      class="table-paginator"
+      [length]="products.length"
+      [pageSize]="PAGE_SIZE"
+      [pageIndex]="pageIndex()"
+      [pageSizeOptions]="[10, 20, 50]"
+      [showFirstLastButtons]="true"
+      (page)="onPageChange($event)"
+      aria-label="Select page"
+    ></mat-paginator>
+  }
 </div>
 
 <!-- Shared row context menu -->

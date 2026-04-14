@@ -1,0 +1,70 @@
+<div class="shift-dialog">
+  <!-- Header -->
+  <div class="shift-dialog__header">
+    <div class="shift-dialog__header-left">
+      <div class="shift-dialog__icon shift-dialog__icon--end">
+        <span class="material-icons">stop_circle</span>
+      </div>
+      <div>
+        <h2 class="shift-dialog__title">End Shift</h2>
+        <p class="shift-dialog__subtitle">Close the store for today</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()" aria-label="Close">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Shift Summary -->
+  <div class="shift-dialog__body">
+    <p class="summary-heading">Shift Summary</p>
+
+    <div class="summary-grid">
+      <div class="summary-stat">
+        <span class="material-icons summary-stat__icon">timer</span>
+        <div>
+          <p class="summary-stat__label">Duration</p>
+          <p class="summary-stat__value">{{ data.duration }}</p>
+        </div>
+      </div>
+      <div class="summary-stat">
+        <span class="material-icons summary-stat__icon">payments</span>
+        <div>
+          <p class="summary-stat__label">Revenue</p>
+          <p class="summary-stat__value">{{ formatCurrency(data.revenue) }}</p>
+        </div>
+      </div>
+      <div class="summary-stat">
+        <span class="material-icons summary-stat__icon">group</span>
+        <div>
+          <p class="summary-stat__label">Cashiers</p>
+          <p class="summary-stat__value">{{ data.activeCashiers }}</p>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider style="margin: 16px 0" />
+
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Closing Notes (optional)</mat-label>
+        <span class="material-icons" matPrefix style="margin-right:6px;font-size:18px;color:#64748b">notes</span>
+        <textarea
+          matInput
+          formControlName="closingNotes"
+          placeholder="e.g. End-of-day handover, safe balance…"
+          rows="3"
+        ></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="shift-dialog__footer">
+    <button mat-button class="cancel-btn" (click)="cancel()">Cancel</button>
+    <button mat-flat-button class="end-btn" (click)="confirm()">
+      <span class="material-icons">stop_circle</span>
+      End Shift
+    </button>
+  </div>
+</div>

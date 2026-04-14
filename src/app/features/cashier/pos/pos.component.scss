@@ -190,6 +190,16 @@
     background: var(--color-primary-light);
   }
 
+  &--out-of-stock {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+
+    .product-card__img {
+      filter: grayscale(100%);
+    }
+  }
+
   &__img-wrap {
     position: relative;
     width: 72px;
@@ -441,6 +451,29 @@
     padding-top: 8px;
     border-top: 1px solid var(--color-border);
     margin-top: 4px;
+  }
+}
+
+// ─── No-shift banner ─────────────────────────
+.no-shift-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 16px 4px;
+  padding: 10px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #9a3412;
+  line-height: 1.4;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: #ea580c;
   }
 }
 

@@ -1,0 +1,272 @@
+<div class="shifts-page page-enter">
+  <!-- ── Header ─────────────────────────────────────────────────── -->
+  <div class="shifts-page__header">
+    <div class="shifts-page__header-left">
+      <h2 class="shifts-page__title">Shifts</h2>
+      <span class="date-badge">
+        <span class="material-icons">today</span>
+        {{ formatDate(today) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Current Shift Widget ───────────────────────────────────── -->
+  @if (!activeShift()) {
+    <!-- State A: Store is closed -->
+    <div class="current-shift-card current-shift-card--idle">
+      <div class="shift-idle__icon">
+        <span class="material-icons">nightlight_round</span>
+      </div>
+      <div class="shift-idle__body">
+        <p class="shift-idle__title">No shift currently active</p>
+        <p class="shift-idle__desc">The store is closed. Start a shift to begin trading.</p>
+      </div>
+      <button class="start-shift-btn" (click)="openStartDialog()" aria-label="Start shift">
+        <span class="material-icons">play_circle</span>
+        Start Shift
+      </button>
+    </div>
+  } @else {
+    <!-- State B: Shift in progress -->
+    <div class="current-shift-card current-shift-card--active">
+      <div class="shift-active__top">
+        <div class="shift-active__status-group">
+          <span class="live-dot"></span>
+          <span class="shift-active__status-label">Shift in Progress</span>
+        </div>
+        <span class="shift-active__started">
+          <span class="material-icons">schedule</span>
+          Started {{ formatTime(activeShift()!.startTime) }}
+        </span>
+      </div>
+
+      <div class="shift-active__stats">
+        <div class="shift-mini-stat">
+          <div class="shift-mini-stat__icon-wrap">
+            <span class="material-icons">timer</span>
+          </div>
+          <div>
+            <p class="shift-mini-stat__label">Duration</p>
+            <p class="shift-mini-stat__value">{{ elapsedLabel() }}</p>
+          </div>
+        </div>
+        <div class="shift-mini-stat__divider"></div>
+        <div class="shift-mini-stat">
+          <div class="shift-mini-stat__icon-wrap shift-mini-stat__icon-wrap--green">
+            <span class="material-icons">payments</span>
+          </div>
+          <div>
+            <p class="shift-mini-stat__label">Revenue</p>
+            <p class="shift-mini-stat__value">{{ formatCurrency(revenueInCurrentShift()) }}</p>
+          </div>
+        </div>
+        <div class="shift-mini-stat__divider"></div>
+        <div class="shift-mini-stat">
+          <div class="shift-mini-stat__icon-wrap shift-mini-stat__icon-wrap--purple">
+            <span class="material-icons">group</span>
+          </div>
+          <div>
+            <p class="shift-mini-stat__label">Active Cashiers</p>
+            <p class="shift-mini-stat__value">{{ activeCashiers() }}</p>
+          </div>
+        </div>
+      </div>
+
+      @if (activeShift()?.openingNotes) {
+        <p class="shift-notes">
+          <span class="material-icons">notes</span>
+          {{ activeShift()!.openingNotes }}
+        </p>
+      }
+
+      <div class="shift-active__actions">
+        <button class="end-shift-btn" (click)="openEndDialog()" aria-label="End shift">
+          <span class="material-icons">stop_circle</span>
+          End Shift
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ── Shift History ──────────────────────────────────────────── -->
+  <div class="shifts-history">
+    <div class="shifts-history__header">
+      <h3 class="shifts-history__title">Shift History</h3>
+
+      <!-- Filter tabs -->
+      <div class="filter-tabs" role="group" aria-label="Filter shifts">
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="filterStatus() === 'all'"
+          (click)="setFilterStatus('all')"
+        >
+          All
+          <span class="filter-tab__count">{{ store.shifts().length }}</span>
+        </button>
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="filterStatus() === 'Open'"
+          (click)="setFilterStatus('Open')"
+        >
+          Open
+          <span class="filter-tab__count filter-tab__count--active">{{ activeCount() }}</span>
+        </button>
+        <button
+          class="filter-tab"
+          [class.filter-tab--active]="filterStatus() === 'Closed'"
+          (click)="setFilterStatus('Closed')"
+        >
+          Closed
+          <span class="filter-tab__count filter-tab__count--closed">{{ closedCount() }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table wrap -->
+    <div class="shifts-table-wrap">
+      @if (isLoading()) {
+        <div class="table-loading">
+          <mat-spinner diameter="36"></mat-spinner>
+        </div>
+      } @else if (filteredShifts().length === 0) {
+        <div class="empty-state">
+          <div class="empty-state__icon">
+            <span class="material-icons">schedule</span>
+          </div>
+          <p class="empty-state__title">No shifts found</p>
+          <p class="empty-state__desc">
+            @if (filterStatus() === 'Open') {
+              No open shifts at the moment.
+            } @else if (filterStatus() === 'Closed') {
+              No closed shifts yet.
+            } @else {
+              Start a shift to begin tracking business hours.
+            }
+          </p>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="pagedShifts()" class="shifts-table">
+          <!-- # -->
+          <ng-container matColumnDef="index">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let shift; let i = index">
+              <span class="row-index">{{ i + 1 }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Date -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let shift">{{ formatDate(shift.startTime) }}</td>
+          </ng-container>
+
+          <!-- Start -->
+          <ng-container matColumnDef="start">
+            <th mat-header-cell *matHeaderCellDef>Start</th>
+            <td mat-cell *matCellDef="let shift">
+              <span class="time-value">{{ formatTime(shift.startTime) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- End -->
+          <ng-container matColumnDef="end">
+            <th mat-header-cell *matHeaderCellDef>End</th>
+            <td mat-cell *matCellDef="let shift">
+              <span class="time-value">{{ shift.endTime ? formatTime(shift.endTime) : '—' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Duration -->
+          <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef>Duration</th>
+            <td mat-cell *matCellDef="let shift">
+              <span class="duration-value">{{
+                formatDuration(shift.startTime, shift.endTime)
+              }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Revenue -->
+          <ng-container matColumnDef="revenue">
+            <th mat-header-cell *matHeaderCellDef>Revenue</th>
+            <td mat-cell *matCellDef="let shift">
+              <span class="revenue-value">{{ formatCurrency(shift.totalSales ?? 0) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Opened By -->
+          <ng-container matColumnDef="openedBy">
+            <th mat-header-cell *matHeaderCellDef>Opened By</th>
+            <td mat-cell *matCellDef="let shift">
+              @if (shift.openedBy) {
+                <div class="user-cell">
+                  <img
+                    class="user-cell__avatar"
+                    [src]="resolveAvatar(shift.openedBy)"
+                    [alt]="resolveUser(shift.openedBy)"
+                  />
+                  <span class="user-cell__name">{{ resolveUser(shift.openedBy) }}</span>
+                </div>
+              } @else {
+                <span class="cell-dash">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Closed By -->
+          <ng-container matColumnDef="closedBy">
+            <th mat-header-cell *matHeaderCellDef>Closed By</th>
+            <td mat-cell *matCellDef="let shift">
+              @if (shift.status === 'Closed' && shift.closedBy) {
+                <div class="user-cell">
+                  <img
+                    class="user-cell__avatar"
+                    [src]="resolveAvatar(shift.closedBy)"
+                    [alt]="resolveUser(shift.closedBy)"
+                  />
+                  <span class="user-cell__name">{{ resolveUser(shift.closedBy) }}</span>
+                </div>
+              } @else {
+                <span class="cell-dash">—</span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let shift">
+              @if (shift.status === 'Open') {
+                <span class="status-pill status-pill--active">
+                  <span class="material-icons">radio_button_checked</span>
+                  Open
+                </span>
+              } @else {
+                <span class="status-pill status-pill--closed">
+                  <span class="material-icons">check_circle</span>
+                  Closed
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="shift-row"></tr>
+        </table>
+      }
+    </div>
+
+    @if (filteredShifts().length > 0) {
+      <mat-paginator
+        class="shifts-paginator"
+        [length]="filteredShifts().length"
+        [pageSize]="PAGE_SIZE"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[10, 20, 50]"
+        [showFirstLastButtons]="true"
+        (page)="onPageChange($event)"
+        aria-label="Select shifts page"
+      ></mat-paginator>
+    }
+  </div>
+</div>

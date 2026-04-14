@@ -5,6 +5,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Product } from '../../../core/models/product.model';
@@ -29,6 +30,7 @@ import { productStore } from '../../../store/products/product.store';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
+    MatPaginatorModule,
     StatusBadgeComponent,
   ],
   templateUrl: './inventory.component.html',
@@ -77,8 +79,22 @@ export class InventoryComponent {
       : this.store.products();
   });
 
+  // ── Pagination ────────────────────────────────────────────
+  readonly pageIndex = signal(0);
+  readonly PAGE_SIZE = 10;
+
+  readonly pagedProducts = computed(() => {
+    const start = this.pageIndex() * this.PAGE_SIZE;
+    return this.filteredProducts().slice(start, start + this.PAGE_SIZE);
+  });
+
   onSearch(value: string) {
     this.searchQuery.set(value);
+    this.pageIndex.set(0);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
   }
 
   formatCurrency(v: number) {

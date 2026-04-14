@@ -21,6 +21,7 @@ export interface LineItem {
 
 export interface SaleItem {
   _id?: string;
+  shiftId?: string;
   items: LineItem[];
   totalAmount: number;
   createdAt?: Date;

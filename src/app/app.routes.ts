@@ -45,6 +45,12 @@ export const routes: Routes = [
           import('./features/management/staff/staff.component').then((m) => m.StaffComponent),
       },
       {
+        path: 'shifts',
+        data: { title: 'Shifts' },
+        loadComponent: () =>
+          import('./features/management/shifts/shifts.component').then((m) => m.ShiftsComponent),
+      },
+      {
         path: 'sales',
         data: { title: 'Sales' },
         loadComponent: () =>

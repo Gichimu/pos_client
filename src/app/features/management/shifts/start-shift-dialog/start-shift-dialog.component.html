@@ -1,0 +1,42 @@
+<div class="shift-dialog">
+  <!-- Header -->
+  <div class="shift-dialog__header">
+    <div class="shift-dialog__header-left">
+      <div class="shift-dialog__icon shift-dialog__icon--start">
+        <span class="material-icons">play_circle</span>
+      </div>
+      <div>
+        <h2 class="shift-dialog__title">Start Shift</h2>
+        <p class="shift-dialog__subtitle">Open the store for trading</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="cancel()" aria-label="Close">
+      <span class="material-icons">close</span>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="shift-dialog__body">
+    <form [formGroup]="form">
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Opening Notes (optional)</mat-label>
+        <span class="material-icons" matPrefix style="margin-right:6px;font-size:18px;color:#64748b">notes</span>
+        <textarea
+          matInput
+          formControlName="openingNotes"
+          placeholder="e.g. Morning shift, full staff on duty…"
+          rows="3"
+        ></textarea>
+      </mat-form-field>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="shift-dialog__footer">
+    <button mat-button class="cancel-btn" (click)="cancel()">Cancel</button>
+    <button mat-flat-button class="start-btn" (click)="confirm()">
+      <span class="material-icons">play_circle</span>
+      Start Shift
+    </button>
+  </div>
+</div>

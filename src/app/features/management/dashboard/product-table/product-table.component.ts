@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, signal } from '@angular/core';
+import { Component, computed, Input, OnChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { inject } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -22,6 +23,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
     MatButtonModule,
     MatMenuModule,
     MatTooltipModule,
+    MatPaginatorModule,
     StatusBadgeComponent,
   ],
   templateUrl: './product-table.component.html',
@@ -31,6 +33,20 @@ export class ProductTableComponent implements OnChanges {
   @Input() products: Product[] = [];
 
   private readonly snackBar = inject(MatSnackBar);
+
+  // ── Pagination ────────────────────────────────────────────
+  private readonly productsSignal = signal<Product[]>([]);
+  readonly pageIndex = signal(0);
+  readonly PAGE_SIZE = 10;
+
+  readonly pagedProducts = computed(() => {
+    const start = this.pageIndex() * this.PAGE_SIZE;
+    return this.productsSignal().slice(start, start + this.PAGE_SIZE);
+  });
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+  }
 
   displayedColumns = [
     'select',
@@ -44,7 +60,8 @@ export class ProductTableComponent implements OnChanges {
   selection = new SelectionModel<Product>(true, []);
 
   ngOnChanges() {
-    console.log('Products updated:', this.products);
+    this.productsSignal.set(this.products);
+    this.pageIndex.set(0);
     this.selection.clear();
   }
 

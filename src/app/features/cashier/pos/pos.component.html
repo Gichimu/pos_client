@@ -74,6 +74,10 @@
             class="product-card"
             (click)="addToCart(product)"
             [class.product-card--in-cart]="getCartQuantity(product._id!) > 0"
+            [class.product-card--out-of-stock]="product.currentStock === 0"
+            [disabled]="product.currentStock === 0"
+            [attr.aria-disabled]="product.currentStock === 0"
+            [matTooltip]="product.currentStock === 0 ? 'Out of stock' : ''"
             aria-label="Add {{ product.name }} to cart"
           >
             <div class="product-card__img-wrap">
@@ -191,13 +195,22 @@
         </div>
       }
 
+      <!-- No-shift warning -->
+      @if (!activeShift()) {
+        <div class="no-shift-banner">
+          <mat-icon>lock_clock</mat-icon>
+          <span>No active shift. Open a shift in Management to enable payments.</span>
+        </div>
+      }
+
       <!-- Pay button -->
       <div class="cart-footer">
         <button
           mat-flat-button
           class="pay-btn"
-          [disabled]="cartItems().length === 0"
+          [disabled]="cartItems().length === 0 || !activeShift()"
           (click)="processPayment()"
+          [matTooltip]="!activeShift() ? 'Open a shift before processing payments' : ''"
         >
           <mat-icon>payments</mat-icon>
           Process Payment

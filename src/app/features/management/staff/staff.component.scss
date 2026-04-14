@@ -139,6 +139,28 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-table-scroll {
+  overflow: hidden;
+}
+
+.staff-paginator {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+
+  .mat-mdc-paginator-container { padding: 8px 14px; min-height: 52px; }
+
+  .mat-mdc-paginator-range-label,
+  .mat-mdc-select-value {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    font-family: 'Inter', sans-serif;
+  }
 }
 
 .staff-table {
@@ -177,7 +199,6 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: none;
   object-fit: cover;
   border: 2px solid var(--color-border);
   display: block;

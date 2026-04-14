@@ -57,7 +57,7 @@
         </button>
       </div>
 
-      @if (!allConfirmed()) {
+      <!-- @if (!allConfirmed()) {
         <button class="confirm-all-btn" (click)="confirmAll()" aria-label="Confirm all items">
           <span class="material-icons">done_all</span>
           Confirm All
@@ -67,7 +67,8 @@
           <span class="material-icons">verified</span>
           All Confirmed
         </div>
-      }
+      } -->
+      <!-- confirm all functionality to be added on request -->
     </div>
   </div>
 
@@ -78,7 +79,7 @@
         <span class="material-icons">payments</span>
       </div>
       <div class="stat-card__body">
-        <p class="stat-card__label">Total Revenue</p>
+        <p class="stat-card__label">Total Sales</p>
         <p class="stat-card__value">{{ formatCurrency(totalRevenue()) }}</p>
       </div>
     </div>
@@ -110,6 +111,16 @@
       </div>
     </div>
   </div>
+
+  <!-- No-active-shift banner -->
+  @if (!activeShift()) {
+    <div class="shift-lock-banner">
+      <span class="material-icons">lock_clock</span>
+      <span
+        >No active shift — confirmation actions are locked for all items from closed shifts.</span
+      >
+    </div>
+  }
 
   <!-- Table -->
   <div class="sales-table-wrap" [class.sales-table-wrap--loading]="isLoading()">
@@ -229,12 +240,26 @@
                       {{ item.paymentMethod }}
                     </span>
                   }
+                  @if (isShiftClosed(item)) {
+                    <span class="shift-closed-badge">
+                      <span class="material-icons">lock</span>
+                      Shift closed
+                    </span>
+                  }
                 </div>
               } @else {
-                <span class="status-pill status-pill--pending">
-                  <span class="material-icons">schedule</span>
-                  Pending
-                </span>
+                <div class="status-cell">
+                  <span class="status-pill status-pill--pending">
+                    <span class="material-icons">schedule</span>
+                    Pending
+                  </span>
+                  @if (isShiftClosed(item)) {
+                    <span class="shift-closed-badge">
+                      <span class="material-icons">lock</span>
+                      Shift closed
+                    </span>
+                  }
+                </div>
               }
             </td>
           </ng-container>
@@ -248,25 +273,37 @@
                   <button
                     mat-stroked-button
                     class="confirm-btn"
+                    [class.confirm-btn--locked]="isShiftClosed(item)"
+                    [disabled]="isShiftClosed(item)"
                     (click)="toggleConfirm(item)"
-                    matTooltip="Confirm this line item"
+                    [matTooltip]="
+                      isShiftClosed(item)
+                        ? 'Shift is closed — actions are locked'
+                        : 'Confirm this line item'
+                    "
                   >
-                    <span class="material-icons">check</span>
+                    <span class="material-icons">{{ isShiftClosed(item) ? 'lock' : 'check' }}</span>
                     Confirm
                   </button>
                 } @else {
                   <button
                     mat-button
                     class="undo-btn"
+                    [class.undo-btn--locked]="isShiftClosed(item)"
+                    [disabled]="isShiftClosed(item)"
                     (click)="toggleConfirm(item)"
-                    matTooltip="Mark as pending"
+                    [matTooltip]="
+                      isShiftClosed(item)
+                        ? 'Shift is closed — actions are locked'
+                        : 'Mark as pending'
+                    "
                   >
-                    <span class="material-icons">undo</span>
+                    <span class="material-icons">{{ isShiftClosed(item) ? 'lock' : 'undo' }}</span>
                     Undo
                   </button>
                 }
 
-                <!-- Delete line item (two-step inline confirm) -->
+                <!-- Delete line item (two-step inline confirm) — also blocked when shift closed -->
                 @if (!item.confirmed) {
                   @if (pendingDeleteItemId() === item._id) {
                     <div class="delete-confirm-inline">
@@ -293,11 +330,18 @@
                     <button
                       mat-icon-button
                       class="delete-btn"
+                      [disabled]="isShiftClosed(item)"
                       (click)="deleteItem(item)"
-                      matTooltip="Remove this item"
+                      [matTooltip]="
+                        isShiftClosed(item)
+                          ? 'Shift is closed — actions are locked'
+                          : 'Remove this item'
+                      "
                       aria-label="Remove item"
                     >
-                      <span class="material-icons">delete_outline</span>
+                      <span class="material-icons">{{
+                        isShiftClosed(item) ? 'lock' : 'delete_outline'
+                      }}</span>
                     </button>
                   }
                 }
