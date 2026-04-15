@@ -88,6 +88,20 @@ body {
   font-family: 'Inter', system-ui, sans-serif !important;
 }
 
+// Report group select panel
+.report-group-panel {
+  font-family: 'Inter', system-ui, sans-serif !important;
+  font-size: 0.875rem !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+
+  .mat-mdc-option {
+    font-size: 0.875rem !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+    min-height: 40px !important;
+  }
+}
+
 // Cashier filter select panel
 .cashier-filter-panel {
   font-family: 'Inter', system-ui, sans-serif !important;
