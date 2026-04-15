@@ -150,7 +150,7 @@
           </p>
         </div>
       } @else {
-        <table mat-table [dataSource]="filteredItems()" class="sales-table">
+        <table mat-table [dataSource]="pagedItems()" class="sales-table">
           <!-- Product image -->
           <ng-container matColumnDef="image">
             <th mat-header-cell *matHeaderCellDef></th>
@@ -362,12 +362,12 @@
     <!-- /.sales-table-scroll -->
 
     <!-- Paginator — pinned at the bottom of the card, never scrolls -->
-    @if (totalItems() > 0) {
+    @if (filteredItems().length > PAGE_SIZE) {
       <mat-paginator
         class="sales-paginator"
-        [length]="totalItems()"
-        [pageSize]="pageSize()"
-        [pageIndex]="currentPage() - 1"
+        [length]="filteredItems().length"
+        [pageSize]="PAGE_SIZE"
+        [pageIndex]="pageIndex()"
         [pageSizeOptions]="[10, 20, 50]"
         [showFirstLastButtons]="true"
         (page)="onPageChange($event)"

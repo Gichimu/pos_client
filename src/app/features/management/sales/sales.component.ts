@@ -23,173 +23,6 @@ import {
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
 
-const today = new Date();
-const h = (hour: number, min: number) =>
-  new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, min);
-
-const MOCK_SALES: any[] = [
-  {
-    _id: 's1',
-    productId: '1',
-    productName: 'Coffee Bocat',
-    productSku: 'COF-001',
-    productImage: 'https://picsum.photos/seed/coffee1/60/60',
-    cashierId: '2',
-    cashierName: 'John D.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=johnd',
-    quantity: 4,
-    unitPrice: 3.0,
-    totalAmount: 12.0,
-    subTotal: 12.0,
-    transactionDate: h(8, 15),
-    confirmed: false,
-  },
-  {
-    _id: 's2',
-    productId: '2',
-    productName: 'Switch Sandwich',
-    productSku: 'SAN-001',
-    productImage: 'https://picsum.photos/seed/sandwich1/60/60',
-    cashierId: '2',
-    cashierName: 'John D.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=johnd',
-    quantity: 3,
-    unitPrice: 2.0,
-    totalAmount: 6.0,
-    subTotal: 6.0,
-    transactionDate: h(8, 42),
-    confirmed: false,
-  },
-  {
-    _id: 's3',
-    productId: '5',
-    productName: 'Beat Buffein',
-    productSku: 'BEV-002',
-    productImage: 'https://picsum.photos/seed/beat1/60/60',
-    cashierId: '4',
-    cashierName: 'Mike T.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=miket',
-    quantity: 6,
-    unitPrice: 3.0,
-    totalAmount: 18.0,
-    subTotal: 18.0,
-    transactionDate: h(9, 10),
-    confirmed: true,
-  },
-  {
-    _id: 's4',
-    productId: '8',
-    productName: 'Latte Special',
-    productSku: 'BEV-003',
-    productImage: 'https://picsum.photos/seed/latte1/60/60',
-    cashierId: '4',
-    cashierName: 'Mike T.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=miket',
-    quantity: 2,
-    unitPrice: 4.5,
-    totalAmount: 9.0,
-    subTotal: 9.0,
-    transactionDate: h(9, 35),
-    confirmed: true,
-  },
-  {
-    _id: 's5',
-    productId: '3',
-    productName: 'Flowny Pastry',
-    productSku: 'PAS-001',
-    productImage: 'https://picsum.photos/seed/pastry1/60/60',
-    cashierId: '2',
-    cashierName: 'John D.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=johnd',
-    quantity: 5,
-    unitPrice: 3.0,
-    totalAmount: 15.0,
-    subTotal: 15.0,
-    transactionDate: h(10, 5),
-    confirmed: false,
-  },
-  {
-    _id: 's6',
-    productId: '6',
-    productName: 'Pastry Iclt',
-    productSku: 'PAS-003',
-    productImage: 'https://picsum.photos/seed/pastry3/60/60',
-    cashierId: '4',
-    cashierName: 'Mike T.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=miket',
-    quantity: 7,
-    unitPrice: 4.0,
-    totalAmount: 28.0,
-    subTotal: 28.0,
-    transactionDate: h(10, 22),
-    confirmed: false,
-  },
-  {
-    _id: 's7',
-    productId: '7',
-    productName: 'Sandwicies',
-    productSku: 'SAN-002',
-    productImage: 'https://picsum.photos/seed/sandwich2/60/60',
-    cashierId: '2',
-    cashierName: 'John D.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=johnd',
-    quantity: 3,
-    unitPrice: 4.0,
-    totalAmount: 12.0,
-    subTotal: 12.0,
-    transactionDate: h(11, 0),
-    confirmed: false,
-  },
-  {
-    _id: 's8',
-    productId: '1',
-    productName: 'Coffee Bocat',
-    productSku: 'COF-001',
-    productImage: 'https://picsum.photos/seed/coffee1/60/60',
-    cashierId: '4',
-    cashierName: 'Mike T.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=miket',
-    quantity: 8,
-    unitPrice: 3.0,
-    totalAmount: 24.0,
-    subTotal: 24.0,
-    transactionDate: h(11, 30),
-    confirmed: false,
-  },
-  {
-    _id: 's9',
-    productId: '4',
-    productName: 'Pastry',
-    productSku: 'PAS-002',
-    productImage: 'https://picsum.photos/seed/pastry2/60/60',
-    cashierId: '2',
-    cashierName: 'John D.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=johnd',
-    quantity: 4,
-    unitPrice: 3.0,
-    totalAmount: 12.0,
-    subTotal: 12.0,
-    transactionDate: h(12, 15),
-    confirmed: false,
-  },
-  {
-    _id: 's10',
-    productId: '5',
-    productName: 'Beat Buffein',
-    productSku: 'BEV-002',
-    productImage: 'https://picsum.photos/seed/beat1/60/60',
-    cashierId: '4',
-    cashierName: 'Mike T.',
-    cashierAvatar: 'https://i.pravatar.cc/32?u=miket',
-    quantity: 3,
-    unitPrice: 3.0,
-    totalAmount: 9.0,
-    subTotal: 9.0,
-    transactionDate: h(13, 0),
-    confirmed: false,
-  },
-];
-
 @Component({
   selector: 'app-sales',
   imports: [
@@ -214,98 +47,65 @@ export class SalesComponent implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
+  readonly today = new Date();
+
   /** The currently open shift, or null. */
   readonly activeShift = computed(() => this.shiftStore.activeShift());
 
-  readonly today = new Date();
-
-  /** Mutable list of sale items — confirmed state is toggled in-place. */
-  // items = signal<any[]>(MOCK_SALES);
-
-  // Assuming 'allSales' is your array of nested objects from Screenshot 1
-  items = computed(
-    () =>
-      this.salesStore.items()?.flatMap((sale: any) =>
-        sale.items.map((item: any) => ({
-          _id: item._id, // Using the sub-item ID
-          parentSaleId: sale._id, // Reference to the parent sale
-          shiftId: sale.shiftId ?? null, // Forward shift id for lock checks
-          saleId: sale.saleId,
-          productId: item.productId,
-          productName: this.getProduct(item.productId)?.name || 'Unknown Product', // Assuming you have this or need to look it up
-          productSku: this.getProduct(item.productId)?.name || 'N/A',
-          productImage: `https://picsum.photos/seed/${item.productId}/60/60`,
-          cashierId: sale.cashierId?._id,
-          cashierName:
-            this.getUser(sale.cashierId?._id)?.firstName +
-              ' ' +
-              this.getUser(sale.cashierId?._id)?.lastName || 'Unknown',
-          cashierAvatar: `https://i.pravatar.cc/32?u=${sale.cashierId?._id}`,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalAmount: item.subTotal,
-          subTotal: item.subTotal,
-          transactionDate: new Date(sale.createdAt),
-          confirmed: item.confirmed,
-        })),
-      ) || [],
-  );
-
-  /** Active status filter. */
-  filterStatus = signal<FilterStatus>('all');
-
-  /** Line-item _id currently awaiting delete confirmation (two-step inline confirm). */
-  pendingDeleteItemId = signal<string | null>(null);
-
-  /** Active cashier filter — null means "All Cashiers". */
-  filterCashierId = signal<string | null>(null);
-
-  /** Cashier list sourced from the full user store — stable across page changes. */
-  readonly cashierOptions = computed(() =>
-    this.userStore
-      .users()
-      // .filter((u) => u.role === 'cashier') --- IGNORE ---
-      .map((u) => ({
-        id: u._id!,
-        name: `${u.firstName} ${u.lastName}`,
-        avatar: u.avatar ?? '',
-      })),
-  );
-
-  // ── Pagination (read from store) ─────────────────────────────────────────
-
-  readonly currentPage = computed(() => this.salesStore.currentPage());
-  readonly totalPages = computed(() => this.salesStore.totalPages());
-  readonly totalItems = computed(() => this.salesStore.totalItems());
-  readonly pageSize = computed(() => this.salesStore.pageSize());
   readonly isLoading = computed(() => this.salesStore.isLoading());
 
-  // ── Computed summary stats ───────────────────────────────────────────────
+  // ── Flat line-item list derived from all sale documents ──────────────────
 
-  readonly totalRevenue = computed(
-    () => this.items()?.reduce((sum, i) => sum + i.totalAmount, 0) || 0,
+  /**
+   * Flattens all sale documents into a single list of enriched line items.
+   * This is the source of truth for the table and all stat cards.
+   */
+  readonly items = computed(() =>
+    this.salesStore.items().flatMap((sale) =>
+      sale.items.map((item) => ({
+        _id: item._id,
+        parentSaleId: sale._id,
+        shiftId: sale.shiftId ?? null,
+        saleId: (sale as any).saleId,
+        productId: item.productId,
+        productName: this.getProduct(item.productId!)?.name ?? 'Unknown Product',
+        productSku: this.getProduct(item.productId!)?.sku ?? 'N/A',
+        productImage: `https://picsum.photos/seed/${item.productId}/60/60`,
+        cashierId: (sale as any).cashierId?._id,
+        cashierName:
+          (() => {
+            const u = this.getUser((sale as any).cashierId?._id);
+            return u ? `${u.firstName} ${u.lastName}` : 'Unknown';
+          })(),
+        cashierAvatar: `https://i.pravatar.cc/32?u=${(sale as any).cashierId?._id}`,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalAmount: item.subTotal,
+        subTotal: item.subTotal,
+        transactionDate: new Date((sale as any).createdAt),
+        confirmed: item.confirmed,
+        paymentMethod: item.paymentMethod ?? null,
+      })),
+    ),
   );
 
-  readonly totalQty = computed(() => this.items()?.reduce((sum, i) => sum + i.quantity, 0) || 0);
+  // ── Filters ──────────────────────────────────────────────────────────────
 
-  readonly confirmedCount = computed(() => this.items()?.filter((i) => i.confirmed).length || 0);
-  readonly pendingCount = computed(() => this.items()?.filter((i) => !i.confirmed).length || 0);
+  filterStatus = signal<FilterStatus>('all');
+  filterCashierId = signal<string | null>(null);
 
-  readonly allConfirmed = computed(() => {
-    const list = this.items();
-    return list?.length > 0 && list.every((i) => i.confirmed);
-  });
+  /** Line-item _id currently awaiting delete confirmation. */
+  pendingDeleteItemId = signal<string | null>(null);
 
-  // ── Filtered list for table ──────────────────────────────────────────────
+  readonly cashierOptions = computed(() =>
+    this.userStore.users().map((u) => ({
+      id: u._id!,
+      name: `${u.firstName} ${u.lastName}`,
+      avatar: u.avatar ?? '',
+    })),
+  );
 
-  ngOnInit(): void {
-    // Reset local filters and reload page 1 every time this route is entered.
-    // The store is a root singleton so its own onInit only fires once at app startup;
-    // this is the correct place to trigger a fresh fetch on each navigation.
-    this.filterStatus.set('all');
-    this.filterCashierId.set(null);
-    this.salesStore.loadPage(1, null);
-  }
+  // ── Filtered list (status + cashier) — used for stat cards + paginator ──
 
   readonly filteredItems = computed(() => {
     const status = this.filterStatus();
@@ -316,6 +116,47 @@ export class SalesComponent implements OnInit {
     if (status === 'pending') return result.filter((i) => !i.confirmed);
     return result;
   });
+
+  // ── Client-side pagination ───────────────────────────────────────────────
+
+  readonly PAGE_SIZE = 10;
+  readonly pageIndex = signal(0);
+
+  /** The slice of filteredItems shown on the current page. */
+  readonly pagedItems = computed(() => {
+    const start = this.pageIndex() * this.PAGE_SIZE;
+    return this.filteredItems().slice(start, start + this.PAGE_SIZE);
+  });
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex.set(event.pageIndex);
+  }
+
+  // ── Stat cards — aggregate over the FULL filtered set ───────────────────
+
+  readonly totalRevenue = computed(() =>
+    this.filteredItems().reduce((sum, i) => sum + i.totalAmount, 0),
+  );
+  readonly totalQty = computed(() =>
+    this.filteredItems().reduce((sum, i) => sum + i.quantity, 0),
+  );
+  readonly confirmedCount = computed(() => this.filteredItems().filter((i) => i.confirmed).length);
+  readonly pendingCount = computed(() => this.filteredItems().filter((i) => !i.confirmed).length);
+  readonly allConfirmed = computed(() => {
+    const list = this.filteredItems();
+    return list.length > 0 && list.every((i) => i.confirmed);
+  });
+
+  // ── Lifecycle ────────────────────────────────────────────────────────────
+
+  ngOnInit(): void {
+    this.filterStatus.set('all');
+    this.filterCashierId.set(null);
+    this.pageIndex.set(0);
+    this.salesStore.loadSales(null);
+  }
+
+  // ── Actions ──────────────────────────────────────────────────────────────
 
   readonly displayedColumns = [
     'image',
@@ -330,43 +171,34 @@ export class SalesComponent implements OnInit {
     'actions',
   ];
 
-  // ── Actions ─────────────────────────────────────────────────────────────
-
-  /**
-   * Returns true when the shift that owns this item is Closed.
-   * Items with no shiftId are considered unlocked (backward compat).
-   */
   isShiftClosed(item: any): boolean {
     if (!item.shiftId) return false;
-    const shift = this.shiftStore.shifts().find((s) => s._id === item.shiftId);
-    return shift?.status === 'Closed';
+    const shift = this.shiftStore.shifts().find((s: any) => s._id === item.shiftId);
+    return (shift as any)?.status === 'Closed';
   }
 
   setFilter(status: FilterStatus) {
     this.filterStatus.set(status);
+    this.pageIndex.set(0);
   }
 
   setCashierFilter(cashierId: string | null) {
     this.filterCashierId.set(cashierId);
-    this.salesStore.loadPage(1, cashierId);
+    this.pageIndex.set(0);
+    // Re-fetch from API with cashier filter so backend can optimise the query
+    this.salesStore.loadSales(cashierId);
   }
 
-  onPageChange(event: PageEvent) {
-    // pageIndex is 0-based in Material Paginator
-    this.salesStore.loadPage(event.pageIndex + 1, this.filterCashierId());
-  }
-
-  getUser(userId: String) {
+  getUser(userId: string) {
     return this.userStore.users().find((user) => user._id === userId);
   }
 
-  getProduct(productId: String) {
+  getProduct(productId: string) {
     return this.productStore.products().find((product) => product._id === productId);
   }
 
   toggleConfirm(item: any) {
     if (item.confirmed) {
-      // Undo is not gated — could be extended later
       this.salesStore.unconfirmItem(item._id, item.parentSaleId).subscribe({
         next: () => {
           this.snackBar.open(`${item.productName} marked as pending`, 'Dismiss', {
@@ -400,7 +232,6 @@ export class SalesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
-      console.log('payment method result', result, item._id, item.parentSaleId);
       this.salesStore.confirmItem(item._id, item.parentSaleId, result.paymentMethod).subscribe({
         next: () => {
           this.snackBar.open(
@@ -426,11 +257,9 @@ export class SalesComponent implements OnInit {
 
   deleteItem(item: any) {
     if (this.pendingDeleteItemId() === item._id) {
-      // Second click — confirmed, proceed with deletion
       this.pendingDeleteItemId.set(null);
       this.salesStore.deleteLineItem(item._id, item.parentSaleId).subscribe({
         next: () => {
-          // Restore inventory for the removed line item
           if (item.productId && item.quantity) {
             this.productStore.adjustStock(item.productId, item.quantity);
           }
@@ -443,7 +272,6 @@ export class SalesComponent implements OnInit {
         },
       });
     } else {
-      // First click — enter confirmation state for this item
       this.pendingDeleteItemId.set(item._id);
     }
   }

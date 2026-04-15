@@ -7,20 +7,13 @@ import { Observable } from 'rxjs';
 export type SaleConfirmStatus = 'pending' | 'confirmed';
 
 interface SaleStoreState {
+  /** Raw sale documents as returned by the API. */
   items: SaleItem[];
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  pageSize: number;
   isLoading: boolean;
 }
 
 const initialState: SaleStoreState = {
   items: [],
-  currentPage: 1,
-  totalPages: 1,
-  totalItems: 0,
-  pageSize: 10,
   isLoading: false,
 };
 
@@ -31,6 +24,7 @@ export const saleStore = signalStore(
     setSales(sales: SaleItem[]) {
       patchState(store, { items: sales });
     },
+
     addSale(sale: SaleItem): Observable<SaleItem> {
       return new Observable((observer) => {
         salesService.addSale(sale).subscribe({
@@ -43,24 +37,25 @@ export const saleStore = signalStore(
         });
       });
     },
-    loadPage(page: number, cashierId?: string | null): void {
+
+    /**
+     * Fetch all sales from the API, optionally filtered by cashier.
+     * Replaces the full items list — no server-side pagination.
+     */
+    loadSales(cashierId?: string | null): void {
       patchState(store, { isLoading: true });
-      salesService.getPage(page, store.pageSize(), cashierId).subscribe({
-        next: (response) => {
-          console.log('Sales page loaded:', response);
-          patchState(store, {
-            items: response.data,
-            currentPage: response.page,
-            totalPages: response.totalPages,
-            totalItems: response.total,
-            isLoading: false,
-          });
+      salesService.getAll(cashierId).subscribe({
+        next: (response: any) => {
+          // Guard: server may return either SaleItem[] or a paginated envelope { data, total, … }
+          const sales: SaleItem[] = Array.isArray(response) ? response : (response?.data ?? []);
+          patchState(store, { items: sales, isLoading: false });
         },
         error: () => {
           patchState(store, { isLoading: false });
         },
       });
     },
+
     confirmItem(itemId: string, saleId: string, paymentMethod: PaymentMethod): Observable<void> {
       return new Observable((observer) => {
         salesService.confirmItem(itemId, saleId, paymentMethod).subscribe({
@@ -80,6 +75,7 @@ export const saleStore = signalStore(
         });
       });
     },
+
     unconfirmItem(itemId: string, saleId: string): Observable<void> {
       return new Observable((observer) => {
         salesService.unconfirmItem(itemId, saleId).subscribe({
@@ -99,6 +95,7 @@ export const saleStore = signalStore(
         });
       });
     },
+
     deleteLineItem(itemId: string, saleId: string): Observable<void> {
       return new Observable((observer) => {
         salesService.deleteLineItem(saleId, itemId).subscribe({
@@ -111,7 +108,6 @@ export const saleStore = signalStore(
                     ? { ...sale, items: sale.items.filter((i) => i._id !== itemId) }
                     : sale,
                 )
-                // Remove the parent sale from the list if it has no items left
                 .filter((sale) => sale.items.length > 0),
             });
             observer.next();
@@ -124,7 +120,7 @@ export const saleStore = signalStore(
   })),
   withHooks({
     onInit(store) {
-      store.loadPage(1);
+      store.loadSales();
     },
   }),
 );

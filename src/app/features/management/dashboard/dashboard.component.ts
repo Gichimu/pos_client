@@ -44,7 +44,11 @@ export class DashboardComponent {
     const today = new Date().toISOString().split('T')[0];
     return this.salesStore
       .items()
-      .filter((s) => new Date(s.createdAt ?? '').toISOString().split('T')[0] === today)
+      .filter((s) => {
+        if (!s.createdAt) return false;
+        const d = new Date(s.createdAt);
+        return !isNaN(d.getTime()) && d.toISOString().split('T')[0] === today;
+      })
       .flatMap((s) => s.items)
       .filter((item) => item.confirmed)
       .reduce((sum, item) => sum + item.subTotal, 0);

@@ -118,18 +118,6 @@ export const productStore = signalStore(
   })),
   withHooks({
     onInit(store, productService = inject(ProductService)) {
-      // productService.getAll().subscribe({
-      //   next: (products: Product[]) => {
-      //     products = products.map((p) => ({
-      //       ...p,
-      //       stockReorderStatus: calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
-      //     }));
-      //     patchState(store, { products: products as Product[] });
-      //   },
-      //   error: (error) => {
-      //     patchState(store, { error: error.message });
-      //   },
-      // });
       store.loadProducts();
     },
   }),

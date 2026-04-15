@@ -42,8 +42,6 @@ export class InventoryComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
-  // readonly products = toSignal(this.store.select(selectProducts), { initialValue: [] });
-
   readonly totalCount = computed(() => this.store.products().length);
   readonly lowStockCount = computed(
     () => this.store.products().filter((p) => p.currentStock < 5).length,
@@ -117,7 +115,6 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((product) => {
       if (product) {
-        // this.store.dispatch(ProductsActions.addProduct({ product }));
         this.store.addProduct(product);
         this.snackBar.open(`${product.name} added to inventory`, 'Dismiss', { duration: 3000 });
       }
@@ -131,7 +128,6 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((updated) => {
       if (updated) {
-        // this.store.dispatch(ProductsActions.updateProduct({ product: updated }));
         this.store.updateProduct(updated);
         this.snackBar.open(`${updated.name} updated`, 'Dismiss', { duration: 3000 });
       }
@@ -153,7 +149,6 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        // this.store.dispatch(ProductsActions.deleteProduct({ id: product._id }));
         this.store.deleteProduct(product._id!);
         this.snackBar.open(`${product.name} removed`, 'Dismiss', { duration: 3000 });
       }

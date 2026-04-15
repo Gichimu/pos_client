@@ -13,3 +13,5 @@ export interface Product {
   stockReorderStatus?: StockReorderStatus;
   category: string;
 }
+
+
