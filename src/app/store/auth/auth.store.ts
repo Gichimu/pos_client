@@ -25,6 +25,7 @@ export const authStore = signalStore(
           // Assuming the response contains the authenticated user data
           const authenticatedUser: User = response.user;
           localStorage.setItem('token', response.token); // Store the token for future requests
+          localStorage.setItem('refreshToken', response.refreshToken); // Store the refresh token if provided
           patchState(store, { user: authenticatedUser, isAuthenticated: true });
         }),
         catchError((error) => {
@@ -35,9 +36,11 @@ export const authStore = signalStore(
       );
     },
     logout() {
-      authService.logout().subscribe({
+      const refreshToken = localStorage.getItem('refreshToken') || '';
+      authService.logout(refreshToken).subscribe({
         next: () => {
           localStorage.removeItem('token'); // Clear the token on logout
+          localStorage.removeItem('refreshToken'); // Clear the refresh token on logout
           patchState(store, { user: null, isAuthenticated: false });
         },
       });

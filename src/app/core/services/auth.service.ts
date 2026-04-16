@@ -13,18 +13,6 @@ export class AuthService {
   // private readonly store = inject(Store);
   http = inject(HttpClient);
 
-  // initializeAuth(): void {
-  //   const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-  //   if (stored) {
-  //     try {
-  //       const user: User = JSON.parse(stored);
-  //       this.store.dispatch(AuthActions.loginSuccess({ user }));
-  //     } catch {
-  //       localStorage.removeItem(AUTH_STORAGE_KEY);
-  //     }
-  //   }
-  // }
-
   login(user: User): Observable<any> {
     // localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
     // this.store.dispatch(AuthActions.loginSuccess({ user }));
@@ -35,10 +23,16 @@ export class AuthService {
     });
   }
 
-  logout(): Observable<any> {
+  refreshToken(token: string): Observable<string> {
+    return this.http.post<string>(`${environment.apiUrl}/auth/refresh-token`, {
+      refreshToken: token,
+    });
+  }
+
+  logout(refresh: string): Observable<any> {
     // localStorage.removeItem(AUTH_STORAGE_KEY);
     // this.store.dispatch(AuthActions.logout());
 
-    return this.http.post(`${environment.apiUrl}/auth/logout`, {});
+    return this.http.post(`${environment.apiUrl}/auth/logout`, { refreshToken: refresh });
   }
 }
