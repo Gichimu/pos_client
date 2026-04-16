@@ -7,11 +7,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { saleStore } from '../../../../store/sales/sale.store';
 
 export interface EndShiftDialogData {
   duration: string;
   revenue: number;
   activeCashiers: number;
+  unconfirmedCount: number;
 }
 
 export interface EndShiftDialogResult {
@@ -35,6 +37,7 @@ export interface EndShiftDialogResult {
 })
 export class EndShiftDialogComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly saleStore = inject(saleStore);
   private readonly dialogRef = inject(MatDialogRef<EndShiftDialogComponent>);
   readonly data = inject<EndShiftDialogData>(MAT_DIALOG_DATA);
 

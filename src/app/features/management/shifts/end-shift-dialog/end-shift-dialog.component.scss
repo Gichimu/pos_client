@@ -104,6 +104,42 @@
   }
 }
 
+// ── Warning banner ────────────────────────────────────────
+.warning-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 0 24px;
+  padding: 14px 16px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-left: 4px solid #f59e0b;
+  border-radius: 10px;
+
+  &__icon {
+    font-size: 22px;
+    color: #d97706;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  &__content { display: flex; flex-direction: column; gap: 4px; }
+
+  &__title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #92400e;
+    margin: 0;
+  }
+
+  &__desc {
+    font-size: 0.8rem;
+    color: #a16207;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
 .full-field { width: 100%; }
 
 .close-btn { color: var(--color-text-muted) !important; }

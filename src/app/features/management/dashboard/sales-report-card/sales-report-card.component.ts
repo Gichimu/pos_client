@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
@@ -45,7 +45,7 @@ const GROUP_LABELS: Record<GroupBy, string> = {
   templateUrl: './sales-report-card.component.html',
   styleUrl: './sales-report-card.component.scss',
 })
-export class SalesReportCardComponent {
+export class SalesReportCardComponent implements OnInit {
   private readonly salesStore = inject(saleStore);
   private readonly userStore = inject(userStore);
   private readonly productStore = inject(productStore);
@@ -216,6 +216,11 @@ export class SalesReportCardComponent {
       },
     },
   };
+
+  ngOnInit(): void {
+    // Initial load of sales data
+    this.salesStore.loadSales();
+  }
 
   // ── Helpers ──────────────────────────────────────────────
   get chartTitle(): string {
