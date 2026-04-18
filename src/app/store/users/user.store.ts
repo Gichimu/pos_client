@@ -2,6 +2,7 @@ import { patchState, signalStore, withHooks, withMethods, withState } from '@ngr
 import { User } from '../../core/models/user.model';
 import { inject } from '@angular/core';
 import { UserService } from '../../core/services/user-service';
+import { catchError, tap, throwError } from 'rxjs';
 
 const initialState = {
   users: [] as User[],
@@ -15,17 +16,29 @@ export const userStore = signalStore(
   withMethods((store, userService = inject(UserService)) => ({
     setUsers(users: User[]) {},
     addUser(user: User) {
-      userService.addUser(user).subscribe({
-        next: (newUser) => {
+      // userService.addUser(user).subscribe({
+      //   next: (newUser) => {
+      //     console.log('added user', newUser);
+      //     const currentUsers = store.users() as User[];
+      //     patchState(store, { users: [...currentUsers, newUser] });
+      //   },
+      //   error: (error) => {
+      //     // Handle error as needed, e.g., patchState to set an error message
+      //     patchState(store, { error: error });
+      //   },
+      // });
+      return userService.addUser(user).pipe(
+        tap((newUser: User) => {
           console.log('added user', newUser);
           const currentUsers = store.users() as User[];
           patchState(store, { users: [...currentUsers, newUser] });
-        },
-        error: (error) => {
-          // Handle error as needed, e.g., patchState to set an error message
+        }),
+        catchError((error) => {
+          console.error('Failed to add user:', error);
           patchState(store, { error: error });
-        },
-      });
+          return throwError(() => error);
+        }),
+      );
     },
     updateUser(user: User) {
       userService.updateUser(user).subscribe({

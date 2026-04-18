@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -20,6 +19,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 
 @Component({
   selector: 'app-staff',
@@ -38,7 +38,7 @@ import {
 export class StaffComponent {
   userstore = inject(userStore);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly sweetAlert = inject(SweetAlertService);
 
   readonly adminCount = computed(
     () => this.userstore.users().filter((u) => u.roles.includes('superAdmin')).length,
@@ -106,8 +106,16 @@ export class StaffComponent {
     ref.afterClosed().subscribe((user) => {
       if (user) {
         // this.store.dispatch(StaffActions.addUser({ user }));
-        this.userstore.addUser(user);
-        this.snackBar.open(`${user.firstName} added successfully`, 'Dismiss', { duration: 3000 });
+        this.userstore.addUser(user).subscribe({
+          next: () => {
+            this.sweetAlert.success(`${user.firstName} added successfully`);
+          },
+          error: (error) => {
+            this.sweetAlert.error(
+              `Failed to add ${user.firstName}: ${error.error ? error.error.error : error.message}`,
+            );
+          },
+        });
       }
     });
   }
@@ -121,9 +129,7 @@ export class StaffComponent {
     ref.afterClosed().subscribe((updated) => {
       if (updated) {
         this.userstore.updateUser(updated);
-        this.snackBar.open(`${updated.firstName} updated successfully`, 'Dismiss', {
-          duration: 3000,
-        });
+        this.sweetAlert.success(`${updated.firstName} updated successfully`);
       }
     });
   }
@@ -145,7 +151,7 @@ export class StaffComponent {
     ref.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.userstore.deleteUser(user._id!);
-        this.snackBar.open(`${user.firstName} removed`, 'Dismiss', { duration: 3000 });
+        this.sweetAlert.success(`${user.firstName} removed`);
       }
     });
   }

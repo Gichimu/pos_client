@@ -5,8 +5,8 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { CategoryStore } from '../../../../store/categories/category.store';
+import { SweetAlertService } from '../../../../core/services/sweet-alert.service';
 import { Category } from '../../../../core/models/category.model';
 
 @Component({
@@ -24,7 +24,7 @@ import { Category } from '../../../../core/models/category.model';
 })
 export class ManageCategoriesModalComponent {
   private readonly dialogRef = inject(MatDialogRef<ManageCategoriesModalComponent>);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly sweetAlert = inject(SweetAlertService);
   readonly categoryStore = inject(CategoryStore);
 
   /** Name of the category being edited inline (null = not editing). */
@@ -52,7 +52,7 @@ export class ManageCategoriesModalComponent {
       return;
     }
     this.categoryStore.addCategory(name);
-    this.snackBar.open(`"${name}" added`, 'Dismiss', { duration: 2000 });
+    this.sweetAlert.success(`"${name}" added`);
     this.newCategoryName.set('');
     this.addError.set(null);
   }
@@ -73,7 +73,7 @@ export class ManageCategoriesModalComponent {
       return;
     }
     this.categoryStore.renameCategory(oldName, newName);
-    this.snackBar.open(`Renamed to "${newName}"`, 'Dismiss', { duration: 2000 });
+    this.sweetAlert.success(`Renamed to "${newName}"`);
     this.editingCategory.set(null);
   }
 
@@ -84,7 +84,7 @@ export class ManageCategoriesModalComponent {
 
   remove(category: Category) {
     this.categoryStore.removeCategory(category);
-    this.snackBar.open(`"${category}" removed`, 'Dismiss', { duration: 2000 });
+    this.sweetAlert.success(`"${category.name}" removed`);
   }
 
   onAddKeydown(event: KeyboardEvent) {

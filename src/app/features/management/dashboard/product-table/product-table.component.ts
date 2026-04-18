@@ -7,11 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { inject } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Product } from '../../../../core/models/product.model';
 import { StatusBadgeComponent } from '../../../../shared/components/status-badge/status-badge.component';
+import { SweetAlertService } from '../../../../core/services/sweet-alert.service';
 
 @Component({
   selector: 'app-product-table',
@@ -32,7 +32,7 @@ import { StatusBadgeComponent } from '../../../../shared/components/status-badge
 export class ProductTableComponent implements OnChanges {
   @Input() products: Product[] = [];
 
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly sweetAlert = inject(SweetAlertService);
 
   // ── Pagination ────────────────────────────────────────────
   private readonly productsSignal = signal<Product[]>([]);
@@ -82,14 +82,14 @@ export class ProductTableComponent implements OnChanges {
   }
 
   onEdit(product: Product) {
-    this.snackBar.open(`Edit: ${product.name}`, 'Dismiss', { duration: 2500 });
+    this.sweetAlert.info(`Edit: ${product.name}`);
   }
 
   onDelete(product: Product) {
-    this.snackBar.open(`Deleted: ${product.name}`, 'Undo', { duration: 3000 });
+    this.sweetAlert.success(`Deleted: ${product.name}`);
   }
 
   onView(product: Product) {
-    this.snackBar.open(`Viewing: ${product.name}`, 'Close', { duration: 2500 });
+    this.sweetAlert.info(`Viewing: ${product.name}`);
   }
 }

@@ -49,27 +49,39 @@
 
       <!-- Category tabs -->
       <div class="category-tabs" role="group" aria-label="Filter by category">
+        <!-- All tab — no image -->
         <button
-          class="category-tab"
+          class="category-tab category-tab--all"
           [class.category-tab--active]="selectedCategory() === null"
           (click)="setCategory(null)"
+          aria-label="Show all products"
         >
-          All
+          <span class="material-icons category-tab__all-icon">apps</span>
+          <span class="category-tab__label">All</span>
         </button>
+
         @for (cat of categoryStore.categories(); track cat._id) {
           <button
             class="category-tab"
             [class.category-tab--active]="selectedCategory() === cat._id"
             (click)="setCategory(cat._id!)"
+            [attr.aria-label]="cat.name"
           >
-            {{ cat.name }}
+            <img
+              class="category-tab__img"
+              [src]="getCategoryImage(cat.name)"
+              [alt]="cat.name"
+              loading="lazy"
+            />
+            <div class="category-tab__overlay"></div>
+            <span class="category-tab__label">{{ cat.name }}</span>
           </button>
         }
       </div>
 
       <!-- Grid -->
       <div class="product-grid">
-        @for (product of filteredProducts(); track product._id) {
+        @for (product of filteredProducts(); track product._id; let i = $index) {
           <button
             class="product-card"
             (click)="addToCart(product)"
@@ -77,26 +89,20 @@
             [class.product-card--out-of-stock]="product.currentStock === 0"
             [disabled]="product.currentStock === 0"
             [attr.aria-disabled]="product.currentStock === 0"
-            [matTooltip]="product.currentStock === 0 ? 'Out of stock' : ''"
+            [matTooltip]="product.currentStock === 0 ? 'Out of stock' : product.name + ' — ' + formatCurrency(product.sellingPrice)"
+            [style.--card-bg]="getCardColor(product.name)"
+            [style.--card-accent]="getCardAccent(product.name)"
             aria-label="Add {{ product.name }} to cart"
           >
-            <div class="product-card__img-wrap">
-              <img
-                class="product-card__img"
-                [src]="'https://picsum.photos/seed/' + product.sku + '/200/300'"
-                [alt]="product.name"
-                loading="lazy"
-              />
-              @if (getCartQuantity(product._id!) > 0) {
-                <span class="product-card__qty-badge">
-                  {{ getCartQuantity(product._id!) }}
-                </span>
-              }
-            </div>
+            @if (getCartQuantity(product._id!) > 0) {
+              <span class="product-card__qty-badge">
+                {{ getCartQuantity(product._id!) }}
+              </span>
+            }
             <p class="product-card__name">{{ product.name }}</p>
             <p class="product-card__price">{{ formatCurrency(product.sellingPrice) }}</p>
             <span class="product-card__stock" [class.out]="product.currentStock === 0">
-              {{ product.currentStock > 0 ? 'In stock: ' + product.currentStock : 'Out of stock' }}
+              {{ product.currentStock > 0 ? product.currentStock + ' left' : 'Out of stock' }}
             </span>
           </button>
         }

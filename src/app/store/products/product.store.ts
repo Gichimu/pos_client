@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withHooks } from '@ngrx/signals';
 import { ProductService } from '../../core/services/product-service';
 import { Product, StockReorderStatus } from '../../core/models/product.model';
+import { catchError, Observable, of, tap, throwError } from 'rxjs';
 
 export type ProductState = {
   products: Product[];
@@ -35,20 +36,35 @@ export const productStore = signalStore(
     setProducts(products: Product[]) {
       patchState(store, { products });
     },
-    addProduct(product: Product) {
-      productService.addProduct(product).subscribe({
-        next: (newProduct: Product) => {
+    addProduct(product: Product): Observable<Product | null> {
+      // productService.addProduct(product).subscribe({
+      //   next: (newProduct: Product) => {
+      //     const currentProducts = store.products() as Product[];
+      //     newProduct.stockReorderStatus = calculateReorderStatusValue(
+      //       newProduct.currentStock,
+      //       newProduct.stockReorderLevel,
+      //     );
+      //     patchState(store, { products: [...currentProducts, newProduct] });
+      //   },
+      //   error: (error) => {
+      //     patchState(store, { error: error.message });
+      //   },
+      // });
+      return productService.addProduct(product).pipe(
+        tap((newProduct: Product) => {
           const currentProducts = store.products() as Product[];
           newProduct.stockReorderStatus = calculateReorderStatusValue(
             newProduct.currentStock,
             newProduct.stockReorderLevel,
           );
           patchState(store, { products: [...currentProducts, newProduct] });
-        },
-        error: (error) => {
+        }),
+        catchError((error) => {
+          console.error('Failed to add product:', error);
           patchState(store, { error: error.message });
-        },
-      });
+          return throwError(() => error);
+        }),
+      );
     },
 
     loadProducts() {

@@ -4,7 +4,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,6 +19,7 @@ import {
   PaymentMethodDialogData,
   PaymentMethodDialogResult,
 } from './payment-method-dialog.component';
+import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
 
@@ -44,7 +44,7 @@ export class SalesComponent implements OnInit {
   readonly userStore = inject(userStore);
   readonly productStore = inject(productStore);
   readonly shiftStore = inject(shiftStore);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly sweetAlert = inject(SweetAlertService);
   private readonly dialog = inject(MatDialog);
 
   readonly today = new Date();
@@ -201,16 +201,10 @@ export class SalesComponent implements OnInit {
     if (item.confirmed) {
       this.salesStore.unconfirmItem(item._id, item.parentSaleId).subscribe({
         next: () => {
-          this.snackBar.open(`${item.productName} marked as pending`, 'Dismiss', {
-            duration: 2500,
-          });
+          this.sweetAlert.info(`${item.productName} marked as pending`);
         },
         error: () => {
-          this.snackBar.open(
-            `Failed to unconfirm ${item.productName}. Please try again.`,
-            'Dismiss',
-            { duration: 3000 },
-          );
+          this.sweetAlert.error(`Failed to unconfirm ${item.productName}. Please try again.`);
         },
       });
       return;
@@ -234,25 +228,17 @@ export class SalesComponent implements OnInit {
       if (!result) return;
       this.salesStore.confirmItem(item._id, item.parentSaleId, result.paymentMethod).subscribe({
         next: () => {
-          this.snackBar.open(
-            `${item.productName} confirmed via ${result.paymentMethod}`,
-            'Dismiss',
-            { duration: 2500 },
-          );
+          this.sweetAlert.success(`${item.productName} confirmed via ${result.paymentMethod}`);
         },
         error: () => {
-          this.snackBar.open(
-            `Failed to confirm ${item.productName}. Please try again.`,
-            'Dismiss',
-            { duration: 3000 },
-          );
+          this.sweetAlert.error(`Failed to confirm ${item.productName}. Please try again.`);
         },
       });
     });
   }
 
   confirmAll() {
-    this.snackBar.open('All line items confirmed', 'Dismiss', { duration: 2500 });
+    this.sweetAlert.success('All line items confirmed');
   }
 
   deleteItem(item: any) {
@@ -263,12 +249,10 @@ export class SalesComponent implements OnInit {
           if (item.productId && item.quantity) {
             this.productStore.adjustStock(item.productId, item.quantity);
           }
-          this.snackBar.open(`${item.productName} removed`, 'Dismiss', { duration: 2500 });
+          this.sweetAlert.success(`${item.productName} removed`);
         },
         error: () => {
-          this.snackBar.open('Failed to delete item. Please try again.', 'Dismiss', {
-            duration: 3000,
-          });
+          this.sweetAlert.error('Failed to delete item. Please try again.');
         },
       });
     } else {

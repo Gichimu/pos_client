@@ -7,7 +7,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { interval } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -25,6 +24,7 @@ import {
 } from './end-shift-dialog/end-shift-dialog.component';
 import { authStore } from '../../../store/auth/auth.store';
 import { productStore } from '../../../store/products/product.store';
+import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 
 type StatusFilter = 'all' | 'Open' | 'Closed';
 
@@ -49,7 +49,7 @@ export class ShiftsComponent implements OnInit {
   readonly productStore = inject(productStore);
   readonly salesStore = inject(saleStore);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly sweetAlert = inject(SweetAlertService);
 
   readonly today = new Date();
 
@@ -209,12 +209,8 @@ export class ShiftsComponent implements OnInit {
           openedBy: this.authStore.user()?._id || 'Unknown User', // user should always be defined here, but fallback just in case
         })
         .subscribe({
-          next: () =>
-            this.snackBar.open('Shift started successfully', 'Dismiss', { duration: 3000 }),
-          error: () =>
-            this.snackBar.open('Failed to start shift. Please try again.', 'Dismiss', {
-              duration: 3000,
-            }),
+          next: () => this.sweetAlert.success('Shift started successfully'),
+          error: () => this.sweetAlert.error('Failed to start shift. Please try again.'),
         });
     });
   }
@@ -255,13 +251,10 @@ export class ShiftsComponent implements OnInit {
         })
         .subscribe({
           next: () => {
-            this.createShiftReport(); // Generate shift report on successful close
-            this.snackBar.open('Shift ended successfully', 'Dismiss', { duration: 3000 });
+            this.createShiftReport();
+            this.sweetAlert.success('Shift ended successfully');
           },
-          error: () =>
-            this.snackBar.open('Failed to end shift. Please try again.', 'Dismiss', {
-              duration: 3000,
-            }),
+          error: () => this.sweetAlert.error('Failed to end shift. Please try again.'),
         });
     });
   }

@@ -6,7 +6,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Product } from '../../../core/models/product.model';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
@@ -21,6 +20,7 @@ import {
 import { ManageCategoriesModalComponent } from './manage-categories-modal/manage-categories-modal.component';
 import { CategoryStore } from '../../../store/categories/category.store';
 import { productStore } from '../../../store/products/product.store';
+import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 
 @Component({
   selector: 'app-inventory',
@@ -40,7 +40,7 @@ export class InventoryComponent {
   private readonly store = inject(productStore);
   private readonly categoryStore = inject(CategoryStore);
   private readonly dialog = inject(MatDialog);
-  private readonly snackBar = inject(MatSnackBar);
+  private readonly sweetAlert = inject(SweetAlertService);
 
   readonly totalCount = computed(() => this.store.products().length);
   readonly lowStockCount = computed(
@@ -115,8 +115,14 @@ export class InventoryComponent {
     );
     ref.afterClosed().subscribe((product) => {
       if (product) {
-        this.store.addProduct(product);
-        this.snackBar.open(`${product.name} added to inventory`, 'Dismiss', { duration: 3000 });
+        this.store.addProduct(product).subscribe({
+          next: () => {
+            this.sweetAlert.success(`${product.name} added to inventory`);
+          },
+          error: (error: any) => {
+            this.sweetAlert.error(`Failed to add product: ${error.error ? error.error.error : error.message}`);
+          },
+        });
       }
     });
   }
@@ -129,7 +135,7 @@ export class InventoryComponent {
     ref.afterClosed().subscribe((updated) => {
       if (updated) {
         this.store.updateProduct(updated);
-        this.snackBar.open(`${updated.name} updated`, 'Dismiss', { duration: 3000 });
+        this.sweetAlert.success(`${updated.name} updated`);
       }
     });
   }
@@ -150,7 +156,7 @@ export class InventoryComponent {
     ref.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         this.store.deleteProduct(product._id!);
-        this.snackBar.open(`${product.name} removed`, 'Dismiss', { duration: 3000 });
+        this.sweetAlert.success(`${product.name} removed`);
       }
     });
   }
