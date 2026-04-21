@@ -29,10 +29,14 @@ export class AuthService {
     });
   }
 
-  logout(refresh: string): Observable<any> {
-    // localStorage.removeItem(AUTH_STORAGE_KEY);
-    // this.store.dispatch(AuthActions.logout());
+  confirmAccount(userId: string, newPassword: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/auth/confirm-account`, {
+      userId,
+      newPassword,
+    });
+  }
 
+  logout(refresh: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/auth/logout`, { refreshToken: refresh });
   }
 }

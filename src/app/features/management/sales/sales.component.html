@@ -22,9 +22,7 @@
         >
           <mat-option [value]="null">All Cashiers</mat-option>
           @for (cashier of cashierOptions(); track cashier.id) {
-            <mat-option [value]="cashier.id">
-              {{ cashier.name }}
-            </mat-option>
+            <mat-option [value]="cashier.id">{{ cashier.name }}</mat-option>
           }
         </mat-select>
       </div>
@@ -37,7 +35,7 @@
           (click)="setFilter('all')"
         >
           All
-          <span class="filter-tab__count">{{ items()?.length || 0 }}</span>
+          <span class="filter-tab__count">{{ filteredItems().length }}</span>
         </button>
         <button
           class="filter-tab"
@@ -56,19 +54,6 @@
           <span class="filter-tab__count filter-tab__count--confirmed">{{ confirmedCount() }}</span>
         </button>
       </div>
-
-      <!-- @if (!allConfirmed()) {
-        <button class="confirm-all-btn" (click)="confirmAll()" aria-label="Confirm all items">
-          <span class="material-icons">done_all</span>
-          Confirm All
-        </button>
-      } @else {
-        <div class="all-confirmed-badge">
-          <span class="material-icons">verified</span>
-          All Confirmed
-        </div>
-      } -->
-      <!-- confirm all functionality to be added on request -->
     </div>
   </div>
 
@@ -79,26 +64,26 @@
         <span class="material-icons">payments</span>
       </div>
       <div class="stat-card__body">
-        <p class="stat-card__label">Total Sales</p>
+        <p class="stat-card__label">Total Revenue</p>
         <p class="stat-card__value">{{ formatCurrency(totalRevenue()) }}</p>
       </div>
     </div>
     <div class="stat-card">
       <div class="stat-card__icon stat-card__icon--items">
+        <span class="material-icons">receipt_long</span>
+      </div>
+      <div class="stat-card__body">
+        <p class="stat-card__label">Total Sales</p>
+        <p class="stat-card__value">{{ totalSalesCount() }}</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__icon stat-card__icon--confirmed">
         <span class="material-icons">shopping_bag</span>
       </div>
       <div class="stat-card__body">
         <p class="stat-card__label">Units Sold</p>
         <p class="stat-card__value">{{ totalQty() }}</p>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-card__icon stat-card__icon--confirmed">
-        <span class="material-icons">check_circle</span>
-      </div>
-      <div class="stat-card__body">
-        <p class="stat-card__label">Confirmed</p>
-        <p class="stat-card__value">{{ confirmedCount() }} / {{ items()?.length || 0 }}</p>
       </div>
     </div>
     <div class="stat-card">
@@ -112,38 +97,26 @@
     </div>
   </div>
 
-  <!-- No-active-shift banner -->
-  @if (!activeShift()) {
-    <div class="shift-lock-banner">
-      <span class="material-icons">lock_clock</span>
-      <span
-        >No active shift — confirmation actions are locked for all items from closed shifts.</span
-      >
-    </div>
-  }
-
-  <!-- Table -->
+  <!-- Table card -->
   <div class="sales-table-wrap" [class.sales-table-wrap--loading]="isLoading()">
-    <!-- Loading overlay -->
     @if (isLoading()) {
       <div class="table-loading-overlay">
         <mat-spinner diameter="36"></mat-spinner>
       </div>
     }
 
-    <!-- Scrollable area: table or empty state -->
     <div class="sales-table-scroll">
       @if (filteredItems().length === 0 && !isLoading()) {
         <div class="empty-state">
           <div class="empty-state__icon">
             <span class="material-icons">receipt_long</span>
           </div>
-          <p class="empty-state__title">No items found</p>
+          <p class="empty-state__title">No sales found</p>
           <p class="empty-state__desc">
             @if (filterStatus() === 'confirmed') {
-              No confirmed items yet.
+              No confirmed sales yet.
             } @else if (filterStatus() === 'pending') {
-              All items have been confirmed.
+              All sales have been confirmed.
             } @else {
               No sales recorded today.
             }
@@ -151,178 +124,132 @@
         </div>
       } @else {
         <table mat-table [dataSource]="pagedItems()" class="sales-table">
-          <!-- Product image -->
-          <ng-container matColumnDef="image">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let item">
-              <img
-                class="product-thumb"
-                [src]="item.productImage"
-                [alt]="item.productName"
-                loading="lazy"
-              />
-            </td>
-          </ng-container>
-
           <!-- Sale ID -->
           <ng-container matColumnDef="saleId">
             <th mat-header-cell *matHeaderCellDef>Sale #</th>
-            <td mat-cell *matCellDef="let item">{{ item.saleId }}</td>
-          </ng-container>
-
-          <!-- Product name + SKU -->
-          <ng-container matColumnDef="product">
-            <th mat-header-cell *matHeaderCellDef>Product</th>
-            <td mat-cell *matCellDef="let item">
-              <p class="product-name">{{ item.productName }}</p>
-              <p class="product-sku">SKU: {{ item.productSku }}</p>
+            <td mat-cell *matCellDef="let sale">
+              <span class="sale-id-badge">{{ getSaleIdLabel(sale) }}</span>
             </td>
           </ng-container>
 
           <!-- Cashier -->
           <ng-container matColumnDef="cashier">
             <th mat-header-cell *matHeaderCellDef>Cashier</th>
-            <td mat-cell *matCellDef="let item">
+            <td mat-cell *matCellDef="let sale">
               <div class="cashier-cell">
                 <img
                   class="cashier-avatar"
-                  [src]="item.cashierAvatar"
-                  [alt]="item.cashierName"
+                  [src]="getCashierAvatar(sale)"
+                  [alt]="getCashierName(sale)"
                   loading="lazy"
                 />
-                <span class="cashier-name">{{ item.cashierName }}</span>
+                <span class="cashier-name">{{ getCashierName(sale) }}</span>
               </div>
             </td>
           </ng-container>
 
-          <!-- Qty Sold -->
-          <ng-container matColumnDef="qty">
-            <th mat-header-cell *matHeaderCellDef>Qty Sold</th>
-            <td mat-cell *matCellDef="let item">
-              <span class="qty-badge">{{ item.quantity }}</span>
+          <!-- Item count (total units) -->
+          <ng-container matColumnDef="itemCount">
+            <th mat-header-cell *matHeaderCellDef>Items</th>
+            <td mat-cell *matCellDef="let sale">
+              <span class="qty-badge">{{ getItemCount(sale) }} units</span>
             </td>
           </ng-container>
 
-          <!-- Unit Price -->
-          <ng-container matColumnDef="unitPrice">
-            <th mat-header-cell *matHeaderCellDef>Unit Price</th>
-            <td mat-cell *matCellDef="let item">{{ formatCurrency(item.unitPrice) }}</td>
-          </ng-container>
-
-          <!-- Total -->
+          <!-- Total amount -->
           <ng-container matColumnDef="total">
             <th mat-header-cell *matHeaderCellDef>Total</th>
-            <td mat-cell *matCellDef="let item">
-              <span class="total-value">{{ formatCurrency(item.subTotal) }}</span>
+            <td mat-cell *matCellDef="let sale">
+              <span class="total-value">{{ formatCurrency(sale.totalAmount) }}</span>
             </td>
           </ng-container>
 
-          <!-- Time -->
-          <ng-container matColumnDef="time">
-            <th mat-header-cell *matHeaderCellDef>Time</th>
-            <td mat-cell *matCellDef="let item">
-              <span class="time-value">{{ formatTime(item.transactionDate) }}</span>
+          <!-- Date -->
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date &amp; Time</th>
+            <td mat-cell *matCellDef="let sale">
+              <span class="time-value">{{ formatDateTime(getSaleDate(sale)) }}</span>
             </td>
           </ng-container>
 
           <!-- Status -->
           <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let item">
-              @if (item.confirmed) {
-                <div class="status-cell">
+            <td mat-cell *matCellDef="let sale">
+              <div class="status-cell">
+                @if (sale.confirmed) {
                   <span class="status-pill status-pill--confirmed">
                     <span class="material-icons">check_circle</span>
                     Confirmed
                   </span>
-                  @if (item.paymentMethod) {
-                    <span class="payment-badge payment-badge--{{ item.paymentMethod | lowercase }}">
-                      {{ item.paymentMethod }}
-                    </span>
+                  @if (getSalePaymentMethod(sale); as pm) {
+                    <span class="payment-badge payment-badge--{{ pm | lowercase }}">{{ pm }}</span>
                   }
-                  @if (isShiftClosed(item)) {
-                    <span class="shift-closed-badge">
-                      <span class="material-icons">lock</span>
-                      Shift closed
-                    </span>
-                  }
-                </div>
-              } @else {
-                <div class="status-cell">
+                } @else {
                   <span class="status-pill status-pill--pending">
                     <span class="material-icons">schedule</span>
                     Pending
                   </span>
-                  @if (isShiftClosed(item)) {
-                    <span class="shift-closed-badge">
-                      <span class="material-icons">lock</span>
-                      Shift closed
-                    </span>
-                  }
-                </div>
-              }
+                }
+                @if (isShiftClosed(sale)) {
+                  <span class="shift-closed-badge">
+                    <span class="material-icons">lock</span>
+                    Shift closed
+                  </span>
+                }
+              </div>
             </td>
           </ng-container>
 
           <!-- Actions -->
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let item">
+            <td mat-cell *matCellDef="let sale">
               <div class="row-actions">
-                @if (!item.confirmed) {
+                <!-- Confirm / Undo confirm -->
+                @if (!sale.confirmed) {
                   <button
                     mat-stroked-button
                     class="confirm-btn"
-                    [class.confirm-btn--locked]="isShiftClosed(item)"
-                    [disabled]="isShiftClosed(item)"
-                    (click)="toggleConfirm(item)"
+                    [class.confirm-btn--locked]="isShiftClosed(sale)"
+                    [disabled]="isShiftClosed(sale)"
+                    (click)="toggleConfirm(sale)"
                     [matTooltip]="
-                      isShiftClosed(item)
-                        ? 'Shift is closed — actions are locked'
-                        : 'Confirm this line item'
+                      isShiftClosed(sale) ? 'Shift is closed — actions locked' : 'Confirm this sale'
                     "
                   >
-                    <span class="material-icons">{{ isShiftClosed(item) ? 'lock' : 'check' }}</span>
+                    <span class="material-icons">{{ isShiftClosed(sale) ? 'lock' : 'check' }}</span>
                     Confirm
-                  </button>
-                } @else {
-                  <button
-                    mat-button
-                    class="undo-btn"
-                    [class.undo-btn--locked]="isShiftClosed(item)"
-                    [disabled]="isShiftClosed(item)"
-                    (click)="toggleConfirm(item)"
-                    [matTooltip]="
-                      isShiftClosed(item)
-                        ? 'Shift is closed — actions are locked'
-                        : 'Mark as pending'
-                    "
-                  >
-                    <span class="material-icons">{{ isShiftClosed(item) ? 'lock' : 'undo' }}</span>
-                    Undo
                   </button>
                 }
 
-                <!-- Delete line item (two-step inline confirm) — also blocked when shift closed -->
-                @if (!item.confirmed) {
-                  @if (pendingDeleteItemId() === item._id) {
+                @if (!sale.confirmed) {
+                  <!-- Void -->
+                  <button
+                    mat-stroked-button
+                    class="void-btn"
+                    (click)="voidSale(sale)"
+                    matTooltip="Void this sale and restore stock"
+                    aria-label="Void sale"
+                  >
+                    <span class="material-icons">block</span>
+                    Void
+                  </button>
+
+                  <!-- Delete (two-step) -->
+                  @if (pendingDeleteSaleId() === sale._id) {
                     <div class="delete-confirm-inline">
-                      <span class="delete-confirm-inline__label">Remove item?</span>
+                      <span class="delete-confirm-inline__label">Delete sale?</span>
                       <button
                         mat-flat-button
                         class="delete-confirm-btn"
-                        (click)="deleteItem(item)"
-                        matTooltip="Yes, remove this item permanently"
+                        (click)="deleteSale(sale)"
+                        matTooltip="Yes, permanently delete"
                       >
                         <span class="material-icons">delete_forever</span>
-                        Yes, remove
+                        Yes, delete
                       </button>
-                      <button
-                        mat-button
-                        class="delete-cancel-btn"
-                        (click)="cancelDelete()"
-                        matTooltip="Cancel"
-                      >
+                      <button mat-button class="delete-cancel-btn" (click)="cancelDelete()">
                         Cancel
                       </button>
                     </div>
@@ -330,18 +257,11 @@
                     <button
                       mat-icon-button
                       class="delete-btn"
-                      [disabled]="isShiftClosed(item)"
-                      (click)="deleteItem(item)"
-                      [matTooltip]="
-                        isShiftClosed(item)
-                          ? 'Shift is closed — actions are locked'
-                          : 'Remove this item'
-                      "
-                      aria-label="Remove item"
+                      (click)="deleteSale(sale)"
+                      matTooltip="Delete this sale"
+                      aria-label="Delete sale"
                     >
-                      <span class="material-icons">{{
-                        isShiftClosed(item) ? 'lock' : 'delete_outline'
-                      }}</span>
+                      <span class="material-icons">delete_outline</span>
                     </button>
                   }
                 }
@@ -350,18 +270,11 @@
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-          <tr
-            mat-row
-            *matRowDef="let row; columns: displayedColumns"
-            class="sales-row"
-            [class.sales-row--confirmed]="row.confirmed"
-          ></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="sales-row" [class.sales-row--confirmed]="row.confirmed"></tr>
         </table>
       }
     </div>
-    <!-- /.sales-table-scroll -->
 
-    <!-- Paginator — pinned at the bottom of the card, never scrolls -->
     @if (filteredItems().length > PAGE_SIZE) {
       <mat-paginator
         class="sales-paginator"

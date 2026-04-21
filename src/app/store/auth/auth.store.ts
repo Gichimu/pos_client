@@ -8,11 +8,14 @@ import { throwError } from 'rxjs';
 type AuthState = {
   user: User | null;
   isAuthenticated: boolean;
+  /** Populated when the logged-in user has status === 'pending'. */
+  pendingUser: User | null;
 };
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
+  pendingUser: null,
 };
 
 export const authStore = signalStore(
@@ -22,26 +25,48 @@ export const authStore = signalStore(
     login(user: User) {
       return authService.login(user).pipe(
         tap((response) => {
-          // Assuming the response contains the authenticated user data
           const authenticatedUser: User = response.user;
-          localStorage.setItem('token', response.token); // Store the token for future requests
-          localStorage.setItem('refreshToken', response.refreshToken); // Store the refresh token if provided
-          patchState(store, { user: authenticatedUser, isAuthenticated: true });
+          if (authenticatedUser.status === 'pending') {
+            // Store pending user — they must set a new password before accessing the app
+            patchState(store, { pendingUser: authenticatedUser, isAuthenticated: false });
+          } else {
+            localStorage.setItem('token', response.token);
+            localStorage.setItem('refreshToken', response.refreshToken);
+            patchState(store, { user: authenticatedUser, isAuthenticated: true, pendingUser: null });
+          }
         }),
         catchError((error) => {
-          // Handle login error as needed, e.g., set an error message in the state
           console.error('Login failed', error);
           return throwError(() => error);
         }),
       );
     },
+    confirmAccount(newPassword: string) {
+      const pendingUser = store.pendingUser();
+      if (!pendingUser?._id) return throwError(() => new Error('No pending user'));
+      return authService.confirmAccount(pendingUser._id, newPassword).pipe(
+        tap((response) => {
+          const activatedUser: User = response.user ?? { ...pendingUser, status: 'active' };
+          localStorage.setItem('token', response.token ?? '');
+          localStorage.setItem('refreshToken', response.refreshToken ?? '');
+          patchState(store, { pendingUser: null, user: null, isAuthenticated: false });
+        }),
+        catchError((error) => {
+          console.error('Confirm account failed', error);
+          return throwError(() => error);
+        }),
+      );
+    },
+    clearPendingUser() {
+      patchState(store, { pendingUser: null });
+    },
     logout() {
       const refreshToken = localStorage.getItem('refreshToken') || '';
       authService.logout(refreshToken).subscribe({
         next: () => {
-          localStorage.removeItem('token'); // Clear the token on logout
-          localStorage.removeItem('refreshToken'); // Clear the refresh token on logout
-          patchState(store, { user: null, isAuthenticated: false });
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          patchState(store, { user: null, isAuthenticated: false, pendingUser: null });
         },
       });
     },

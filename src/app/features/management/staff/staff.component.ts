@@ -35,10 +35,15 @@ import { SweetAlertService } from '../../../core/services/sweet-alert.service';
   templateUrl: './staff.component.html',
   styleUrl: './staff.component.scss',
 })
-export class StaffComponent {
+export class StaffComponent implements OnInit {
   userstore = inject(userStore);
   private readonly dialog = inject(MatDialog);
   private readonly sweetAlert = inject(SweetAlertService);
+
+  ngOnInit(): void {
+    // Refresh the user list every time this page is visited
+    this.userstore.loadUsers().subscribe();
+  }
 
   readonly adminCount = computed(
     () => this.userstore.users().filter((u) => u.roles.includes('superAdmin')).length,
@@ -54,6 +59,10 @@ export class StaffComponent {
 
   readonly activeCount = computed(
     () => this.userstore.users().filter((u) => u.status === 'active').length,
+  );
+
+  readonly pendingCount = computed(
+    () => this.userstore.users().filter((u) => u.status === 'pending').length,
   );
 
   readonly inactiveCount = computed(
@@ -105,7 +114,6 @@ export class StaffComponent {
 
     ref.afterClosed().subscribe((user) => {
       if (user) {
-        // this.store.dispatch(StaffActions.addUser({ user }));
         this.userstore.addUser(user).subscribe({
           next: () => {
             this.sweetAlert.success(`${user.firstName} added successfully`);
@@ -165,7 +173,9 @@ export class StaffComponent {
   }
 
   getStatusBadgeClass(status: string): string {
-    return status === 'active' ? 'status-badge--active' : 'status-badge--inactive';
+    if (status === 'active') return 'status-badge--active';
+    if (status === 'pending') return 'status-badge--pending';
+    return 'status-badge--inactive';
   }
 
   getRoleLabel(role: string): string {
@@ -173,6 +183,8 @@ export class StaffComponent {
   }
 
   getStatusLabel(status: string): string {
-    return status === 'active' ? 'Active' : 'Inactive';
+    if (status === 'active') return 'Active';
+    if (status === 'pending') return 'Pending';
+    return 'Inactive';
   }
 }

@@ -1,5 +1,5 @@
 // Inventory CRUD component
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -36,11 +36,15 @@ import { SweetAlertService } from '../../../core/services/sweet-alert.service';
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
 })
-export class InventoryComponent {
+export class InventoryComponent implements OnInit {
   private readonly store = inject(productStore);
   private readonly categoryStore = inject(CategoryStore);
   private readonly dialog = inject(MatDialog);
   private readonly sweetAlert = inject(SweetAlertService);
+
+  ngOnInit(): void {
+    this.store.loadProducts();
+  }
 
   readonly totalCount = computed(() => this.store.products().length);
   readonly lowStockCount = computed(
@@ -82,6 +86,7 @@ export class InventoryComponent {
   readonly PAGE_SIZE = 10;
 
   readonly pagedProducts = computed(() => {
+    console.log('filtered products', this.filteredProducts());
     const start = this.pageIndex() * this.PAGE_SIZE;
     return this.filteredProducts().slice(start, start + this.PAGE_SIZE);
   });
@@ -120,7 +125,9 @@ export class InventoryComponent {
             this.sweetAlert.success(`${product.name} added to inventory`);
           },
           error: (error: any) => {
-            this.sweetAlert.error(`Failed to add product: ${error.error ? error.error.error : error.message}`);
+            this.sweetAlert.error(
+              `Failed to add product: ${error.error ? error.error.error : error.message}`,
+            );
           },
         });
       }

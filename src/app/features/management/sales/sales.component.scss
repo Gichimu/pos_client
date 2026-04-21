@@ -341,7 +341,15 @@
   &:last-child .mat-mdc-cell { border-bottom: none; }
 
   &--confirmed {
-    .mat-mdc-cell { opacity: 0.75; }
+    background: #f8fafc;
+    pointer-events: none;
+
+    .mat-mdc-cell {
+      opacity: 0.55;
+      color: var(--color-text-muted);
+    }
+
+    &:hover { background: #f8fafc; }
   }
 }
 
@@ -476,12 +484,51 @@
   &--pending   { background: #fef9c3; color: #854d0e; }
 }
 
+// ─── Sale ID badge ────────────────────────────
+.sale-id-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #e0e7ff;
+  color: #3730a3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
 // ─── Row action buttons ───────────────────────
 .row-actions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 4px;
+  gap: 6px;
+}
+
+// ─── Void button ──────────────────────────────
+.void-btn {
+  height: 32px !important;
+  padding: 0 12px !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  font-family: 'Inter', sans-serif !important;
+  color: #b45309 !important;
+  border-color: #fbbf24 !important;
+  border-radius: 7px !important;
+  line-height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: #fffbeb !important;
+
+  .material-icons { font-size: 15px; }
+
+  &:hover {
+    background: #fef3c7 !important;
+    border-color: #f59e0b !important;
+  }
 }
 
 // ─── Delete button ────────────────────────────

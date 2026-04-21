@@ -245,6 +245,21 @@
   justify-content: flex-end;
 }
 
+.pending-sales-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 9px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #92400e;
+
+  .material-icons { font-size: 16px; color: #f97316; }
+}
+
 .end-shift-btn {
   display: inline-flex;
   align-items: center;
@@ -265,6 +280,15 @@
 
   &:hover { background: #b91c1c; transform: translateY(-1px); }
   &:active { transform: translateY(0); }
+
+  &--disabled,
+  &:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+  }
 }
 
 // ─── History section ───────────────────────────────

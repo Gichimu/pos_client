@@ -46,6 +46,7 @@ export const saleStore = signalStore(
       patchState(store, { isLoading: true });
       salesService.getAll(cashierId).subscribe({
         next: (response: any) => {
+          console.log('API response for sales:', response);
           // Guard: server may return either SaleItem[] or a paginated envelope { data, total, … }
           const sales: SaleItem[] = Array.isArray(response) ? response : (response?.data ?? []);
           patchState(store, { items: sales, isLoading: false });
@@ -111,6 +112,72 @@ export const saleStore = signalStore(
                 .filter((sale) => sale.items.length > 0),
             });
             observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+
+    /** Permanently deletes an entire sale record. */
+    deleteSale(saleId: string): Observable<void> {
+      return new Observable((observer) => {
+        salesService.deleteSale(saleId).subscribe({
+          next: () => {
+            patchState(store, { items: store.items().filter((s) => s._id !== saleId) });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+
+    /** Confirms an entire sale with a payment method. */
+    confirmSale(
+      saleId: string,
+      paymentMethod: PaymentMethod,
+      splitAmounts?: { cashAmount: number; mpesaAmount: number },
+    ): Observable<void> {
+      return new Observable((observer) => {
+        salesService.confirmSale(saleId, paymentMethod, splitAmounts).subscribe({
+          next: (updatedSale) => {
+            patchState(store, {
+              items: store
+                .items()
+                .map((s) => (s._id === saleId ? { ...s, confirmed: true, paymentMethod } : s)),
+            });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+
+    /** Reverts a confirmed sale back to pending. */
+    unconfirmSale(saleId: string): Observable<void> {
+      return new Observable((observer) => {
+        salesService.unconfirmSale(saleId).subscribe({
+          next: () => {
+            patchState(store, {
+              items: store.items().map((s) => (s._id === saleId ? { ...s, confirmed: false } : s)),
+            });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+
+    /** Voids an entire sale — removes it from store after backend confirms. */
+    voidSale(saleId: string): Observable<SaleItem> {
+      return new Observable((observer) => {
+        salesService.voidSale(saleId).subscribe({
+          next: (voidedSale) => {
+            patchState(store, { items: store.items().filter((s) => s._id !== saleId) });
+            observer.next(voidedSale);
             observer.complete();
           },
           error: (err) => observer.error(err),

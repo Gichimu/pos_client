@@ -1,6 +1,6 @@
 export type SaleConfirmStatus = 'pending' | 'confirmed';
 
-export type PaymentMethod = 'Cash' | 'M-Pesa' | 'PDQ';
+export type PaymentMethod = 'Cash' | 'M-Pesa' | 'PDQ' | 'Split';
 
 export interface LineItem {
   _id?: string;
@@ -10,12 +10,9 @@ export interface LineItem {
   productImage?: string;
   cashierName?: string;
   cashierAvatar?: string;
-  cashierId?: string;
   quantity: number;
   unitPrice: number;
   subTotal: number;
-  confirmed: boolean;
-  paymentMethod?: PaymentMethod | null;
   transactionDate?: Date;
 }
 
@@ -23,8 +20,11 @@ export interface SaleItem {
   _id?: string;
   saleId?: string;
   shiftId?: string;
+  cashierId?: string;
   items: LineItem[];
+  paymentMethod?: PaymentMethod | null;
   totalAmount: number;
+  confirmed: boolean;
   createdAt?: Date;
 }
 

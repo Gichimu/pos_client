@@ -63,6 +63,7 @@
 
   &--active { background: #dcfce7; color: #15803d; }
   &--inactive { background: #fef9c3; color: #854d0e; }
+  &--pending { background: #fef3c7; color: #b45309; }
 }
 
 .stat-dot {
@@ -80,6 +81,7 @@
   border-radius: 50%;
   &--active   { background: #22c55e; }
   &--inactive { background: #000000; }
+  &--pending  { background: #b45309; }
 }
 
 .search-box {
@@ -239,6 +241,7 @@
 
   &--active { background: #dcfce7; color: #15803d; }
   &--inactive { background: #fef9c3; color: #854d0e; }
+  &--pending { background: #fef3c7; color: #b45309; }
 }
 
 .row-actions {

@@ -18,7 +18,7 @@ import { saleStore } from '../../../store/sales/sale.store';
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   private readonly productStore = inject(productStore);
   private readonly dialog = inject(MatDialog);
   readonly userStore = inject(userStore);
@@ -42,17 +42,23 @@ export class DashboardComponent {
   );
   readonly salesToday = computed(() => {
     const today = new Date().toISOString().split('T')[0];
-    return this.salesStore
-      .items()
-      .filter((s) => {
-        if (!s.createdAt) return false;
-        const d = new Date(s.createdAt);
-        return !isNaN(d.getTime()) && d.toISOString().split('T')[0] === today;
-      })
-      .flatMap((s) => s.items)
-      .filter((item) => item.confirmed)
-      .reduce((sum, item) => sum + item.subTotal, 0);
+    return (
+      this.salesStore
+        .items()
+        .filter((s) => {
+          if (!s.createdAt) return false;
+          const d = new Date(s.createdAt);
+          return !isNaN(d.getTime()) && d.toISOString().split('T')[0] === today;
+        })
+        // .flatMap((s) => s.items)
+        .filter((item) => item.confirmed)
+        .reduce((sum, item) => sum + item.totalAmount, 0)
+    );
   });
+
+  ngOnInit(): void {
+    this.productStore.loadProducts();
+  }
 
   openGenerateReport() {
     this.dialog.open(GenerateReportModalComponent, {

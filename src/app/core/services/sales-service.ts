@@ -44,4 +44,35 @@ export class SalesService {
   deleteLineItem(saleId: string, itemId: string): Observable<void> {
     return this.http.delete<void>(`${this.url}/sales/${saleId}/items/${itemId}`);
   }
+
+  /** DELETE /sales/:saleId – permanently removes an entire sale record. */
+  deleteSale(saleId: string): Observable<void> {
+    return this.http.delete<void>(`${this.url}/sales/${saleId}`);
+  }
+
+  /** POST /sales/:saleId/void – voids an entire sale on the backend. */
+  voidSale(saleId: string): Observable<SaleItem> {
+    return this.http.post<SaleItem>(`${this.url}/sales/${saleId}/void`, {});
+  }
+
+  /** PATCH /sales/:saleId/confirm – confirms an entire sale with a payment method. */
+  confirmSale(
+    saleId: string,
+    paymentMethod: PaymentMethod,
+    splitAmounts?: { cashAmount: number; mpesaAmount: number },
+  ): Observable<SaleItem> {
+    return this.http.patch<SaleItem>(`${this.url}/sales/${saleId}/confirm`, {
+      paymentMethod,
+      confirmed: true,
+      ...(splitAmounts ?? {}),
+    });
+  }
+
+  /** PATCH /sales/:saleId/unconfirm – reverts a confirmed sale to pending. */
+  unconfirmSale(saleId: string): Observable<SaleItem> {
+    return this.http.patch<SaleItem>(`${this.url}/sales/${saleId}/unconfirm`, {
+      paymentMethod: null,
+      confirmed: false,
+    });
+  }
 }

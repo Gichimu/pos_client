@@ -73,11 +73,22 @@ export class ShiftsComponent implements OnInit {
     const shiftStart = new Date(shift.startTime).getTime();
     return this.salesStore
       .items()
-      .flatMap((s) => s.items)
       .filter(
         (i) => i.confirmed && new Date((i as any).transactionDate ?? 0).getTime() >= shiftStart,
       )
+      .flatMap((s) => s.items)
       .reduce((sum, i) => sum + i.subTotal, 0);
+  });
+
+  /** Number of unconfirmed sales belonging to the currently active shift. */
+  readonly pendingSalesInShift = computed(() => {
+    const shift = this.activeShift();
+    if (!shift) return 0;
+    const shiftStart = new Date(shift.startTime).getTime();
+    return this.salesStore
+      .items()
+      .filter((s) => new Date((s as any).createdAt ?? 0).getTime() >= shiftStart)
+      .filter((s) => !s.confirmed).length;
   });
 
   readonly activeCashiers = computed(
@@ -126,15 +137,16 @@ export class ShiftsComponent implements OnInit {
     const salesByCashier: Record<string, number> = {};
 
     salesInShift.forEach((sale) => {
+      if (!sale.confirmed) return;
       const cashierId = (sale as any).cashierId ?? 'Unknown Cashier';
       salesByCashier[cashierId] = (salesByCashier[cashierId] || 0) + sale.totalAmount;
 
+      const salePaymentMethod = (sale as any).paymentMethod || 'Unknown Payment';
       sale.items.forEach((item) => {
-        if (!item.confirmed) return;
         const productId = item.productId || 'Unknown Product';
         const productName =
           this.productStore.products().find((p) => p._id === productId)?.name || 'Unknown Product';
-        const paymentMethod = item.paymentMethod || 'Unknown Payment';
+        const paymentMethod = salePaymentMethod;
 
         salesByProduct[productName] = (salesByProduct[productName] || 0) + item.subTotal;
         salesByPayment[paymentMethod] = (salesByPayment[paymentMethod] || 0) + item.subTotal;
@@ -227,7 +239,6 @@ export class ShiftsComponent implements OnInit {
         const d = new Date((s as any).createdAt ?? 0);
         return d.getTime() >= shiftStart;
       })
-      .flatMap((s) => s.items)
       .filter((i) => !i.confirmed).length;
 
     const dialogData: EndShiftDialogData = {

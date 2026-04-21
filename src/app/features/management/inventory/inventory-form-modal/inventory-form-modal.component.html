@@ -26,32 +26,53 @@
   <!-- Body -->
   <div class="inv-modal__body">
     <form [formGroup]="form" class="inv-form">
-      <!-- Row 1: Name + Category -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Product Name</mat-label>
-          <mat-icon matPrefix>inventory_2</mat-icon>
-          <input matInput formControlName="name" placeholder="e.g. Coffee Bocat" />
-          @if (form.get('name')?.invalid && form.get('name')?.touched) {
-            <mat-error>Name is required (min 2 chars)</mat-error>
-          }
-        </mat-form-field>
 
+      <!-- Row 1: Product Name (full width) -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Product Name</mat-label>
+        <mat-icon matPrefix>inventory_2</mat-icon>
+        <input matInput formControlName="name" placeholder="e.g. Coffee Bocat" />
+        @if (form.get('name')?.invalid && form.get('name')?.touched) {
+          <mat-error>Name is required (min 2 chars)</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Row 2: Category + SubCategory -->
+      <div class="form-row">
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Category</mat-label>
           <mat-icon matPrefix>category</mat-icon>
           <mat-select formControlName="category">
-            @for (cat of categories(); track cat) {
-              <mat-option [value]="cat">{{ cat.name }}</mat-option>
+            @for (cat of categories(); track cat._id) {
+              <mat-option [value]="cat.name">{{ cat.name }}</mat-option>
             }
           </mat-select>
           @if (form.get('category')?.invalid && form.get('category')?.touched) {
             <mat-error>Category is required</mat-error>
           }
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Sub-Category</mat-label>
+          <mat-icon matPrefix>label_outline</mat-icon>
+          <mat-select
+            formControlName="subCategory"
+            [disabled]="availableSubCategories().length === 0"
+          >
+            @for (sub of availableSubCategories(); track sub.value) {
+              <mat-option [value]="sub.value">{{ sub.label }}</mat-option>
+            }
+          </mat-select>
+          @if (availableSubCategories().length === 0) {
+            <mat-hint>Select a category first</mat-hint>
+          }
+          @if (form.get('subCategory')?.invalid && form.get('subCategory')?.touched) {
+            <mat-error>Sub-category is required</mat-error>
+          }
+        </mat-form-field>
       </div>
 
-      <!-- Row 2: Buying + Selling price -->
+      <!-- Row 3: Buying + Selling price -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Buying Price (Ksh.)</mat-label>
@@ -86,7 +107,7 @@
         </mat-form-field>
       </div>
 
-      <!-- Row 3: Stock + Reorder status -->
+      <!-- Row 4: Stock + Reorder level -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Current Stock</mat-label>
@@ -125,6 +146,7 @@
           placeholder="https://… or leave blank for auto"
         />
       </mat-form-field>
+
     </form>
   </div>
 

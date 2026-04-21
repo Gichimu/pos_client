@@ -89,10 +89,14 @@ export class SalesReportCardComponent implements OnInit {
         // month
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
       })
+      .filter((item) => item.confirmed)
       .flatMap((sale) =>
-        sale.items
-          .filter((item) => item.confirmed)
-          .map((item) => ({ ...item, shiftId: sale.shiftId, cashierId: (sale as any).cashierId })),
+        sale.items.map((item) => ({
+          ...item,
+          shiftId: sale.shiftId,
+          cashierId: (sale as any).cashierId,
+          paymentMethod: (sale as any).paymentMethod ?? null,
+        })),
       );
   });
 

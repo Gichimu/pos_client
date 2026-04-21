@@ -29,59 +29,69 @@
     </div>
   </header>
 
-  <!-- Main split layout -->
+  <!-- Main layout -->
   <div class="pos-body">
-    <!-- Left: Product grid -->
-    <div class="products-panel">
-      <!-- Search -->
-      <!-- <div class="search-wrap">
-        <mat-form-field appearance="outline" class="search-field">
-          <mat-label>Search products…</mat-label>
-          <mat-icon matPrefix>search</mat-icon>
-          <input
-            matInput
-            [value]="searchQuery()"
-            (input)="onSearchChange($any($event.target).value)"
-            aria-label="Search products"
-          />
-        </mat-form-field>
-      </div> -->
+    <!-- Left: Category sidebar -->
+    <nav class="category-sidebar" aria-label="Product categories">
+      <!-- All -->
+      <button
+        class="cat-card cat-card--all"
+        [class.cat-card--active]="selectedCategory() === null"
+        (click)="setCategory(null)"
+        aria-label="Show all products"
+      >
+        <span class="material-icons cat-card__all-icon">apps</span>
+        <span class="cat-card__label">All</span>
+      </button>
 
-      <!-- Category tabs -->
-      <div class="category-tabs" role="group" aria-label="Filter by category">
-        <!-- All tab — no image -->
+      @for (cat of categoryStore.categories(); track cat._id) {
         <button
-          class="category-tab category-tab--all"
-          [class.category-tab--active]="selectedCategory() === null"
-          (click)="setCategory(null)"
-          aria-label="Show all products"
+          class="cat-card"
+          [class.cat-card--active]="selectedCategory() === cat.name"
+          (click)="setCategory(cat.name!)"
+          [attr.aria-label]="cat.name"
         >
-          <span class="material-icons category-tab__all-icon">apps</span>
-          <span class="category-tab__label">All</span>
+          <img
+            class="cat-card__img"
+            [src]="getCategoryImage(cat.name)"
+            [alt]="cat.name"
+            loading="lazy"
+          />
+          <div class="cat-card__overlay"></div>
+          <span class="cat-card__label">{{ cat.name }}</span>
         </button>
+      }
+    </nav>
 
-        @for (cat of categoryStore.categories(); track cat._id) {
+    <!-- Center: Products -->
+    <div class="products-panel">
+      <!-- Subcategory pills — only shown when a category is selected and has subcategories -->
+      @if (selectedCategory() !== null && availableSubCategories().length > 0) {
+        <div class="subcategory-bar" role="group" aria-label="Filter by sub-category">
+          <!-- "All" pill -->
           <button
-            class="category-tab"
-            [class.category-tab--active]="selectedCategory() === cat._id"
-            (click)="setCategory(cat._id!)"
-            [attr.aria-label]="cat.name"
+            class="sub-pill"
+            [class.sub-pill--active]="selectedSubCategory() === null"
+            (click)="setSubCategory(null)"
           >
-            <img
-              class="category-tab__img"
-              [src]="getCategoryImage(cat.name)"
-              [alt]="cat.name"
-              loading="lazy"
-            />
-            <div class="category-tab__overlay"></div>
-            <span class="category-tab__label">{{ cat.name }}</span>
+            All
           </button>
-        }
-      </div>
 
-      <!-- Grid -->
+          @for (sub of availableSubCategories(); track sub) {
+            <button
+              class="sub-pill"
+              [class.sub-pill--active]="selectedSubCategory() === sub"
+              (click)="setSubCategory(sub)"
+            >
+              {{ sub }}
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Product grid -->
       <div class="product-grid">
-        @for (product of filteredProducts(); track product._id; let i = $index) {
+        @for (product of filteredProducts(); track product._id) {
           <button
             class="product-card"
             (click)="addToCart(product)"
@@ -89,7 +99,11 @@
             [class.product-card--out-of-stock]="product.currentStock === 0"
             [disabled]="product.currentStock === 0"
             [attr.aria-disabled]="product.currentStock === 0"
-            [matTooltip]="product.currentStock === 0 ? 'Out of stock' : product.name + ' — ' + formatCurrency(product.sellingPrice)"
+            [matTooltip]="
+              product.currentStock === 0
+                ? 'Out of stock'
+                : product.name + ' — ' + formatCurrency(product.sellingPrice)
+            "
             [style.--card-bg]="getCardColor(product.name)"
             [style.--card-accent]="getCardAccent(product.name)"
             aria-label="Add {{ product.name }} to cart"

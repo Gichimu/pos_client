@@ -46,7 +46,13 @@ export class StaffFormModalComponent implements OnInit {
     email: [this.data?.user?.email ?? '', [Validators.required, Validators.email]],
     password: ['', this.data?.user ? [] : [Validators.required, Validators.minLength(8)]],
     roles: [this.data?.user?.roles ?? [], Validators.required],
-    status: [this.data?.user?.status ?? 'active', Validators.required],
+    status: [
+      {
+        value: this.data?.user?.status ? this.data?.user?.status : 'pending',
+        disabled: this.data?.user?.status ? false : true,
+      },
+      Validators.required,
+    ],
   }) as FormGroup;
 
   ngOnInit() {
@@ -63,7 +69,7 @@ export class StaffFormModalComponent implements OnInit {
       return;
     }
 
-    const { firstName, lastName, email, password, roles, status }: any = this.form.value;
+    const { firstName, lastName, email, password, roles, status }: any = this.form.getRawValue();
     const user: User = {
       _id: this.data?.user?._id,
       firstName: firstName!,

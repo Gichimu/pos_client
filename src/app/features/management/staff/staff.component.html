@@ -14,14 +14,24 @@
         </span>
       </div> -->
       <div class="staff-stats">
-        <span class="stat-pill status-pill--active">
-          <span class="status-dot status-dot--active"></span>
-          Active: {{ activeCount() }} {{ activeCount() === 1 ? 'member' : 'members' }}
-        </span>
-        <span class="stat-pill status-pill--inactive">
-          <span class="status-dot status-dot--inactive"></span>
-          Inactive: {{ inactiveCount() }} {{ inactiveCount() === 1 ? 'member' : 'members' }}
-        </span>
+        @if (activeCount() > 0) {
+          <span class="stat-pill status-pill--active">
+            <span class="status-dot status-dot--active"></span>
+            Active: {{ activeCount() }} {{ activeCount() === 1 ? 'member' : 'members' }}
+          </span>
+        }
+        @if (inactiveCount() > 0) {
+          <span class="stat-pill status-pill--inactive">
+            <span class="status-dot status-dot--inactive"></span>
+            Inactive: {{ inactiveCount() }} {{ inactiveCount() === 1 ? 'member' : 'members' }}
+          </span>
+        }
+        @if (pendingCount() > 0) {
+          <span class="stat-pill status-pill--pending">
+            <span class="status-dot status-dot--pending"></span>
+            Pending: {{ pendingCount() }} {{ pendingCount() === 1 ? 'member' : 'members' }}
+          </span>
+        }
       </div>
     </div>
 
@@ -59,73 +69,73 @@
       </div>
     } @else {
       <div class="staff-table-scroll">
-      <table mat-table [dataSource]="pagedStaff()" class="staff-table">
-        <!-- Avatar -->
-        <ng-container matColumnDef="avatar">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let user">
-            <img
-              class="avatar"
-              [src]="user.avatar || 'https://i.pravatar.cc/40?u=' + user.email"
-              [alt]="user.firstName + ' ' + user.lastName"
-              loading="lazy"
-            />
-          </td>
-        </ng-container>
+        <table mat-table [dataSource]="pagedStaff()" class="staff-table">
+          <!-- Avatar -->
+          <ng-container matColumnDef="avatar">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let user">
+              <img
+                class="avatar"
+                [src]="user.avatar || 'https://i.pravatar.cc/40?u=' + user.email"
+                [alt]="user.firstName + ' ' + user.lastName"
+                loading="lazy"
+              />
+            </td>
+          </ng-container>
 
-        <!-- Name -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Name</th>
-          <td mat-cell *matCellDef="let user">
-            <p class="user-name">{{ user.firstName }} {{ user.lastName }}</p>
-          </td>
-        </ng-container>
+          <!-- Name -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let user">
+              <p class="user-name">{{ user.firstName }} {{ user.lastName }}</p>
+            </td>
+          </ng-container>
 
-        <!-- Email -->
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef>Email</th>
-          <td mat-cell *matCellDef="let user">
-            <p class="user-email">{{ user.email }}</p>
-          </td>
-        </ng-container>
+          <!-- Email -->
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>Email</th>
+            <td mat-cell *matCellDef="let user">
+              <p class="user-email">{{ user.email }}</p>
+            </td>
+          </ng-container>
 
-        <!-- Roles -->
-        <ng-container matColumnDef="roles">
-          <th mat-header-cell *matHeaderCellDef>Roles</th>
-          <td mat-cell *matCellDef="let user">
-            <ng-container *ngFor="let role of user.roles">
-              <span class="role-badge" [class]="getRoleBadgeClass(role)">
-                {{ getRoleLabel(role) }}
+          <!-- Roles -->
+          <ng-container matColumnDef="roles">
+            <th mat-header-cell *matHeaderCellDef>Roles</th>
+            <td mat-cell *matCellDef="let user">
+              <ng-container *ngFor="let role of user.roles">
+                <span class="role-badge" [class]="getRoleBadgeClass(role)">
+                  {{ getRoleLabel(role) }}
+                </span>
+              </ng-container>
+            </td>
+          </ng-container>
+
+          <!-- Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let user">
+              <span class="status-badge" [class]="getStatusBadgeClass(user.status)">
+                {{ getStatusLabel(user.status) }}
               </span>
-            </ng-container>
-          </td>
-        </ng-container>
+            </td>
+          </ng-container>
 
-        <!-- Status -->
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Status</th>
-          <td mat-cell *matCellDef="let user">
-            <span class="status-badge" [class]="getStatusBadgeClass(user.status)">
-              {{ getStatusLabel(user.status) }}
-            </span>
-          </td>
-        </ng-container>
-
-        <!-- Actions -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let user">
-            <div class="row-actions">
-              <button
-                mat-icon-button
-                class="action-icon action-icon--edit"
-                (click)="openEditDialog(user)"
-                matTooltip="Edit member"
-                aria-label="Edit member"
-              >
-                <span class="material-icons">edit</span>
-              </button>
-              <!-- <button
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let user">
+              <div class="row-actions">
+                <button
+                  mat-icon-button
+                  class="action-icon action-icon--edit"
+                  (click)="openEditDialog(user)"
+                  matTooltip="Edit member"
+                  aria-label="Edit member"
+                >
+                  <span class="material-icons">edit</span>
+                </button>
+                <!-- <button
                 mat-icon-button
                 class="action-icon action-icon--delete"
                 (click)="confirmDelete(user)"
@@ -134,14 +144,14 @@
               >
                 <span class="material-icons">delete_outline</span>
               </button> -->
-              <!-- For safety, delete action is hidden. Can be enabled if needed, but should ideally be a "status" action instead that doesn't permanently remove the user -->
-            </div>
-          </td>
-        </ng-container>
+                <!-- For safety, delete action is hidden. Can be enabled if needed, but should ideally be a "status" action instead that doesn't permanently remove the user -->
+              </div>
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="staff-row"></tr>
-      </table>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="staff-row"></tr>
+        </table>
       </div>
 
       @if (filteredStaff().length > PAGE_SIZE) {

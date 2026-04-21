@@ -172,14 +172,13 @@ export class LoginComponent {
 
       this.authStore.login({ email, password } as User).subscribe({
         next: () => {
-          console.log(
-            'auth user after login',
-            this.authStore.user(),
-            this.authStore.isAuthenticated(),
-          );
-          this.authStore.isAuthenticated() && this.router.navigate(['/management']);
+          if (this.authStore.pendingUser()) {
+            this.router.navigate(['/confirm-account']);
+          } else if (this.authStore.isAuthenticated()) {
+            this.router.navigate(['/management']);
+          }
         },
-        error: (error) => {
+        error: () => {
           this.error.set('Login failed. Please check your credentials.');
         },
       });

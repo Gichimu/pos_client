@@ -15,6 +15,18 @@ export const userStore = signalStore(
   withState(initialState),
   withMethods((store, userService = inject(UserService)) => ({
     setUsers(users: User[]) {},
+    loadUsers() {
+      patchState(store, { loading: true });
+      return userService.getAll().pipe(
+        tap((users: User[]) => {
+          patchState(store, { users, loading: false, error: null });
+        }),
+        catchError((error) => {
+          patchState(store, { loading: false, error });
+          return throwError(() => error);
+        }),
+      );
+    },
     addUser(user: User) {
       // userService.addUser(user).subscribe({
       //   next: (newUser) => {
@@ -70,16 +82,8 @@ export const userStore = signalStore(
     },
   })),
   withHooks({
-    onInit(store, userService = inject(UserService)) {
-      // Optionally, you can load initial users here by calling an API or using a service.
-      // For example: this.loadUsers();
-      userService.getAll().subscribe({
-        next: (users: User[]) => {
-          console.log('finding users', users);
-          patchState(store, { users: users, loading: false, error: null });
-        },
-        error: (error) => patchState(store, { loading: false, error: error }), // Handle error as needed
-      });
+    onInit(store) {
+      store.loadUsers();
     },
   }),
 );

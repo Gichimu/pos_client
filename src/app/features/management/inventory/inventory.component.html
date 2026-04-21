@@ -62,100 +62,100 @@
       </div>
     } @else {
       <div class="inv-table-scroll">
-      <table mat-table [dataSource]="pagedProducts()" class="inv-table">
-        <!-- Image -->
-        <ng-container matColumnDef="image">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let p">
-            <img
-              class="product-thumb"
-              [src]="'https://picsum.photos/seed/' + p.sku + '/200/300'"
-              [alt]="p.name"
-              loading="lazy"
-            />
-          </td>
-        </ng-container>
+        <table mat-table [dataSource]="pagedProducts()" class="inv-table">
+          <!-- Image -->
+          <ng-container matColumnDef="image">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let p">
+              <img
+                class="product-thumb"
+                [src]="'https://picsum.photos/seed/' + p.sku + '/200/300'"
+                [alt]="p.name"
+                loading="lazy"
+              />
+            </td>
+          </ng-container>
 
-        <!-- Name / SKU -->
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Product</th>
-          <td mat-cell *matCellDef="let p">
-            <p class="product-name">{{ p.name }}</p>
-            <p class="product-sku">SKU: {{ p.sku }}</p>
-          </td>
-        </ng-container>
+          <!-- Name / SKU -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Product</th>
+            <td mat-cell *matCellDef="let p">
+              <p class="product-name">{{ p.name }}</p>
+              <p class="product-sku">SKU: {{ p.sku }}</p>
+            </td>
+          </ng-container>
 
-        <!-- Category -->
-        <ng-container matColumnDef="category">
-          <th mat-header-cell *matHeaderCellDef>Category</th>
-          <td mat-cell *matCellDef="let p">
-            <span class="category-tag">{{ getCategoryName(p.category) }}</span>
-          </td>
-        </ng-container>
+          <!-- Category -->
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="category-tag">{{ p.category }}</span>
+            </td>
+          </ng-container>
 
-        <!-- Buying Price -->
-        <ng-container matColumnDef="buyingPrice">
-          <th mat-header-cell *matHeaderCellDef>Buying Price</th>
-          <td mat-cell *matCellDef="let p">{{ formatCurrency(p.buyingPrice) }}</td>
-        </ng-container>
+          <!-- Buying Price -->
+          <ng-container matColumnDef="buyingPrice">
+            <th mat-header-cell *matHeaderCellDef>Buying Price</th>
+            <td mat-cell *matCellDef="let p">{{ formatCurrency(p.buyingPrice) }}</td>
+          </ng-container>
 
-        <!-- Selling Price -->
-        <ng-container matColumnDef="sellingPrice">
-          <th mat-header-cell *matHeaderCellDef>Selling Price</th>
-          <td mat-cell *matCellDef="let p">
-            <span class="selling-price">{{ formatCurrency(p.sellingPrice) }}</span>
-          </td>
-        </ng-container>
+          <!-- Selling Price -->
+          <ng-container matColumnDef="sellingPrice">
+            <th mat-header-cell *matHeaderCellDef>Selling Price</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="selling-price">{{ formatCurrency(p.sellingPrice) }}</span>
+            </td>
+          </ng-container>
 
-        <!-- Current Stock -->
-        <ng-container matColumnDef="currentStock">
-          <th mat-header-cell *matHeaderCellDef>Stock</th>
-          <td mat-cell *matCellDef="let p">
-            <span
-              class="stock-val"
-              [class.stock-val--low]="p.currentStock > 0 && p.currentStock < 5"
-              [class.stock-val--out]="p.currentStock === 0"
-              >{{ p.currentStock }}</span
-            >
-          </td>
-        </ng-container>
-
-        <!-- Stock Reorder Status -->
-        <ng-container matColumnDef="stockReorderStatus">
-          <th mat-header-cell *matHeaderCellDef>Reorder</th>
-          <td mat-cell *matCellDef="let p">
-            <app-status-badge [status]="p.stockReorderStatus" />
-          </td>
-        </ng-container>
-
-        <!-- Actions -->
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef></th>
-          <td mat-cell *matCellDef="let p">
-            <div class="row-actions">
-              <button
-                mat-icon-button
-                class="action-icon action-icon--edit"
-                (click)="openEditDialog(p)"
-                matTooltip="Edit product"
+          <!-- Current Stock -->
+          <ng-container matColumnDef="currentStock">
+            <th mat-header-cell *matHeaderCellDef>Stock</th>
+            <td mat-cell *matCellDef="let p">
+              <span
+                class="stock-val"
+                [class.stock-val--low]="p.currentStock > 0 && p.currentStock < 5"
+                [class.stock-val--out]="p.currentStock === 0"
+                >{{ p.currentStock }}</span
               >
-                <span class="material-icons">edit</span>
-              </button>
-              <button
-                mat-icon-button
-                class="action-icon action-icon--delete"
-                (click)="confirmDelete(p)"
-                matTooltip="Delete product"
-              >
-                <span class="material-icons">delete_outline</span>
-              </button>
-            </div>
-          </td>
-        </ng-container>
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="inv-row"></tr>
-      </table>
+          <!-- Stock Reorder Status -->
+          <ng-container matColumnDef="stockReorderStatus">
+            <th mat-header-cell *matHeaderCellDef>Reorder</th>
+            <td mat-cell *matCellDef="let p">
+              <app-status-badge [status]="p.stockReorderStatus" />
+            </td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let p">
+              <div class="row-actions">
+                <button
+                  mat-icon-button
+                  class="action-icon action-icon--edit"
+                  (click)="openEditDialog(p)"
+                  matTooltip="Edit product"
+                >
+                  <span class="material-icons">edit</span>
+                </button>
+                <button
+                  mat-icon-button
+                  class="action-icon action-icon--delete"
+                  (click)="confirmDelete(p)"
+                  matTooltip="Delete product"
+                >
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="inv-row"></tr>
+        </table>
       </div>
 
       @if (filteredProducts().length > PAGE_SIZE) {

@@ -61,11 +61,28 @@ export class PosComponent implements OnInit {
   /** The currently selected category _id, or null for "All". */
   selectedCategory = signal<string | null>(null);
 
+  /** The currently selected sub-category value, or null for "All". */
+  selectedSubCategory = signal<string | null>(null);
+
+  /** Unique sub-categories derived from products in the selected category. */
+  readonly availableSubCategories = computed<string[]>(() => {
+    const catId = this.selectedCategory();
+    if (!catId) return [];
+    const subs = this.productStore
+      .products()
+      .filter((p) => p.category === catId)
+      .map((p) => p.subCategory)
+      .filter(Boolean);
+    return [...new Set(subs)];
+  });
+
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
     const catId = this.selectedCategory();
+    const subCat = this.selectedSubCategory();
     let products = this.productStore.products();
     if (catId) products = products.filter((p) => p.category === catId);
+    if (subCat) products = products.filter((p) => p.subCategory === subCat);
     if (q) products = products.filter((p) => p.name.toLowerCase().includes(q));
     return products;
   });
@@ -75,7 +92,7 @@ export class PosComponent implements OnInit {
   readonly grandTotal = computed(() => this.store.total()); // Assuming tax is included in the product prices, so grand total is just the cart total
 
   ngOnInit() {
-    this.productStore.setProducts(this.productStore.products());
+    this.productStore.loadProducts();
   }
   onSearchChange(value: string) {
     this.searchQuery.set(value);
@@ -83,6 +100,11 @@ export class PosComponent implements OnInit {
 
   setCategory(categoryId: string | null) {
     this.selectedCategory.set(categoryId);
+    this.selectedSubCategory.set(null); // reset sub-category on category change
+  }
+
+  setSubCategory(sub: string | null) {
+    this.selectedSubCategory.set(sub);
   }
 
   addToCart(product: Product) {
@@ -130,12 +152,16 @@ export class PosComponent implements OnInit {
         quantity: item.quantity,
         unitPrice: item.product.sellingPrice,
         subTotal,
-        confirmed: false,
       } as LineItem;
     });
 
     const saleTotalAmount = lineItems.reduce((sum, line) => sum + line.subTotal, 0);
-    const sale: SaleItem = { items: lineItems, totalAmount: saleTotalAmount, shiftId: shift._id };
+    const sale: SaleItem = {
+      items: lineItems,
+      totalAmount: saleTotalAmount,
+      shiftId: shift._id,
+      confirmed: false,
+    };
 
     this.saleStore.addSale(sale).subscribe({
       next: (newSale) => {

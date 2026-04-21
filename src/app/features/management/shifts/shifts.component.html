@@ -80,7 +80,20 @@
       }
 
       <div class="shift-active__actions">
-        <button class="end-shift-btn" (click)="openEndDialog()" aria-label="End shift">
+        @if (pendingSalesInShift() > 0) {
+          <div class="pending-sales-warning">
+            <span class="material-icons">warning_amber</span>
+            {{ pendingSalesInShift() }} pending sale{{ pendingSalesInShift() === 1 ? '' : 's' }} — confirm all before closing
+          </div>
+        }
+        <button
+          class="end-shift-btn"
+          [class.end-shift-btn--disabled]="pendingSalesInShift() > 0"
+          [disabled]="pendingSalesInShift() > 0"
+          (click)="openEndDialog()"
+          aria-label="End shift"
+          [title]="pendingSalesInShift() > 0 ? 'Confirm all pending sales before closing the shift' : 'End this shift'"
+        >
           <span class="material-icons">stop_circle</span>
           End Shift
         </button>

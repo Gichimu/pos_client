@@ -14,6 +14,13 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
   {
+    path: 'confirm-account',
+    loadComponent: () =>
+      import('./features/auth/confirm-account/confirm-account.component').then(
+        (m) => m.ConfirmAccountComponent,
+      ),
+  },
+  {
     path: 'management',
     canActivate: [authGuard, roleGuard(['superAdmin', 'manager'])],
     loadComponent: () =>

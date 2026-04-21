@@ -1,0 +1,135 @@
+<div class="login-page">
+  <div class="login-page__bg"></div>
+
+  <div class="login-card">
+    <!-- Logo -->
+    <div class="login-card__logo">
+      <div class="logo-icon">P</div>
+      <span class="logo-text">Point of Sale</span>
+    </div>
+
+    <!-- Icon badge -->
+    <div class="confirm-icon-wrap">
+      <div class="confirm-icon">
+        <mat-icon>lock_reset</mat-icon>
+      </div>
+    </div>
+
+    <h1 class="login-card__title">Set Your Password</h1>
+    <p class="login-card__subtitle">
+      Your account is new. Create a permanent password to activate it.
+    </p>
+
+    <!-- User info banner -->
+    @if (pendingUser(); as user) {
+      <div class="user-preview">
+        <div class="user-preview__icon">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div>
+          <p class="user-preview__name">{{ user.firstName }} {{ user.lastName }}</p>
+          <p class="user-preview__role">{{ user.email }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- New password -->
+      <label class="field-label">New Password</label>
+      <div class="password-field" [class.field--error]="pwCtrl.invalid && pwCtrl.touched">
+        <mat-icon class="password-field__icon">lock_outline</mat-icon>
+        <input
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="newPassword"
+          class="password-field__input"
+          placeholder="Minimum 6 characters"
+          autocomplete="new-password"
+          aria-label="New password"
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          (click)="togglePassword()"
+          [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+        >
+          <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </div>
+      @if (pwCtrl.invalid && pwCtrl.touched) {
+        <div class="field-error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          @if (pwCtrl.errors?.['required']) { Password is required }
+          @else if (pwCtrl.errors?.['minlength']) {
+            Password must be at least {{ pwCtrl.errors?.['minlength']?.requiredLength }} characters
+          }
+        </div>
+      }
+
+      <!-- Confirm password -->
+      <label class="field-label" style="margin-top: 12px;">Confirm Password</label>
+      <div
+        class="password-field"
+        [class.field--error]="
+          (confirmCtrl.invalid && confirmCtrl.touched) ||
+          (form.errors?.['passwordMismatch'] && confirmCtrl.touched)
+        "
+      >
+        <mat-icon class="password-field__icon">lock_outline</mat-icon>
+        <input
+          [type]="showConfirmPassword() ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          class="password-field__input"
+          placeholder="Re-enter your password"
+          autocomplete="new-password"
+          aria-label="Confirm password"
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          (click)="toggleConfirmPassword()"
+          [attr.aria-label]="showConfirmPassword() ? 'Hide password' : 'Show password'"
+        >
+          <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </div>
+      @if (confirmCtrl.touched && form.errors?.['passwordMismatch']) {
+        <div class="field-error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          Passwords do not match
+        </div>
+      }
+
+      <!-- API error -->
+      @if (error()) {
+        <div class="auth-error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          {{ error() }}
+        </div>
+      }
+
+      <button
+        mat-flat-button
+        type="submit"
+        class="login-btn"
+        [disabled]="form.invalid || isLoading()"
+        style="margin-top: 20px;"
+      >
+        @if (isLoading()) {
+          <mat-icon class="spin">refresh</mat-icon>
+          Activating…
+        } @else {
+          <mat-icon>check_circle</mat-icon>
+          Activate Account
+        }
+      </button>
+    </form>
+
+    <!-- Back to login -->
+    <button class="back-link" type="button" (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Login
+    </button>
+  </div>
+</div>
