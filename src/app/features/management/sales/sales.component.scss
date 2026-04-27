@@ -255,6 +255,107 @@
   }
 }
 
+// ─── Bulk action bar ──────────────────────────
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  border-radius: var(--radius-card);
+  animation: slideDown 0.2s ease;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .material-icons {
+      font-size: 20px;
+      color: #6366f1;
+    }
+  }
+
+  &__count {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #3730a3;
+  }
+
+  &__sep {
+    color: #a5b4fc;
+    font-size: 1rem;
+  }
+
+  &__total {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4338ca;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__clear-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: 1px solid #a5b4fc;
+    background: transparent;
+    color: #4338ca;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    .material-icons { font-size: 15px; }
+
+    &:hover { background: #e0e7ff; }
+  }
+
+  &__confirm-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 18px;
+    border-radius: 7px;
+    border: none;
+    background: #6366f1;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+
+    .material-icons { font-size: 16px; }
+
+    &:hover { background: #4f46e5; transform: translateY(-1px); }
+    &:active { transform: translateY(0); }
+  }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ─── Select column ────────────────────────────
+.select-col {
+  width: 48px !important;
+  padding-right: 0 !important;
+  padding-left: 14px !important;
+}
+
 // ─── Table wrapper ────────────────────────────
 .sales-table-wrap {
   background: var(--color-surface);
@@ -350,6 +451,14 @@
     }
 
     &:hover { background: #f8fafc; }
+  }
+
+  &--selected {
+    background: #f5f3ff !important;
+
+    .mat-mdc-cell { border-bottom-color: #e0e7ff; }
+
+    &:hover { background: #ede9fe !important; }
   }
 }
 

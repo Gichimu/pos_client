@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withHooks } from '@ngrx/signals';
 import { PaymentMethod, SaleItem } from '../../core/models/sale.model';
 import { SalesService } from '../../core/services/sales-service';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
 
 export type SaleConfirmStatus = 'pending' | 'confirmed';
 
@@ -162,6 +162,32 @@ export const saleStore = signalStore(
           next: () => {
             patchState(store, {
               items: store.items().map((s) => (s._id === saleId ? { ...s, confirmed: false } : s)),
+            });
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      });
+    },
+
+    /** Confirms multiple pending sales in parallel with a single payment method. */
+    confirmBulk(saleIds: string[], paymentMethod: PaymentMethod): Observable<void> {
+      return new Observable((observer) => {
+        if (saleIds.length === 0) {
+          observer.next();
+          observer.complete();
+          return;
+        }
+        const calls = saleIds.map((id) => salesService.confirmSale(id, paymentMethod));
+        forkJoin(calls).subscribe({
+          next: () => {
+            patchState(store, {
+              items: store
+                .items()
+                .map((s) =>
+                  saleIds.includes(s._id!) ? { ...s, confirmed: true, paymentMethod } : s,
+                ),
             });
             observer.next();
             observer.complete();

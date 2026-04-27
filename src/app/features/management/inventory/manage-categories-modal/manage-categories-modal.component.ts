@@ -1,4 +1,4 @@
-import { Component, inject, Signal, signal } from '@angular/core';
+import { Component, inject, OnInit, Signal, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -22,7 +22,7 @@ import { Category } from '../../../../core/models/category.model';
   templateUrl: './manage-categories-modal.component.html',
   styleUrl: './manage-categories-modal.component.scss',
 })
-export class ManageCategoriesModalComponent {
+export class ManageCategoriesModalComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<ManageCategoriesModalComponent>);
   private readonly sweetAlert = inject(SweetAlertService);
   readonly categoryStore = inject(CategoryStore);
@@ -39,6 +39,10 @@ export class ManageCategoriesModalComponent {
 
   get categories(): Signal<Category[]> {
     return this.categoryStore.categories;
+  }
+
+  ngOnInit(): void {
+    this.categoryStore.loadCategories();
   }
 
   add() {

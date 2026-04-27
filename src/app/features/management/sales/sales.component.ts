@@ -8,6 +8,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import Swal from 'sweetalert2';
 import { MatDialog } from '@angular/material/dialog';
 import { saleStore } from '../../../store/sales/sale.store';
@@ -39,6 +40,7 @@ type FilterStatus = 'all' | 'pending' | 'confirmed';
     MatFormFieldModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatCheckboxModule,
   ],
   templateUrl: './sales.component.html',
   styleUrl: './sales.component.scss',
@@ -63,6 +65,33 @@ export class SalesComponent implements OnInit {
 
   /** Sale _id awaiting the two-step delete confirmation. */
   pendingDeleteSaleId = signal<string | null>(null);
+
+  // ── Bulk selection ───────────────────────────────────────────────────────
+  selectedIds = signal<Set<string>>(new Set<string>());
+
+  readonly hasSelection = computed(() => this.selectedIds().size > 0);
+
+  readonly selectedTotal = computed(() => {
+    const ids = this.selectedIds();
+    return this.salesStore.items()
+      .filter((s) => s._id && ids.has(s._id))
+      .reduce((sum, s) => sum + s.totalAmount, 0);
+  });
+
+  readonly pendingOnPage = computed(() => this.pagedItems().filter((s) => !s.confirmed));
+
+  readonly allPendingOnPageSelected = computed(() => {
+    const pending = this.pendingOnPage();
+    if (pending.length === 0) return false;
+    return pending.every((s) => this.selectedIds().has(s._id!));
+  });
+
+  readonly somePendingOnPageSelected = computed(() => {
+    const pending = this.pendingOnPage();
+    return (
+      pending.some((s) => this.selectedIds().has(s._id!)) && !this.allPendingOnPageSelected()
+    );
+  });
 
   readonly cashierOptions = computed(() =>
     this.userStore.users().map((u) => ({
@@ -98,6 +127,7 @@ export class SalesComponent implements OnInit {
 
   onPageChange(event: PageEvent): void {
     this.pageIndex.set(event.pageIndex);
+    this.clearSelection();
   }
 
   // ── Stat cards ───────────────────────────────────────────────────────────
@@ -116,6 +146,7 @@ export class SalesComponent implements OnInit {
 
   // ── Columns ──────────────────────────────────────────────────────────────
   readonly displayedColumns = [
+    'select',
     'saleId',
     'cashier',
     'itemCount',
@@ -137,11 +168,13 @@ export class SalesComponent implements OnInit {
   setFilter(status: FilterStatus) {
     this.filterStatus.set(status);
     this.pageIndex.set(0);
+    this.clearSelection();
   }
 
   setCashierFilter(cashierId: string | null) {
     this.filterCashierId.set(cashierId);
     this.pageIndex.set(0);
+    this.clearSelection();
     this.salesStore.loadSales(cashierId);
   }
 
@@ -275,6 +308,74 @@ export class SalesComponent implements OnInit {
           this.sweetAlert.success(`Sale ${this.getSaleIdLabel(sale)} voided — stock restored`);
         },
         error: () => this.sweetAlert.error('Failed to void sale. Please try again.'),
+      });
+    });
+  }
+
+  // ── Bulk selection actions ────────────────────────────────────────────────
+
+  toggleRow(sale: SaleItem): void {
+    if (sale.confirmed) return;
+    const next = new Set(this.selectedIds());
+    if (next.has(sale._id!)) {
+      next.delete(sale._id!);
+    } else {
+      next.add(sale._id!);
+    }
+    this.selectedIds.set(next);
+  }
+
+  toggleAll(): void {
+    const pending = this.pendingOnPage();
+    const allSelected = this.allPendingOnPageSelected();
+    const next = new Set(this.selectedIds());
+    if (allSelected) {
+      pending.forEach((s) => next.delete(s._id!));
+    } else {
+      pending.forEach((s) => next.add(s._id!));
+    }
+    this.selectedIds.set(next);
+  }
+
+  clearSelection(): void {
+    this.selectedIds.set(new Set<string>());
+  }
+
+  confirmSelection(): void {
+    const ids = [...this.selectedIds()];
+    if (ids.length === 0) return;
+
+    const combinedTotal = this.salesStore
+      .items()
+      .filter((s) => s._id && ids.includes(s._id))
+      .reduce((sum, s) => sum + s.totalAmount, 0);
+
+    const dialogRef = this.dialog.open<
+      PaymentMethodDialogComponent,
+      PaymentMethodDialogData,
+      PaymentMethodDialogResult
+    >(PaymentMethodDialogComponent, {
+      data: {
+        saleId: '',
+        saleIdLabel: `${ids.length} sale${ids.length > 1 ? 's' : ''}`,
+        totalAmount: combinedTotal,
+        isBulk: true,
+        bulkCount: ids.length,
+      },
+      width: '560px',
+      disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+      this.salesStore.confirmBulk(ids, result.paymentMethod).subscribe({
+        next: () => {
+          this.sweetAlert.success(
+            `${ids.length} sale${ids.length > 1 ? 's' : ''} confirmed via ${result.paymentMethod}`,
+          );
+          this.clearSelection();
+        },
+        error: () => this.sweetAlert.error('Some sales failed to confirm. Please try again.'),
       });
     });
   }

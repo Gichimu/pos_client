@@ -32,7 +32,11 @@ export const authStore = signalStore(
           } else {
             localStorage.setItem('token', response.token);
             localStorage.setItem('refreshToken', response.refreshToken);
-            patchState(store, { user: authenticatedUser, isAuthenticated: true, pendingUser: null });
+            patchState(store, {
+              user: authenticatedUser,
+              isAuthenticated: true,
+              pendingUser: null,
+            });
           }
         }),
         catchError((error) => {

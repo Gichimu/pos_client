@@ -26,7 +26,7 @@
         </div>
       }
 
-      @for (cat of categories(); track cat) {
+      @for (cat of categories(); track cat._id) {
         <div class="cat-row" role="listitem">
           @if (editingCategory() === cat) {
             <!-- Inline rename -->

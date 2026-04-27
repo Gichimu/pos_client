@@ -12,6 +12,10 @@ export interface PaymentMethodDialogData {
   saleId: string;
   saleIdLabel: string;
   totalAmount: number;
+  /** Set to true when confirming multiple sales at once. Hides the Split option. */
+  isBulk?: boolean;
+  /** Number of sales being confirmed in bulk mode. */
+  bulkCount?: number;
 }
 
 export interface PaymentMethodDialogResult {
@@ -37,17 +41,23 @@ interface PaymentOption {
         <span class="material-icons pmDialog__header-icon">payments</span>
       </div>
       <div>
-        <p class="pmDialog__title">Select Payment Method</p>
+        <p class="pmDialog__title">
+          {{ data.isBulk ? 'Confirm ' + data.bulkCount + ' Sales' : 'Select Payment Method' }}
+        </p>
         <p class="pmDialog__subtitle">
-          {{ data.saleIdLabel }} &mdash;
-          <strong>{{ formatCurrency(data.totalAmount) }}</strong>
+          @if (data.isBulk) {
+            Combined total: <strong>{{ formatCurrency(data.totalAmount) }}</strong>
+          } @else {
+            {{ data.saleIdLabel }} &mdash;
+            <strong>{{ formatCurrency(data.totalAmount) }}</strong>
+          }
         </p>
       </div>
     </div>
 
     <mat-dialog-content>
       <div class="pmDialog__options">
-        @for (option of paymentOptions; track option.method) {
+        @for (option of availableOptions; track option.method) {
           <button
             class="pmDialog__option"
             [class.pmDialog__option--selected]="selectedMethod() === option.method"
@@ -131,7 +141,7 @@ interface PaymentOption {
       <button mat-stroked-button (click)="cancel()">Cancel</button>
       <button mat-flat-button color="primary" [disabled]="!canConfirm()" (click)="confirm()">
         <span class="material-icons">check</span>
-        Confirm Payment
+        {{ data.isBulk ? 'Confirm All' : 'Confirm Payment' }}
       </button>
     </mat-dialog-actions>
   `,
@@ -380,6 +390,13 @@ export class PaymentMethodDialogComponent {
     { method: 'PDQ',    icon: 'credit_card',    label: 'PDQ',    description: 'Card / terminal' },
     { method: 'Split',  icon: 'call_split',     label: 'Split',  description: 'Cash + M-Pesa' },
   ];
+
+  /** In bulk mode, Split is hidden since amounts can't be split per-sale. */
+  get availableOptions(): PaymentOption[] {
+    return this.data.isBulk
+      ? this.paymentOptions.filter((o) => o.method !== 'Split')
+      : this.paymentOptions;
+  }
 
   constructor(
     private readonly dialogRef: MatDialogRef<PaymentMethodDialogComponent, PaymentMethodDialogResult>,

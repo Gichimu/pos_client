@@ -67,6 +67,17 @@ export const CategoryStore = signalStore(
           },
         });
     },
+    loadCategories() {
+      categoryService.getAll().subscribe({
+        next: (categories: any) => {
+          console.log('loaded categories', categories);
+          patchState(store, { categories: categories });
+        },
+        error: (error) => {
+          console.error('Failed to load categories', error);
+        },
+      });
+    },
   })),
   withHooks({
     onInit(store, categoryService = inject(CategoryService)) {
