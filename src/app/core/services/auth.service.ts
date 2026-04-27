@@ -39,4 +39,12 @@ export class AuthService {
   logout(refresh: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/auth/logout`, { refreshToken: refresh });
   }
+
+  tokenIsValid(token: string): boolean {
+    if (!token) return false;
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const exp = payload.exp;
+    const now = Math.floor(Date.now() / 1000);
+    return exp > now;
+  }
 }
