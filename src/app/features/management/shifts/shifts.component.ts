@@ -25,6 +25,8 @@ import {
 import { authStore } from '../../../store/auth/auth.store';
 import { productStore } from '../../../store/products/product.store';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
+import { ShiftReportService } from '../../../core/services/shift-report.service';
+import { requisitionStore } from '../../../store/requisitions/requisition.store';
 
 type StatusFilter = 'all' | 'Open' | 'Closed';
 
@@ -50,6 +52,8 @@ export class ShiftsComponent implements OnInit {
   readonly salesStore = inject(saleStore);
   private readonly dialog = inject(MatDialog);
   private readonly sweetAlert = inject(SweetAlertService);
+  private readonly shiftReportService = inject(ShiftReportService);
+  private readonly reqStore = inject(requisitionStore);
 
   readonly today = new Date();
 
@@ -119,46 +123,6 @@ export class ShiftsComponent implements OnInit {
   setFilterStatus(status: StatusFilter): void {
     this.filterStatus.set(status);
     this.pageIndex.set(0);
-  }
-
-  //create a shift report with tables for sales by product, payment method, and cashier for the current shift
-  createShiftReport() {
-    const shift = this.activeShift();
-    if (!shift) return;
-
-    const shiftStart = new Date(shift.startTime).getTime();
-    const salesInShift = this.salesStore
-      .items()
-      .filter((s) => new Date(s.createdAt ?? 0).getTime() >= shiftStart);
-
-    // Group sales by product, payment method, and cashier
-    const salesByProduct: Record<string, number> = {};
-    const salesByPayment: Record<string, number> = {};
-    const salesByCashier: Record<string, number> = {};
-
-    salesInShift.forEach((sale) => {
-      if (!sale.confirmed) return;
-      const cashierId = (sale as any).cashierId ?? 'Unknown Cashier';
-      salesByCashier[cashierId] = (salesByCashier[cashierId] || 0) + sale.totalAmount;
-
-      const salePaymentMethod = (sale as any).paymentMethod || 'Unknown Payment';
-      sale.items.forEach((item) => {
-        const productId = item.productId || 'Unknown Product';
-        const productName =
-          this.productStore.products().find((p) => p._id === productId)?.name || 'Unknown Product';
-        const paymentMethod = salePaymentMethod;
-
-        salesByProduct[productName] = (salesByProduct[productName] || 0) + item.subTotal;
-        salesByPayment[paymentMethod] = (salesByPayment[paymentMethod] || 0) + item.subTotal;
-      });
-    });
-
-    // Log the report data to the console (or format it as needed for display)
-    console.log('Sales by Product:', salesByProduct);
-    console.log('Sales by Payment Method:', salesByPayment);
-    console.log('Sales by Cashier:', salesByCashier);
-
-    // You can further format this data into tables or charts as needed for your application
   }
 
   onPageChange(event: PageEvent): void {
@@ -231,14 +195,10 @@ export class ShiftsComponent implements OnInit {
     const shift = this.activeShift();
     if (!shift) return;
 
-    // Count line items belonging to this shift that have not been confirmed
     const shiftStart = new Date(shift.startTime).getTime();
     const unconfirmedCount = this.salesStore
       .items()
-      .filter((s) => {
-        const d = new Date((s as any).createdAt ?? 0);
-        return d.getTime() >= shiftStart;
-      })
+      .filter((s) => new Date((s as any).createdAt ?? 0).getTime() >= shiftStart)
       .filter((i) => !i.confirmed).length;
 
     const dialogData: EndShiftDialogData = {
@@ -255,14 +215,50 @@ export class ShiftsComponent implements OnInit {
 
     ref.afterClosed().subscribe((result) => {
       if (result === undefined) return; // cancelled
+
+      const closedByUserId = this.authStore.user()?._id ?? '';
+      const closedByName = this.resolveUser(closedByUserId);
+      const openedByName = this.resolveUser(shift.openedBy);
+
+      // Snapshot sales data NOW (before the async close removes the active shift)
+      const salesInShift = [
+        ...this.salesStore
+          .items()
+          .filter(
+            (s) =>
+              s.shiftId === shift._id ||
+              new Date((s as any).createdAt ?? 0).getTime() >= shiftStart,
+          ),
+      ];
+
+      // Build a userId → "First Last" lookup map
+      const userMap: Record<string, string> = {};
+      this.userStore.users().forEach((u) => {
+        if (u._id) userMap[u._id] = u.firstName;
+      });
+
+      // Snapshot requisitions before the store clears
+      const requisitions = [...this.reqStore.items()];
+
       this.store
         .closeShift(shift._id!, {
           closingNotes: result.closingNotes,
-          closedBy: this.authStore.user()?._id || 'Unknown User',
+          closedBy: closedByUserId || 'Unknown User',
+          requisitions,
         })
         .subscribe({
           next: () => {
-            this.createShiftReport();
+            // Clear requisitions now that the shift is closed
+            this.reqStore.clearRequisitions();
+            // Print shift report with the snapshotted data
+            this.shiftReportService.print({
+              shift: { ...shift, endTime: new Date(), closedBy: closedByUserId },
+              openedByName,
+              closedByName,
+              sales: salesInShift,
+              userMap,
+              requisitions,
+            });
             this.sweetAlert.success('Shift ended successfully');
           },
           error: () => this.sweetAlert.error('Failed to end shift. Please try again.'),

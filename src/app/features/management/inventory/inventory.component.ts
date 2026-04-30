@@ -21,6 +21,9 @@ import { ManageCategoriesModalComponent } from './manage-categories-modal/manage
 import { CategoryStore } from '../../../store/categories/category.store';
 import { productStore } from '../../../store/products/product.store';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
+import { requisitionStore } from '../../../store/requisitions/requisition.store';
+import { authStore } from '../../../store/auth/auth.store';
+import { RbacAllow } from '../../../core/directives/rbac-allow';
 
 @Component({
   selector: 'app-inventory',
@@ -32,6 +35,7 @@ import { SweetAlertService } from '../../../core/services/sweet-alert.service';
     MatTooltipModule,
     MatPaginatorModule,
     StatusBadgeComponent,
+    RbacAllow,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -41,6 +45,8 @@ export class InventoryComponent implements OnInit {
   private readonly categoryStore = inject(CategoryStore);
   private readonly dialog = inject(MatDialog);
   private readonly sweetAlert = inject(SweetAlertService);
+  private readonly reqStore = inject(requisitionStore);
+  private readonly auth = inject(authStore);
 
   ngOnInit(): void {
     this.store.loadProducts();
@@ -141,6 +147,17 @@ export class InventoryComponent implements OnInit {
     );
     ref.afterClosed().subscribe((updated) => {
       if (updated) {
+        // Detect a stock addition and record it as a requisition
+        const stockDelta = updated.currentStock - (product.currentStock ?? 0);
+        if (stockDelta > 0) {
+          this.reqStore.addRequisition({
+            productId: updated._id ?? '',
+            productName: updated.name,
+            quantity: stockDelta,
+            addedBy: this.auth.user()?._id,
+            addedAt: new Date(),
+          });
+        }
         this.store.updateProduct(updated);
         this.sweetAlert.success(`${updated.name} updated`);
       }

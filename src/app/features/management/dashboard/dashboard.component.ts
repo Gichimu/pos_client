@@ -58,6 +58,15 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.productStore.loadProducts();
+    this.userStore.loadUsers().subscribe({
+      next: (users) => {
+        // Users loaded successfully; any dependent logic can go here if needed
+        console.log('Users loaded successfully', users);
+      },
+      error: (error) => {
+        console.error('Failed to load users:', error);
+      },
+    });
   }
 
   openGenerateReport() {

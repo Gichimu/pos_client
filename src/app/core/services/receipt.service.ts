@@ -126,6 +126,8 @@ export class ReceiptService {
         <p class="stars">${stars}</p>
       </div>`;
 
+    const kotBody = this.buildKotBody({ sale, cashier, shift, cartSnapshot, grandTotal });
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -211,7 +213,96 @@ export class ReceiptService {
       margin: 4px 0;
     }
 
-    /* ── Duplicate separator ── */
+    /* ── KOT styles ── */
+    .kot {
+      width: 80mm;
+      max-width: 80mm;
+      margin: 0 auto;
+      padding: 4mm 2mm;
+    }
+
+    .kot-header {
+      text-align: center;
+      font-size: 22pt;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 6px 0 4px;
+      letter-spacing: 1px;
+    }
+
+    .kot-subtitle {
+      text-align: center;
+      font-size: 13pt;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 2px 0 4px;
+      line-height: 1.3;
+    }
+
+    .kot-waiter {
+      text-align: center;
+      font-size: 14pt;
+      font-weight: 900;
+      text-transform: uppercase;
+      margin: 5px 0 2px;
+    }
+
+    .kot-orderNo {
+      text-align: center;
+      font-size: 12pt;
+      font-weight: 700;
+      margin: 2px 0;
+    }
+
+    .kot-shift {
+      text-align: center;
+      font-size: 16pt;
+      font-weight: 900;
+      margin: 4px 0 2px;
+    }
+
+    .kot-time {
+      text-align: center;
+      font-size: 8pt;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin: 2px 0 4px;
+    }
+
+    .kot-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+      margin: 0;
+    }
+
+    .kot-table th,
+    .kot-table td {
+      padding: 3px 4px;
+      font-size: 8.5pt;
+      border: 1px solid #000;
+    }
+
+    .kot-table thead th {
+      font-weight: 900;
+      background: #fff;
+      text-align: center;
+    }
+
+    .kot-col-name  { width: 42%; text-align: left; }
+    .kot-col-qty   { width: 18%; text-align: center; }
+    .kot-col-price { width: 20%; text-align: right; }
+    .kot-col-total { width: 20%; text-align: right; }
+
+    .kot-total-row td {
+      text-align: center;
+      font-size: 13pt;
+      font-weight: 900;
+      border-top: 2px solid #000;
+      padding: 4px;
+    }
+
+    /* ── Cut separator ── */
     .cut-line {
       width: 80mm;
       max-width: 80mm;
@@ -230,15 +321,93 @@ export class ReceiptService {
       }
       body { margin: 0; padding: 0; }
       .receipt { width: 80mm; max-width: 80mm; }
+      .kot { width: 80mm; max-width: 80mm; }
+
+      /* Force a page break at the cut line — thermal drivers interpret
+         a page boundary as a cut command when "cut after each page" is
+         enabled in the printer driver settings.                          */
+      .cut-line {
+        display: block;
+        break-after: page;
+        page-break-after: always; /* legacy fallback */
+        border: none;             /* hide the dashed line on actual print */
+        margin: 0;
+        padding: 0;
+        height: 0;
+        font-size: 0;
+      }
     }
   </style>
 </head>
 <body>
   ${receiptBody}
   <div class="cut-line">- - - - - - - - - CUT - - - - - - - - -</div>
-  ${receiptBody}
+  ${kotBody}
 </body>
 </html>`;
+  }
+
+  // ── KOT builder ────────────────────────────────────────────────────
+  private buildKotBody(data: PrintReceiptData): string {
+    const { sale, cashier, shift, cartSnapshot, grandTotal } = data;
+
+    const waiterName = cashier
+      ? `${cashier.firstName} ${cashier.lastName ?? ''}`.trim().toUpperCase()
+      : 'CASHIER';
+    const orderNo = sale.saleId ? sale.saleId.slice(-5).toUpperCase() : '00000';
+    const now = new Date();
+    const shiftDate = shift ? this.formatDate(new Date(shift.startTime)) : this.formatDate(now);
+    const printTime = this.formatTimeFull(now);
+    const stars = '*'.repeat(52);
+
+    const kotItemsHtml = cartSnapshot
+      .map((item) => {
+        const name = this.escapeHtml(item.product.name.toUpperCase());
+        const qty = item.quantity.toFixed(2);
+        const price = item.product.sellingPrice.toFixed(2);
+        const total = (item.quantity * item.product.sellingPrice).toFixed(2);
+        return `<tr>
+          <td class="kot-col-name">${name}</td>
+          <td class="kot-col-qty">${qty}</td>
+          <td class="kot-col-price">${price}</td>
+          <td class="kot-col-total">${total}</td>
+        </tr>`;
+      })
+      .join('');
+
+    return `
+      <div class="kot">
+        <p class="stars">${stars}</p>
+        <p class="kot-header">KITCHEN</p>
+        <p class="stars">${stars}</p>
+        <p class="kot-subtitle">KITCHEN ORDER<br>TICKET(KOT)</p>
+        <p class="stars">${stars}</p>
+        <p class="kot-waiter">WAITER: ${this.escapeHtml(waiterName)}</p>
+        <p class="kot-orderNo">Order No: ${orderNo}</p>
+        <p class="kot-shift">SHIFT: ${shiftDate}</p>
+        <p class="kot-time">PRINT TIME: ${printTime}</p>
+        <p class="stars">${stars}</p>
+
+        <table class="kot-table">
+          <thead>
+            <tr>
+              <th class="kot-col-name">Name</th>
+              <th class="kot-col-qty">Qty</th>
+              <th class="kot-col-price">Price</th>
+              <th class="kot-col-total">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${kotItemsHtml}
+            <tr class="kot-total-row">
+              <td colspan="4">Total: ${grandTotal.toFixed(2)}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="stars">${stars}</p>
+        <p class="stars">${stars}</p>
+      </div>`;
   }
 
   // ── Void receipt ────────────────────────────────────────────────────
@@ -390,6 +559,16 @@ export class ReceiptService {
     const ampm = h >= 12 ? 'pm' : 'am';
     h = h % 12 || 12;
     return `${h}:${min}${ampm}`;
+  }
+
+  /** HH:MM:SS am/pm — used in KOT PRINT TIME field */
+  private formatTimeFull(d: Date): string {
+    let h = d.getHours();
+    const min = String(d.getMinutes()).padStart(2, '0');
+    const sec = String(d.getSeconds()).padStart(2, '0');
+    const ampm = h >= 12 ? 'pm' : 'am';
+    h = h % 12 || 12;
+    return `${h}:${min}:${sec}${ampm}`;
   }
 
   private escapeHtml(str: string): string {

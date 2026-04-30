@@ -73,7 +73,8 @@ export class SalesComponent implements OnInit {
 
   readonly selectedTotal = computed(() => {
     const ids = this.selectedIds();
-    return this.salesStore.items()
+    return this.salesStore
+      .items()
       .filter((s) => s._id && ids.has(s._id))
       .reduce((sum, s) => sum + s.totalAmount, 0);
   });
@@ -88,9 +89,7 @@ export class SalesComponent implements OnInit {
 
   readonly somePendingOnPageSelected = computed(() => {
     const pending = this.pendingOnPage();
-    return (
-      pending.some((s) => this.selectedIds().has(s._id!)) && !this.allPendingOnPageSelected()
-    );
+    return pending.some((s) => this.selectedIds().has(s._id!)) && !this.allPendingOnPageSelected();
   });
 
   readonly cashierOptions = computed(() =>

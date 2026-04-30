@@ -1,5 +1,13 @@
 export type ShiftStatus = 'Open' | 'Closed';
 
+export interface RequisitionItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  addedBy?: string;
+  addedAt: Date | string;
+}
+
 export interface Shift {
   _id?: string;
   startTime: Date | string;
@@ -22,4 +30,5 @@ export interface OpenShiftDto {
 export interface CloseShiftDto {
   closingNotes?: string;
   closedBy: string;
+  requisitions?: RequisitionItem[];
 }
