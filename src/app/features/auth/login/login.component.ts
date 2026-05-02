@@ -24,7 +24,7 @@ export type PinPadKey = (typeof PIN_PAD_KEYS)[number];
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -94,13 +94,25 @@ export class LoginComponent {
       );
     }
 
-    // const fromApi = this.users().find((u) => u.role === role && u.status === 'active');
+    // const fromApi = this.users().find(
+    //   (u) => u.roles.includes(role) && u.status === 'active' && u.pin === this.pin(),
+    // );
+
+    console.log('selected cashier from API', this.users());
     const fromApi = null; // Disable API lookup for cashiers to avoid confusion during development when API is unavailable.
     return fromApi ?? MOCK_USERS.find((u) => u.role === role && u.status === 'active') ?? null;
   });
 
   /** Array of 5 booleans indicating which PIN dots are filled. */
   readonly pinFilled = computed(() => [0, 1, 2, 3, 4].map((i) => i < this.pin().length));
+
+  ngOnInit() {
+    this.store.loadUsers().subscribe({
+      error: () => {
+        console.warn('Failed to load users from API. Falling back to mock data.');
+      },
+    });
+  }
 
   // ── Step navigation ─────────────────────────────────────────────────────
 
@@ -186,18 +198,17 @@ export class LoginComponent {
     }
 
     // Cashier PIN path
-    if (this.pin() !== MOCK_CREDENTIALS.cashier) {
-      this.error.set('Incorrect PIN. Hint: 12345');
-      this.pin.set('');
-      return;
-    }
+    // if (this.pin() !== MOCK_CREDENTIALS.cashier) {
+    //   this.error.set('Incorrect PIN. Hint: 12345');
+    //   this.pin.set('');
+    //   return;
+    // }
 
     const user = this.selectedUser();
     console.log('authenticating user', user);
     if (user) {
       this.authStore.login(user).subscribe({
         next: () => {
-          console.log('auth user after login', this.authStore.user());
           this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
         },
         error: (error) => {
