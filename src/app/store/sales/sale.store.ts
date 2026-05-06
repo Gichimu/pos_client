@@ -39,12 +39,12 @@ export const saleStore = signalStore(
     },
 
     /**
-     * Fetch all sales from the API, optionally filtered by cashier.
+     * Fetch all sales from the API, optionally filtered by date range and/or cashier.
      * Replaces the full items list — no server-side pagination.
      */
-    loadSales(cashierId?: string | null): void {
+    loadSales(options?: { cashierId?: string | null; startDate?: string | null; endDate?: string | null }): void {
       patchState(store, { isLoading: true });
-      salesService.getAll(cashierId).subscribe({
+      salesService.getAll(options).subscribe({
         next: (response: any) => {
           console.log('API response for sales:', response);
           // Guard: server may return either SaleItem[] or a paginated envelope { data, total, … }
@@ -211,8 +211,9 @@ export const saleStore = signalStore(
       });
     },
   })),
-  withHooks({
+    withHooks({
     onInit(store) {
+      // Initial load with no filters; the report component will re-fetch with date params
       store.loadSales();
     },
   }),

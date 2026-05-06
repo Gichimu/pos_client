@@ -160,7 +160,7 @@ export class SalesComponent implements OnInit {
     this.filterStatus.set('all');
     this.filterCashierId.set(null);
     this.pageIndex.set(0);
-    this.salesStore.loadSales(null);
+    this.salesStore.loadSales();
   }
 
   // ── Filter helpers ───────────────────────────────────────────────────────
@@ -174,7 +174,7 @@ export class SalesComponent implements OnInit {
     this.filterCashierId.set(cashierId);
     this.pageIndex.set(0);
     this.clearSelection();
-    this.salesStore.loadSales(cashierId);
+    this.salesStore.loadSales({ cashierId });
   }
 
   // ── Row helpers ───────────────────────────────────────────────────────────

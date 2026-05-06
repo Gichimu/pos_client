@@ -11,12 +11,16 @@ export class SalesService {
   private readonly url = environment.apiUrl;
   private readonly http = inject(HttpClient);
 
-  /** GET /sales — returns all sales records, with optional cashier filter. */
-  getAll(cashierId?: string | null): Observable<SaleItem[]> {
+  /** GET /sales — returns all sales records, with optional date range and cashier filters. */
+  getAll(options?: {
+    cashierId?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+  }): Observable<SaleItem[]> {
     let params = new HttpParams();
-    if (cashierId) {
-      params = params.set('cashierId', cashierId);
-    }
+    if (options?.cashierId) params = params.set('cashierId', options.cashierId);
+    if (options?.startDate) params = params.set('startDate', options.startDate);
+    if (options?.endDate) params = params.set('endDate', options.endDate);
     return this.http.get<SaleItem[]>(`${this.url}/sales`, { params });
   }
 

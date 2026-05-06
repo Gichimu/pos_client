@@ -17,12 +17,69 @@
   flex-wrap: wrap;
 }
 
+// ── Custom date range row ─────────────────────────────────
+.date-range-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-primary-light);
+  flex-wrap: wrap;
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  &__sep {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  &__error {
+    font-size: 0.78rem;
+    color: #ef4444;
+    font-weight: 500;
+  }
+
+  &__loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-left: auto;
+  }
+}
+
+.date-input {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
 // KPI block
 .kpi-block {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  min-width: 160px;
+  min-width: 140px;
   padding-right: 20px;
   border-right: 1px solid var(--color-border);
 
@@ -121,6 +178,11 @@
   background: #fafbfc;
 }
 
+.export-group {
+  position: relative;
+  display: inline-flex;
+}
+
 .export-btn {
   display: inline-flex;
   align-items: center;
@@ -139,10 +201,23 @@
 
   .material-icons { font-size: 16px; }
 
+  &__chevron {
+    font-size: 18px !important;
+    margin-left: 2px;
+    color: var(--color-text-muted);
+  }
+
   &:hover {
     background: #f1f5f9;
     border-color: #cbd5e1;
   }
+}
+
+.export-menu-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  vertical-align: middle;
+  color: var(--color-text-muted);
 }
 
 // View mode toggle
@@ -244,6 +319,40 @@
 .revenue-val {
   font-weight: 700;
   color: var(--color-text);
+}
+
+// Loading state
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 14px;
+  color: var(--color-text-muted);
+
+  p { font-size: 0.9rem; margin: 0; }
+}
+
+// Spinner
+.spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+
+  &--sm {
+    width: 14px;
+    height: 14px;
+    border-width: 2px;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 // Empty state
