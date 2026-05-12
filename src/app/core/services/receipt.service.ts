@@ -139,6 +139,7 @@ export class ReceiptService {
     body {
       font-family: 'Courier New', Courier, monospace;
       font-size: 9pt;
+      font-weight: 700;
       background: #fff;
       color: #000;
     }
@@ -445,7 +446,15 @@ export class ReceiptService {
         const qty = item.quantity.toFixed(2);
         const unit = item.unitPrice.toFixed(2);
         const total = item.subTotal.toFixed(2);
-        const name = (item.productName ?? 'ITEM').toUpperCase();
+        // productId may arrive as a populated object { _id, name } from the API
+        const rawProductId = (item as any).productId;
+        const resolvedName =
+          (typeof rawProductId === 'object' && rawProductId !== null
+            ? rawProductId.name
+            : null) ??
+          item.productName ??
+          'ITEM';
+        const name = resolvedName.toUpperCase();
         return `<tr>
           <td class="col-qty">${qty}</td>
           <td class="col-name">${this.escapeHtml(name)}</td>
@@ -513,7 +522,7 @@ export class ReceiptService {
   <title>VOID — ${environment.storeName} — ${billNo}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Courier New', Courier, monospace; font-size: 9pt; background: #fff; color: #000; }
+    body { font-family: 'Courier New', Courier, monospace; font-size: 9pt; font-weight: 700; background: #fff; color: #000; }
     .receipt { width: 80mm; max-width: 80mm; margin: 0 auto; padding: 4mm 2mm; position: relative; }
     .stars { font-size: 7.5pt; letter-spacing: 0; text-align: center; margin: 3px 0; overflow: hidden; white-space: nowrap; }
     .store-name { text-align: center; font-size: 16pt; font-weight: 900; text-transform: uppercase; margin: 6px 0; }
@@ -538,8 +547,6 @@ export class ReceiptService {
   </style>
 </head>
 <body>
-  ${receiptBody}
-  <div class="cut-line">- - - - - - - - - CUT - - - - - - - - -</div>
   ${receiptBody}
 </body>
 </html>`;

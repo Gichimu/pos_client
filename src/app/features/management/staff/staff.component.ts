@@ -109,7 +109,7 @@ export class StaffComponent implements OnInit {
   openAddDialog() {
     const ref = this.dialog.open<StaffFormModalComponent, StaffFormData, User>(
       StaffFormModalComponent,
-      { data: {}, disableClose: false },
+      { data: {}, disableClose: false, maxWidth: '95vw' },
     );
 
     ref.afterClosed().subscribe((user) => {
@@ -131,7 +131,7 @@ export class StaffComponent implements OnInit {
   openEditDialog(user: User) {
     const ref = this.dialog.open<StaffFormModalComponent, StaffFormData, User>(
       StaffFormModalComponent,
-      { data: { user }, disableClose: false },
+      { data: { user }, disableClose: false, maxWidth: '95vw' },
     );
 
     ref.afterClosed().subscribe((updated) => {

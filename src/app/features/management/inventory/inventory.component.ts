@@ -52,12 +52,17 @@ export class InventoryComponent implements OnInit {
     this.store.loadProducts();
   }
 
-  readonly totalCount = computed(() => this.store.products().length);
+  /** Only show sellable menu products (exclude raw-stock items). */
+  private readonly menuProducts = computed(() =>
+    this.store.products().filter((p) => !p.productType || p.productType === 'menu'),
+  );
+
+  readonly totalCount = computed(() => this.menuProducts().length);
   readonly lowStockCount = computed(
-    () => this.store.products().filter((p) => p.currentStock < 5).length,
+    () => this.menuProducts().filter((p) => p.currentStock < 5).length,
   );
   readonly outOfStock = computed(
-    () => this.store.products().filter((p) => p.currentStock === 0).length,
+    () => this.menuProducts().filter((p) => p.currentStock === 0).length,
   );
 
   readonly displayedColumns = [
@@ -76,15 +81,13 @@ export class InventoryComponent implements OnInit {
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
     return q
-      ? this.store
-          .products()
-          .filter(
-            (p) =>
-              p.name.toLowerCase().includes(q) ||
-              p.category.toLowerCase().includes(q) ||
-              p.sku.toLowerCase().includes(q),
-          )
-      : this.store.products();
+      ? this.menuProducts().filter(
+          (p) =>
+            p.name.toLowerCase().includes(q) ||
+            p.category.toLowerCase().includes(q) ||
+            p.sku.toLowerCase().includes(q),
+        )
+      : this.menuProducts();
   });
 
   // ── Pagination ────────────────────────────────────────────
@@ -116,13 +119,13 @@ export class InventoryComponent implements OnInit {
   }
 
   openManageCategoriesDialog() {
-    this.dialog.open(ManageCategoriesModalComponent, { width: '460px' });
+    this.dialog.open(ManageCategoriesModalComponent, { width: '460px', maxWidth: '95vw' });
   }
 
   openAddDialog() {
     const ref = this.dialog.open<InventoryFormModalComponent, ProductFormData, Product>(
       InventoryFormModalComponent,
-      { data: {} },
+      { data: {}, maxWidth: '95vw' },
     );
     ref.afterClosed().subscribe((product) => {
       if (product) {
@@ -143,7 +146,7 @@ export class InventoryComponent implements OnInit {
   openEditDialog(product: Product) {
     const ref = this.dialog.open<InventoryFormModalComponent, ProductFormData, Product>(
       InventoryFormModalComponent,
-      { data: { product } },
+      { data: { product }, maxWidth: '95vw' },
     );
     ref.afterClosed().subscribe((updated) => {
       if (updated) {

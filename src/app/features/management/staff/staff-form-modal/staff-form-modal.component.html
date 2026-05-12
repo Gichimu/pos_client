@@ -144,7 +144,7 @@
 
   <!-- Footer -->
   <div class="staff-modal__footer">
-    <button mat-button class="cancel-btn" (click)="close()">Cancel</button>
+    <button mat-stroked-button class="cancel-btn" (click)="close()">Cancel</button>
     <button mat-flat-button class="save-btn" (click)="save()">
       <mat-icon>{{ isEdit() ? 'save' : 'person_add' }}</mat-icon>
       {{ isEdit() ? 'Save Changes' : 'Add Member' }}

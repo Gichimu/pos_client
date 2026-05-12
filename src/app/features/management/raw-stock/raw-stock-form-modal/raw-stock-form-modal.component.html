@@ -1,20 +1,16 @@
-<div class="inv-modal">
+<div class="rs-modal">
   <!-- Header -->
-  <div class="inv-modal__header">
-    <div class="inv-modal__header-left">
-      <div class="inv-modal__icon">
-        <mat-icon>{{ isEdit() ? 'edit' : 'add_box' }}</mat-icon>
+  <div class="rs-modal__header">
+    <div class="rs-modal__header-left">
+      <div class="rs-modal__icon">
+        <mat-icon>{{ isEdit() ? 'edit' : 'kitchen' }}</mat-icon>
       </div>
       <div>
-        <h2 class="inv-modal__title">
-          {{ isEdit() ? 'Edit Product' : 'Add Product' }}
+        <h2 class="rs-modal__title">
+          {{ isEdit() ? 'Edit Raw Stock Item' : 'Add Raw Stock Item' }}
         </h2>
-        <p class="inv-modal__subtitle">
-          {{
-            isEdit()
-              ? 'Update product details and stock info'
-              : 'Fill in the details to add a new product'
-          }}
+        <p class="rs-modal__subtitle">
+          {{ isEdit() ? 'Update stock details' : 'Add an ingredient or raw material' }}
         </p>
       </div>
     </div>
@@ -24,27 +20,27 @@
   </div>
 
   <!-- Body -->
-  <div class="inv-modal__body">
-    <form [formGroup]="form" class="inv-form">
+  <div class="rs-modal__body">
+    <form [formGroup]="form" class="rs-form">
 
-      <!-- Row 1: Product Name (full width) -->
+      <!-- Item Name -->
       <mat-form-field appearance="outline" class="full-field">
-        <mat-label>Product Name</mat-label>
-        <mat-icon matPrefix>inventory_2</mat-icon>
-        <input matInput formControlName="name" placeholder="e.g. Coffee Bocat" />
+        <mat-label>Item Name</mat-label>
+        <mat-icon matPrefix>kitchen</mat-icon>
+        <input matInput formControlName="name" placeholder="e.g. All-Purpose Flour" />
         @if (form.get('name')?.invalid && form.get('name')?.touched) {
           <mat-error>Name is required (min 2 chars)</mat-error>
         }
       </mat-form-field>
 
-      <!-- Row 2: Category + SubCategory -->
+      <!-- Category + SubCategory -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Category</mat-label>
           <mat-icon matPrefix>category</mat-icon>
           <mat-select formControlName="category">
-            @for (cat of categories(); track cat._id) {
-              <mat-option [value]="cat.name">{{ cat.name }}</mat-option>
+            @for (cat of categories; track cat.value) {
+              <mat-option [value]="cat.value">{{ cat.label }}</mat-option>
             }
           </mat-select>
           @if (form.get('category')?.invalid && form.get('category')?.touched) {
@@ -53,7 +49,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Sub-Category</mat-label>
+          <mat-label>Item Type</mat-label>
           <mat-icon matPrefix>label_outline</mat-icon>
           <mat-select
             formControlName="subCategory"
@@ -67,12 +63,12 @@
             <mat-hint>Select a category first</mat-hint>
           }
           @if (form.get('subCategory')?.invalid && form.get('subCategory')?.touched) {
-            <mat-error>Sub-category is required</mat-error>
+            <mat-error>Item type is required</mat-error>
           }
         </mat-form-field>
       </div>
 
-      <!-- Row 3: Buying + Selling price -->
+      <!-- Buying Price + Stock -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Buying Price (Ksh.)</mat-label>
@@ -91,26 +87,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Selling Price (Ksh.)</mat-label>
-          <mat-icon matPrefix>sell</mat-icon>
-          <input
-            matInput
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="sellingPrice"
-            placeholder="0.00"
-          />
-          @if (form.get('sellingPrice')?.invalid && form.get('sellingPrice')?.touched) {
-            <mat-error>Enter a valid price</mat-error>
-          }
-        </mat-form-field>
-      </div>
-
-      <!-- Row 4: Stock + Reorder level -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Current Stock</mat-label>
+          <mat-label>Current Stock (units)</mat-label>
           <mat-icon matPrefix>warehouse</mat-icon>
           <input
             matInput
@@ -121,41 +98,31 @@
             placeholder="0"
           />
           @if (form.get('currentStock')?.invalid && form.get('currentStock')?.touched) {
-            <mat-error>Enter a valid stock quantity</mat-error>
+            <mat-error>Enter a valid quantity</mat-error>
           }
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Stock Reorder Level</mat-label>
-          <mat-icon matPrefix>loop</mat-icon>
-          <mat-select formControlName="stockReorderLevel">
-            @for (opt of reorderLevelOptions; track opt.value) {
-              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
-            }
-          </mat-select>
         </mat-form-field>
       </div>
 
-      <!-- Image URL (optional) -->
+      <!-- Reorder Level -->
       <mat-form-field appearance="outline" class="full-field">
-        <mat-label>Image URL <span class="optional">(optional)</span></mat-label>
-        <mat-icon matPrefix>image</mat-icon>
-        <input
-          matInput
-          formControlName="imageUrl"
-          placeholder="https://… or leave blank for auto"
-        />
+        <mat-label>Reorder Alert Level</mat-label>
+        <mat-icon matPrefix>loop</mat-icon>
+        <mat-select formControlName="stockReorderLevel">
+          @for (opt of reorderLevelOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
       </mat-form-field>
 
     </form>
   </div>
 
   <!-- Footer -->
-  <div class="inv-modal__footer">
+  <div class="rs-modal__footer">
     <button mat-stroked-button class="cancel-btn" (click)="close()">Cancel</button>
     <button mat-flat-button class="save-btn" (click)="save()">
       <mat-icon>{{ isEdit() ? 'save' : 'add_box' }}</mat-icon>
-      {{ isEdit() ? 'Save Changes' : 'Add Product' }}
+      {{ isEdit() ? 'Save Changes' : 'Add Item' }}
     </button>
   </div>
 </div>

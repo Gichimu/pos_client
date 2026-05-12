@@ -207,8 +207,8 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
 
-  @media (max-width: 900px) { grid-template-columns: repeat(2, 1fr); }
-  @media (max-width: 560px) { grid-template-columns: 1fr; }
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 560px)  { grid-template-columns: 1fr; }
 }
 
 .stat-card {
@@ -373,7 +373,8 @@
 
 // ─── Scrollable table area ────────────────────
 .sales-table-scroll {
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 // ─── Loading overlay ──────────────────────────
@@ -409,6 +410,7 @@
 
 .sales-table {
   width: 100%;
+  min-width: 700px;
   font-family: 'Inter', sans-serif;
 
   .mat-mdc-header-cell {

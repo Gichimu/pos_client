@@ -1,6 +1,14 @@
 <div class="shell">
+  <!-- Mobile sidebar overlay -->
+  <div
+    class="sidebar-overlay"
+    [class.sidebar-overlay--visible]="sidebarOpen()"
+    (click)="closeSidebar()"
+    aria-hidden="true"
+  ></div>
+
   <!-- Sidebar -->
-  <aside class="sidebar">
+  <aside class="sidebar" [class.sidebar--mobile-open]="sidebarOpen()">
     <!-- Logo -->
     <div class="sidebar__logo">
       <div class="logo-mark">C</div>
@@ -9,20 +17,58 @@
 
     <!-- Navigation -->
     <nav class="sidebar__nav" aria-label="Main navigation">
-      @for (item of navItems; track item.path) {
-        <a
-          class="nav-item"
-          [routerLink]="item.path"
-          routerLinkActive="nav-item--active"
-          [matTooltip]="item.label"
-          *rbacAllow="item.roles ?? []"
-          matTooltipPosition="right"
-          [matTooltipDisabled]="true"
-          [attr.aria-label]="item.label"
-        >
-          <mat-icon class="nav-item__icon">{{ item.icon }}</mat-icon>
-          <span class="nav-item__label">{{ item.label }}</span>
-        </a>
+      @for (item of navItems; track item.label) {
+        @if (item.children?.length) {
+          <!-- Expandable group -->
+          <div class="nav-group" *rbacAllow="item.roles ?? []">
+            <button
+              class="nav-item nav-group__trigger"
+              [class.nav-group__trigger--active]="isGroupExpanded(item.label)"
+              (click)="toggleGroup(item.label)"
+              [attr.aria-expanded]="isGroupExpanded(item.label)"
+              [attr.aria-label]="item.label"
+            >
+              <mat-icon class="nav-item__icon">{{ item.icon }}</mat-icon>
+              <span class="nav-item__label">{{ item.label }}</span>
+              <mat-icon class="nav-group__chevron">
+                {{ isGroupExpanded(item.label) ? 'expand_less' : 'expand_more' }}
+              </mat-icon>
+            </button>
+            @if (isGroupExpanded(item.label)) {
+              <div class="nav-group__children">
+                @for (child of item.children; track child.path) {
+                  <a
+                    class="nav-item nav-item--child"
+                    [routerLink]="child.path"
+                    routerLinkActive="nav-item--active"
+                    *rbacAllow="child.roles ?? []"
+                    [attr.aria-label]="child.label"
+                    (click)="closeSidebar()"
+                  >
+                    <mat-icon class="nav-item__icon">{{ child.icon }}</mat-icon>
+                    <span class="nav-item__label">{{ child.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <!-- Regular nav link -->
+          <a
+            class="nav-item"
+            [routerLink]="item.path"
+            routerLinkActive="nav-item--active"
+            [matTooltip]="item.label"
+            *rbacAllow="item.roles ?? []"
+            matTooltipPosition="right"
+            [matTooltipDisabled]="true"
+            [attr.aria-label]="item.label"
+            (click)="closeSidebar()"
+          >
+            <mat-icon class="nav-item__icon">{{ item.icon }}</mat-icon>
+            <span class="nav-item__label">{{ item.label }}</span>
+          </a>
+        }
       }
     </nav>
 
@@ -44,7 +90,17 @@
   <div class="main">
     <!-- Header -->
     <header class="header">
-      <h1 class="header__title">{{ pageTitle() }}</h1>
+      <div class="header__left">
+        <button
+          mat-icon-button
+          class="menu-toggle"
+          (click)="toggleSidebar()"
+          aria-label="Toggle navigation menu"
+        >
+          <mat-icon>{{ sidebarOpen() ? 'close' : 'menu' }}</mat-icon>
+        </button>
+        <h1 class="header__title">{{ pageTitle() }}</h1>
+      </div>
 
       <div class="header__actions">
         <!-- Store selector -->

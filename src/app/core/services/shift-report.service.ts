@@ -267,6 +267,7 @@ export class ShiftReportService {
     body {
       font-family: 'Courier New', Courier, monospace;
       font-size: 9pt;
+      font-weight: 700;
       background: #fff;
       color: #000;
     }

@@ -58,6 +58,22 @@ export class PosComponent implements OnInit {
 
   searchQuery = signal('');
 
+  /** Controls the mobile full-screen cart overlay. */
+  showMobileCart = signal(false);
+
+  /** Total units in cart (used for mobile FAB badge). */
+  readonly cartItemCount = computed(() =>
+    this.cartItems().reduce((s: number, i: any) => s + i.quantity, 0),
+  );
+
+  toggleMobileCart(): void {
+    this.showMobileCart.update((v) => !v);
+  }
+
+  closeMobileCart(): void {
+    this.showMobileCart.set(false);
+  }
+
   /** The currently selected category _id, or null for "All". */
   selectedCategory = signal<string | null>(null);
 

@@ -64,6 +64,14 @@ export const routes: Routes = [
           import('./features/management/sales/sales.component').then((m) => m.SalesComponent),
       },
       {
+        path: 'raw-stock',
+        data: { title: 'Raw Stock' },
+        loadComponent: () =>
+          import('./features/management/raw-stock/raw-stock.component').then(
+            (m) => m.RawStockComponent,
+          ),
+      },
+      {
         path: 'reports',
         data: { title: 'Reports' },
         loadComponent: () =>

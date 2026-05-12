@@ -84,6 +84,13 @@ body {
   }
 }
 
+// Ensure dialogs fit on very small screens
+@media (max-width: 479px) {
+  .cdk-overlay-pane {
+    max-width: calc(100vw - 16px) !important;
+  }
+}
+
 .mat-mdc-table {
   font-family: 'Inter', system-ui, sans-serif !important;
 }

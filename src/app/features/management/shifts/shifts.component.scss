@@ -168,16 +168,18 @@
 
 .shift-active__stats {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
   background: #fff;
   border: 1px solid #bbf7d0;
   border-radius: 12px;
   overflow: hidden;
+  flex-wrap: wrap;
 }
 
 .shift-mini-stat {
   flex: 1;
+  min-width: 140px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -223,9 +225,12 @@
 
   &__divider {
     width: 1px;
-    height: 40px;
+    min-height: 40px;
+    align-self: stretch;
     background: #bbf7d0;
     flex-shrink: 0;
+
+    @media (max-width: 639px) { display: none; }
   }
 }
 
@@ -372,7 +377,8 @@
 
 // ─── Table ────────────────────────────────────────
 .shifts-table-wrap {
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .shifts-paginator {
@@ -400,6 +406,7 @@
 
 .shifts-table {
   width: 100%;
+  min-width: 700px;
   font-family: 'Inter', sans-serif;
 
   .mat-mdc-header-cell {

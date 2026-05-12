@@ -27,8 +27,10 @@ import { productStore } from '../../../store/products/product.store';
 interface NavItem {
   label: string;
   icon: string;
-  path: string;
+  path?: string;
   roles?: UserRole[];
+  /** Child items render as an expandable sub-menu */
+  children?: NavItem[];
 }
 
 @Component({
@@ -82,7 +84,20 @@ export class ManagementShellComponent implements OnInit {
       label: 'Inventory',
       icon: 'inventory_2',
       roles: ['superAdmin', 'manager'] as UserRole[],
-      path: '/management/inventory',
+      children: [
+        {
+          label: 'Menu',
+          icon: 'restaurant_menu',
+          roles: ['superAdmin', 'manager'] as UserRole[],
+          path: '/management/inventory',
+        },
+        {
+          label: 'Raw Stock',
+          icon: 'kitchen',
+          roles: ['superAdmin', 'manager'] as UserRole[],
+          path: '/management/raw-stock',
+        },
+      ],
     },
     {
       label: 'Staff Management',
@@ -110,7 +125,48 @@ export class ManagementShellComponent implements OnInit {
     },
   ];
 
+  /** Set of group labels that are currently expanded in the sidebar. */
+  readonly expandedGroups = signal<Set<string>>(new Set<string>());
+
+  /** Controls the mobile slide-out sidebar. Always open on desktop (handled via CSS). */
+  readonly sidebarOpen = signal(false);
+
   notifications = signal(3);
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((v) => !v);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+  toggleGroup(label: string): void {
+    this.expandedGroups.update((current) => {
+      const next = new Set(current);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
+  }
+
+  isGroupExpanded(label: string): boolean {
+    return this.expandedGroups().has(label);
+  }
+
+  private autoExpandGroupForUrl(url: string): void {
+    const inventoryPaths = ['/management/inventory', '/management/raw-stock'];
+    if (inventoryPaths.some((p) => url.includes(p))) {
+      this.expandedGroups.update((s) => {
+        const next = new Set(s);
+        next.add('Inventory');
+        return next;
+      });
+    }
+  }
 
   logout() {
     this.authStore.logout();
@@ -123,5 +179,11 @@ export class ManagementShellComponent implements OnInit {
 
   ngOnInit() {
     this.productStore.loadProducts();
+    // Auto-expand group for the initial URL
+    this.autoExpandGroupForUrl(this.router.url);
+    // Keep expanding when navigating
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe((e) => this.autoExpandGroupForUrl(e.urlAfterRedirects));
   }
 }

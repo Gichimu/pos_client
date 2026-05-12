@@ -131,7 +131,7 @@
     </div>
 
     <!-- Right: Cart -->
-    <div class="cart-panel">
+    <div class="cart-panel" [class.cart-panel--mobile-open]="showMobileCart()">
       <div class="cart-header">
         <h2 class="cart-header__title">
           Current Order
@@ -139,12 +139,22 @@
             <span class="cart-header__count">{{ cartItems().length }}</span>
           }
         </h2>
-        @if (cartItems().length > 0) {
-          <button mat-button class="clear-btn" (click)="clearCart()">
-            <mat-icon>delete_sweep</mat-icon>
-            Clear
+        <div class="cart-header__actions">
+          @if (cartItems().length > 0) {
+            <button mat-button class="clear-btn" (click)="clearCart()">
+              <mat-icon>delete_sweep</mat-icon>
+              Clear
+            </button>
+          }
+          <button
+            mat-icon-button
+            class="cart-close-btn"
+            (click)="closeMobileCart()"
+            aria-label="Close cart"
+          >
+            <mat-icon>arrow_forward_ios</mat-icon>
           </button>
-        }
+        </div>
       </div>
 
       <!-- Items list -->
@@ -241,4 +251,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile cart overlay backdrop -->
+  <div
+    class="cart-overlay"
+    [class.cart-overlay--visible]="showMobileCart()"
+    (click)="closeMobileCart()"
+    aria-hidden="true"
+  ></div>
+
+  <!-- Mobile FAB: open cart -->
+  @if (cartItems().length > 0) {
+    <button class="mobile-cart-fab" (click)="toggleMobileCart()" aria-label="View cart">
+      <mat-icon>shopping_cart</mat-icon>
+      <span class="mobile-cart-fab__count">{{ cartItemCount() }}</span>
+      <span class="mobile-cart-fab__total">{{ formatCurrency(grandTotal()) }}</span>
+    </button>
+  }
 </div>

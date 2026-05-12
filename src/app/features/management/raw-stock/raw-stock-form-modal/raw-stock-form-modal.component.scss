@@ -1,8 +1,8 @@
-.staff-modal {
+.rs-modal {
   background: var(--color-surface);
   border-radius: 16px;
   overflow: hidden;
-  width: 440px;
+  width: 560px;
 
   &__header {
     display: flex;
@@ -23,25 +23,19 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: var(--color-primary-light);
+    background: #ecfdf5;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-
-    mat-icon {
-      font-size: 22px;
-      width: 22px;
-      height: 22px;
-      color: var(--color-primary);
-    }
+    mat-icon { font-size: 22px; width: 22px; height: 22px; color: #059669; }
   }
 
   &__title {
     font-size: 1rem;
     font-weight: 700;
     color: var(--color-text);
-    margin: 0 0 2px 0;
+    margin: 0 0 2px;
   }
 
   &__subtitle {
@@ -50,9 +44,7 @@
     margin: 0;
   }
 
-  &__body {
-    padding: 24px;
-  }
+  &__body { padding: 20px 24px; }
 
   &__footer {
     display: flex;
@@ -68,45 +60,17 @@
   color: var(--color-text-muted) !important;
   width: 32px !important;
   height: 32px !important;
-  line-height: 32px !important;
 }
 
-.staff-form {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.rs-form { display: flex; flex-direction: column; gap: 0; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 }
 
-.full-field {
-  width: 100%;
-}
-
-.role-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.role-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-
-  &--admin   { background: var(--color-primary); }
-  &--manager { background: #a84c0f; }
-  &--cashier { background: #22c55e; }
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-
-  &--active   { background: #22c55e;; }
-  &--inactive { background:  #000000}
-}
+.flex-field, .full-field { width: 100%; }
 
 .cancel-btn {
   font-family: 'Inter', sans-serif !important;
@@ -128,21 +92,16 @@
   font-weight: 600 !important;
   letter-spacing: 0 !important;
   border-radius: 8px !important;
-  background-color: var(--color-primary) !important;
+  background-color: #059669 !important;
   color: #fff !important;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-
-  mat-icon {
-    font-size: 17px;
-    width: 17px;
-    height: 17px;
-  }
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
 }
 
 // ─── Material form-field theme overrides (scoped) ────────────────────────────
-::ng-deep .staff-form {
+::ng-deep .rs-form {
   // Default outline border color
   .mdc-notched-outline__leading,
   .mdc-notched-outline__notch,
@@ -154,7 +113,7 @@
   .mdc-notched-outline__leading  { border-radius: 8px 0 0 8px !important; min-width: 8px !important; }
   .mdc-notched-outline__trailing { border-radius: 0 8px 8px 0 !important; }
 
-  // Focused: primary blue border
+  // Focused: primary blue border + slight weight
   .mat-mdc-form-field.mat-focused {
     .mdc-notched-outline__leading,
     .mdc-notched-outline__notch,
@@ -213,12 +172,17 @@
 
 // ─── Mobile responsive (<480px) ─────────────────────────────────────────────
 @media (max-width: 479px) {
-  .staff-modal {
+  .rs-modal {
     width: 100%;
     border-radius: 12px;
 
     &__header { padding: 16px 16px 14px; }
     &__body   { padding: 14px 16px; }
     &__footer { padding: 12px 16px; gap: 8px; }
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 }
