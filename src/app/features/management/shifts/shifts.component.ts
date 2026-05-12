@@ -174,7 +174,7 @@ export class ShiftsComponent implements OnInit {
   openStartDialog(): void {
     const ref = this.dialog.open<StartShiftDialogComponent, void, StartShiftDialogResult>(
       StartShiftDialogComponent,
-      { width: '460px', disableClose: false, panelClass: 'pos-dialog' },
+      { width: '460px', maxWidth: '95vw', disableClose: false, panelClass: 'pos-dialog' },
     );
 
     ref.afterClosed().subscribe((result) => {
@@ -210,7 +210,7 @@ export class ShiftsComponent implements OnInit {
 
     const ref = this.dialog.open<EndShiftDialogComponent, EndShiftDialogData, EndShiftDialogResult>(
       EndShiftDialogComponent,
-      { data: dialogData, width: '500px', disableClose: false, panelClass: 'pos-dialog' },
+      { data: dialogData, width: '500px', maxWidth: '95vw', disableClose: false, panelClass: 'pos-dialog' },
     );
 
     ref.afterClosed().subscribe((result) => {
