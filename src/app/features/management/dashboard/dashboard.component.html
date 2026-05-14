@@ -7,18 +7,32 @@
       icon="credit_card"
       iconBgClass="icon-bg--blue"
     />
-    <app-stat-card
-      title="Low Stock Items"
-      [value]="lowStockCount().toString()"
-      icon="warning_amber"
-      iconBgClass="icon-bg--red"
-    />
-    <app-stat-card
-      title="Critical Stock Items"
-      [value]="criticalStockCount().toString()"
-      icon="dangerous"
-      iconBgClass="icon-bg--red"
-    />
+    <button
+      class="stat-card-btn"
+      (click)="navigateToInventory('low')"
+      aria-label="View low stock items in inventory"
+      [disabled]="lowStockCount() === 0"
+    >
+      <app-stat-card
+        title="Low Stock Items"
+        [value]="lowStockCount().toString()"
+        icon="warning_amber"
+        iconBgClass="icon-bg--red"
+      />
+    </button>
+    <button
+      class="stat-card-btn"
+      (click)="navigateToInventory('critical')"
+      aria-label="View critical stock items in inventory"
+      [disabled]="criticalStockCount() === 0"
+    >
+      <app-stat-card
+        title="Critical Stock Items"
+        [value]="criticalStockCount().toString()"
+        icon="dangerous"
+        iconBgClass="icon-bg--red"
+      />
+    </button>
     <app-stat-card
       title="Active Cashiers"
       [value]="activeCashiers().toString()"

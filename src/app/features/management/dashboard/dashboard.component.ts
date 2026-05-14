@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { StatCardComponent } from '../../../shared/components/stat-card/stat-card.component';
 import { ProductTableComponent } from './product-table/product-table.component';
 import { GenerateReportModalComponent } from './generate-report-modal/generate-report-modal.component';
@@ -21,6 +20,7 @@ import { saleStore } from '../../../store/sales/sale.store';
 export class DashboardComponent implements OnInit {
   private readonly productStore = inject(productStore);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
   readonly userStore = inject(userStore);
   readonly salesStore = inject(saleStore);
 
@@ -67,6 +67,10 @@ export class DashboardComponent implements OnInit {
     //     console.error('Failed to load users:', error);
     //   },
     // });
+  }
+
+  navigateToInventory(filter: 'low' | 'critical'): void {
+    this.router.navigate(['/management/inventory'], { queryParams: { filter } });
   }
 
   openGenerateReport() {

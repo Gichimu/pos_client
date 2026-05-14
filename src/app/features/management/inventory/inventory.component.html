@@ -4,21 +4,36 @@
     <div class="inv-page__header-left">
       <h2 class="inv-page__title">Inventory</h2>
       <div class="inv-stats">
-        <span class="stat-pill stat-pill--total">
+        <button
+          class="stat-pill stat-pill--total"
+          [class.stat-pill--active]="stockFilter() === 'all'"
+          (click)="setStockFilter('all')"
+          aria-label="Show all products"
+        >
           <span class="material-icons">inventory_2</span>
           {{ totalCount() }} Products
-        </span>
+        </button>
         @if (lowStockCount() > 0) {
-          <span class="stat-pill stat-pill--low">
+          <button
+            class="stat-pill stat-pill--low"
+            [class.stat-pill--active]="stockFilter() === 'low'"
+            (click)="setStockFilter('low')"
+            aria-label="Filter low stock products"
+          >
             <span class="material-icons">warning_amber</span>
             {{ lowStockCount() }} Low Stock
-          </span>
+          </button>
         }
-        @if (outOfStock() > 0) {
-          <span class="stat-pill stat-pill--out">
-            <span class="material-icons">block</span>
-            {{ outOfStock() }} Out of Stock
-          </span>
+        @if (criticalStockCount() > 0) {
+          <button
+            class="stat-pill stat-pill--out"
+            [class.stat-pill--active]="stockFilter() === 'critical'"
+            (click)="setStockFilter('critical')"
+            aria-label="Filter critical stock products"
+          >
+            <span class="material-icons">dangerous</span>
+            {{ criticalStockCount() }} Critical
+          </button>
         }
       </div>
     </div>

@@ -13,16 +13,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
-import { Store } from '@ngrx/store';
 import { filter, map } from 'rxjs/operators';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { selectCurrentUser } from '../../../store/auth/auth.selectors';
 import { AuthService } from '../../../core/services/auth.service';
 import { MatDividerModule } from '@angular/material/divider';
 import { authStore } from '../../../store/auth/auth.store';
 import { User, UserRole } from '../../../core/models/user.model';
 import { RbacAllow } from '../../../core/directives/rbac-allow';
 import { productStore } from '../../../store/products/product.store';
+import { userStore } from '../../../store/users/user.store';
 
 interface NavItem {
   label: string;
@@ -56,6 +55,7 @@ export class ManagementShellComponent implements OnInit {
   private readonly authStore = inject(authStore);
   private readonly authService = inject(AuthService);
   private readonly productStore = inject(productStore);
+  private readonly usersStore = inject(userStore);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
@@ -131,7 +131,27 @@ export class ManagementShellComponent implements OnInit {
   /** Controls the mobile slide-out sidebar. Always open on desktop (handled via CSS). */
   readonly sidebarOpen = signal(false);
 
-  notifications = signal(3);
+  /** Products with low or critical stock, sorted critical-first. */
+  readonly stockAlerts = computed(() =>
+    this.productStore
+      .products()
+      .filter((p) => p.stockReorderStatus === 'low' || p.stockReorderStatus === 'critical')
+      .sort((a, b) => {
+        if (a.stockReorderStatus === 'critical' && b.stockReorderStatus !== 'critical') return -1;
+        if (b.stockReorderStatus === 'critical' && a.stockReorderStatus !== 'critical') return 1;
+        return a.name.localeCompare(b.name);
+      }),
+  );
+
+  /** Users awaiting approval. */
+  readonly pendingUsers = computed(() =>
+    this.usersStore.users().filter((u) => u.status === 'pending'),
+  );
+
+  /** Total unread notification count. */
+  readonly notificationCount = computed(
+    () => this.stockAlerts().length + this.pendingUsers().length,
+  );
 
   toggleSidebar(): void {
     this.sidebarOpen.update((v) => !v);
@@ -166,6 +186,15 @@ export class ManagementShellComponent implements OnInit {
         return next;
       });
     }
+  }
+
+  navigateToInventory(status: string): void {
+    const filter = status === 'critical' ? 'critical' : 'low';
+    this.router.navigate(['/management/inventory'], { queryParams: { filter } });
+  }
+
+  navigateToStaff(): void {
+    this.router.navigate(['/management/staff']);
   }
 
   logout() {

@@ -123,12 +123,75 @@
           mat-icon-button
           matTooltip="Notifications"
           aria-label="Notifications"
-          [matBadge]="notifications()"
+          [matBadge]="notificationCount()"
+          [matBadgeHidden]="notificationCount() === 0"
           matBadgeColor="warn"
           matBadgeSize="small"
+          [matMenuTriggerFor]="notifMenu"
         >
-          <mat-icon>notifications_none</mat-icon>
+          <mat-icon>{{ notificationCount() > 0 ? 'notifications' : 'notifications_none' }}</mat-icon>
         </button>
+
+        <!-- Notification panel -->
+        <mat-menu #notifMenu="matMenu" class="notif-panel" xPosition="before">
+          <!-- Panel header -->
+          <div class="notif-panel__header">
+            <span class="notif-panel__title">Notifications</span>
+            @if (notificationCount() > 0) {
+              <span class="notif-panel__badge">{{ notificationCount() }}</span>
+            }
+          </div>
+
+          <!-- All clear -->
+          @if (notificationCount() === 0) {
+            <div class="notif-empty">
+              <mat-icon>check_circle_outline</mat-icon>
+              <span>All clear! No alerts.</span>
+            </div>
+          }
+
+          <!-- Stock alerts section -->
+          @if (stockAlerts().length > 0) {
+            <div class="notif-section-label">Stock Alerts</div>
+            @for (item of stockAlerts().slice(0, 5); track item._id) {
+              <button mat-menu-item class="notif-item" (click)="navigateToInventory(item.stockReorderStatus!)">
+                <mat-icon [class]="'notif-icon notif-icon--' + item.stockReorderStatus">
+                  {{ item.stockReorderStatus === 'critical' ? 'dangerous' : 'warning_amber' }}
+                </mat-icon>
+                <span class="notif-item__text">
+                  <span class="notif-item__name">{{ item.name }}</span>
+                  <span class="notif-item__desc">
+                    {{ item.stockReorderStatus === 'critical' ? 'Critical stock' : 'Low stock' }} · {{ item.currentStock }} left
+                  </span>
+                </span>
+              </button>
+            }
+            @if (stockAlerts().length > 5) {
+              <button mat-menu-item class="notif-more" (click)="navigateToInventory('low')">
+                +{{ stockAlerts().length - 5 }} more stock alerts — view all
+              </button>
+            }
+          }
+
+          <!-- Pending users section -->
+          @if (pendingUsers().length > 0) {
+            <div class="notif-section-label" [class.notif-section-label--bordered]="stockAlerts().length > 0">Pending Users</div>
+            @for (user of pendingUsers().slice(0, 3); track user._id) {
+              <button mat-menu-item class="notif-item" (click)="navigateToStaff()">
+                <mat-icon class="notif-icon notif-icon--pending">person_outline</mat-icon>
+                <span class="notif-item__text">
+                  <span class="notif-item__name">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="notif-item__desc">Pending approval</span>
+                </span>
+              </button>
+            }
+            @if (pendingUsers().length > 3) {
+              <button mat-menu-item class="notif-more" (click)="navigateToStaff()">
+                +{{ pendingUsers().length - 3 }} more pending users
+              </button>
+            }
+          }
+        </mat-menu>
 
         <!-- User menu -->
         <button mat-button class="user-btn" [matMenuTriggerFor]="userMenu">
@@ -142,7 +205,7 @@
           >
           <mat-icon>keyboard_arrow_down</mat-icon>
         </button>
-        <mat-menu #userMenu="matMenu">
+        <mat-menu #userMenu="matMenu" panelClass="user-menu" xPosition="before">
           <button mat-menu-item><mat-icon>person</mat-icon> Profile</button>
           <button mat-menu-item><mat-icon>settings</mat-icon> Settings</button>
           <mat-divider></mat-divider>

@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { Product } from '../../../core/models/product.model';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import {
@@ -47,9 +48,15 @@ export class InventoryComponent implements OnInit {
   private readonly sweetAlert = inject(SweetAlertService);
   private readonly reqStore = inject(requisitionStore);
   private readonly auth = inject(authStore);
+  private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     this.store.loadProducts();
+    // Apply filter from query params (e.g. when navigated from dashboard or notifications)
+    const filterParam = this.route.snapshot.queryParamMap.get('filter');
+    if (filterParam === 'low' || filterParam === 'critical') {
+      this.stockFilter.set(filterParam);
+    }
   }
 
   /** Only show sellable menu products (exclude raw-stock items). */
@@ -59,10 +66,10 @@ export class InventoryComponent implements OnInit {
 
   readonly totalCount = computed(() => this.menuProducts().length);
   readonly lowStockCount = computed(
-    () => this.menuProducts().filter((p) => p.currentStock < 5).length,
+    () => this.menuProducts().filter((p) => p.stockReorderStatus === 'low').length,
   );
-  readonly outOfStock = computed(
-    () => this.menuProducts().filter((p) => p.currentStock === 0).length,
+  readonly criticalStockCount = computed(
+    () => this.menuProducts().filter((p) => p.stockReorderStatus === 'critical').length,
   );
 
   readonly displayedColumns = [
@@ -77,18 +84,34 @@ export class InventoryComponent implements OnInit {
   ];
 
   searchQuery = signal('');
+  /** Active stock-status filter for the pill tabs. */
+  readonly stockFilter = signal<'all' | 'low' | 'critical'>('all');
 
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
-    return q
-      ? this.menuProducts().filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q) ||
-            p.sku.toLowerCase().includes(q),
-        )
-      : this.menuProducts();
+    const f = this.stockFilter();
+    let products = this.menuProducts();
+
+    // Apply stock filter
+    if (f === 'low') products = products.filter((p) => p.stockReorderStatus === 'low');
+    else if (f === 'critical') products = products.filter((p) => p.stockReorderStatus === 'critical');
+
+    // Apply search query
+    if (q) {
+      products = products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.sku.toLowerCase().includes(q),
+      );
+    }
+    return products;
   });
+
+  setStockFilter(filter: 'all' | 'low' | 'critical'): void {
+    this.stockFilter.set(filter);
+    this.pageIndex.set(0);
+  }
 
   // ── Pagination ────────────────────────────────────────────
   readonly pageIndex = signal(0);
@@ -100,7 +123,7 @@ export class InventoryComponent implements OnInit {
     return this.filteredProducts().slice(start, start + this.PAGE_SIZE);
   });
 
-  onSearch(value: string) {
+  onSearch(value: string): void {
     this.searchQuery.set(value);
     this.pageIndex.set(0);
   }

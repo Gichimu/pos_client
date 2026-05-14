@@ -48,6 +48,28 @@
   }
 }
 
+// Clickable stat card wrapper
+.stat-card-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  border-radius: var(--radius-card);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: left;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
 .action-btn {
   font-family: 'Inter', sans-serif !important;
   font-size: 0.85rem !important;
