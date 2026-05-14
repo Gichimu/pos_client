@@ -79,6 +79,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
+  margin-bottom: 1.5em;
 }
 
 .flex-field, .full-field { width: 100%; }
@@ -97,9 +98,9 @@
   letter-spacing: 0.07em;
   color: var(--color-text-muted);
   padding-bottom: 8px;
-  border-bottom: 1px solid var(--color-border);
-  margin-top: 4px;
-  margin-bottom: -4px;
+  // border-bottom: 1px solid var(--color-border);
+  margin-top: 8px;
+  margin-bottom: 4px;
 }
 
 .lock-icon {
@@ -126,7 +127,7 @@
   font-size: 0.82rem;
   color: #15803d;
   font-weight: 500;
-  margin-top: -4px;
+  margin-top: 0;
 
   mat-icon {
     font-size: 17px;

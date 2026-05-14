@@ -22,7 +22,6 @@
   <!-- Body -->
   <div class="rs-modal__body">
     <form [formGroup]="form" class="rs-form">
-
       <!-- Item Name -->
       <mat-form-field appearance="outline" class="full-field">
         <mat-label>Item Name</mat-label>
@@ -98,7 +97,7 @@
               </mat-optgroup>
             }
           </mat-select>
-          <mat-hint>Applies to stock quantities below</mat-hint>
+          <mat-hint>Applies to stock fields below</mat-hint>
         </mat-form-field>
       </div>
 
@@ -113,7 +112,7 @@
             <mat-icon matPrefix>warehouse</mat-icon>
             <input matInput type="number" formControlName="currentStock" readonly />
             <mat-icon matSuffix class="lock-icon">lock</mat-icon>
-            <mat-hint>Read-only · use "Add to Stock" below</mat-hint>
+            <mat-hint>Read-only — use Add to Stock below</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="flex-field">
@@ -127,7 +126,7 @@
             @if (unitValue()) {
               <span matSuffix class="unit-suffix">{{ unitValue() }}</span>
             }
-            <mat-hint>Alert when stock falls below this</mat-hint>
+            <mat-hint>Alert threshold</mat-hint>
           </mat-form-field>
         </div>
 
@@ -147,9 +146,11 @@
             <span matSuffix class="units-suffix">{{ unitValue() }}</span>
           }
           @if ((addToStock.value ?? 0) > 0) {
-            <mat-hint class="add-hint">↑ New total will be {{ newStockTotal() }} {{ unitValue() }} after saving</mat-hint>
+            <mat-hint class="add-hint"
+              >↑ New total: {{ newStockTotal() }} {{ unitValue() }}</mat-hint
+            >
           } @else {
-            <mat-hint>Enter amount to add on top of current stock</mat-hint>
+            <mat-hint>Enter amount to add to current stock</mat-hint>
           }
         </mat-form-field>
 
@@ -163,7 +164,6 @@
             </span>
           </div>
         }
-
       } @else {
         <!-- ── Add mode: direct editable stock ── -->
         <div class="form-row">
@@ -197,11 +197,10 @@
             @if (unitValue()) {
               <span matSuffix class="unit-suffix">{{ unitValue() }}</span>
             }
-            <mat-hint>Alert when stock falls below this</mat-hint>
+            <mat-hint>Alert threshold</mat-hint>
           </mat-form-field>
         </div>
       }
-
     </form>
   </div>
 
