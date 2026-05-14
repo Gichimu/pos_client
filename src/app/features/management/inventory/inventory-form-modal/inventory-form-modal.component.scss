@@ -78,6 +78,89 @@
   font-weight: 400;
 }
 
+// ─── Stock management section ────────────────────────────────────────────────
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+  margin-top: 4px;
+  margin-bottom: -4px;
+}
+
+.lock-icon {
+  font-size: 15px !important;
+  width: 15px !important;
+  height: 15px !important;
+  color: var(--color-text-light) !important;
+}
+
+.units-suffix {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  padding-right: 2px;
+}
+
+.stock-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  color: #15803d;
+  font-weight: 500;
+  margin-top: -4px;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+    color: #16a34a;
+    flex-shrink: 0;
+  }
+
+  strong { font-weight: 700; }
+}
+
+// ─── Add-to-stock field: always highlighted in primary ───────────────────────
+::ng-deep .add-stock-field {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--color-primary) !important;
+    border-width: 1.5px !important;
+  }
+
+  .mdc-notched-outline__leading  { border-radius: 8px 0 0 8px !important; min-width: 8px !important; }
+  .mdc-notched-outline__trailing { border-radius: 0 8px 8px 0 !important; }
+
+  .mat-mdc-form-field-icon-prefix mat-icon { color: var(--color-primary) !important; }
+  .mdc-floating-label { color: var(--color-primary) !important; }
+
+  .add-hint {
+    color: var(--color-primary) !important;
+    font-weight: 500 !important;
+  }
+}
+
+// ─── Disabled current-stock field (edit mode) ────────────────────────────────
+::ng-deep .inv-form .mat-mdc-form-field.mat-form-field-disabled {
+  .mat-mdc-input-element { color: var(--color-text-muted) !important; }
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--color-border) !important;
+    border-style: dashed !important;
+  }
+}
+
 .cancel-btn {
   font-family: 'Inter', sans-serif !important;
   font-weight: 500 !important;

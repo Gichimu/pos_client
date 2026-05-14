@@ -1,5 +1,5 @@
 import { Component, inject, computed, Signal, effect } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -91,6 +91,21 @@ export class InventoryFormModalComponent {
   readonly reorderOptions = REORDER_OPTIONS;
   readonly reorderLevelOptions = REORDER_LEVEL_OPTIONS;
 
+  /** Units to add on top of existing stock (edit mode only). */
+  readonly addToStock = new FormControl<number | null>(null, [Validators.min(0)]);
+
+  private readonly addToStockValue = toSignal(
+    this.addToStock.valueChanges.pipe(startWith(this.addToStock.value)),
+    { initialValue: this.addToStock.value },
+  );
+
+  /** Live preview of new stock total. */
+  readonly newStockTotal = computed(() => {
+    const current = this.data?.product?.currentStock ?? 0;
+    const add = Number(this.addToStockValue()) || 0;
+    return current + add;
+  });
+
   readonly form = this.fb.group({
     name: [this.data?.product?.name ?? '', [Validators.required, Validators.minLength(2)]],
     category: [this.data?.product?.category ?? '', Validators.required],
@@ -125,6 +140,11 @@ export class InventoryFormModalComponent {
   });
 
   constructor() {
+    // In edit mode, lock the currentStock field — users must use "Add to Stock"
+    if (this.isEdit()) {
+      this.form.controls.currentStock.disable();
+    }
+
     // Reset subCategory whenever category changes, unless existing value is still valid
     effect(() => {
       const validOptions = this.availableSubCategories().map((o) => o.value);
@@ -147,6 +167,12 @@ export class InventoryFormModalComponent {
 
     const v = this.form.getRawValue();
     const name = v.name!.trim();
+
+    // In edit mode, currentStock = existing + addToStock delta; otherwise use form value directly
+    const currentStock = this.isEdit()
+      ? (this.data?.product?.currentStock ?? 0) + (Number(this.addToStock.value) || 0)
+      : Number(v.currentStock);
+
     const product: Product = {
       _id: this.data?.product?._id,
       sku: name,
@@ -155,7 +181,7 @@ export class InventoryFormModalComponent {
       subCategory: v.subCategory!,
       buyingPrice: Number(v.buyingPrice),
       sellingPrice: Number(v.sellingPrice),
-      currentStock: Number(v.currentStock),
+      currentStock,
       stockReorderLevel: v.stockReorderLevel as ReorderLevel,
       imageUrl:
         v.imageUrl?.trim() || `https://picsum.photos/seed/${encodeURIComponent(name)}/60/60`,

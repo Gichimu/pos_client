@@ -107,34 +107,93 @@
         </mat-form-field>
       </div>
 
-      <!-- Row 4: Stock + Reorder level -->
-      <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Current Stock</mat-label>
-          <mat-icon matPrefix>warehouse</mat-icon>
+      <!-- Row 4: Stock management — behaviour differs between edit and add mode -->
+      @if (isEdit()) {
+        <!-- ── Edit mode: locked current stock + "Add to Stock" ── -->
+        <p class="section-label">Stock Management</p>
+
+        <!-- Current Stock (readonly) + Reorder Level -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Current Stock</mat-label>
+            <mat-icon matPrefix>warehouse</mat-icon>
+            <input matInput type="number" formControlName="currentStock" readonly />
+            <mat-icon matSuffix class="lock-icon">lock</mat-icon>
+            <mat-hint>Read-only · use "Add to Stock" below to increase</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Stock Reorder Level</mat-label>
+            <mat-icon matPrefix>loop</mat-icon>
+            <mat-select formControlName="stockReorderLevel">
+              @for (opt of reorderLevelOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Add to Stock (full width, highlighted) -->
+        <mat-form-field appearance="outline" class="full-field add-stock-field">
+          <mat-label>Add to Stock</mat-label>
+          <mat-icon matPrefix>add_circle_outline</mat-icon>
           <input
             matInput
             type="number"
             min="0"
             step="1"
-            formControlName="currentStock"
+            [formControl]="addToStock"
             placeholder="0"
           />
-          @if (form.get('currentStock')?.invalid && form.get('currentStock')?.touched) {
-            <mat-error>Enter a valid stock quantity</mat-error>
+          <span matSuffix class="units-suffix">units</span>
+          @if ((addToStock.value ?? 0) > 0) {
+            <mat-hint class="add-hint">↑ New total will be {{ newStockTotal() }} units after saving</mat-hint>
+          } @else {
+            <mat-hint>Enter units to add on top of current stock</mat-hint>
           }
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Stock Reorder Level</mat-label>
-          <mat-icon matPrefix>loop</mat-icon>
-          <mat-select formControlName="stockReorderLevel">
-            @for (opt of reorderLevelOptions; track opt.value) {
-              <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        <!-- Stock update preview banner -->
+        @if ((addToStock.value ?? 0) > 0) {
+          <div class="stock-preview">
+            <mat-icon>check_circle</mat-icon>
+            <span>
+              Stock will update from <strong>{{ data?.product?.currentStock }}</strong> →
+              <strong>{{ newStockTotal() }} units</strong> on save
+            </span>
+          </div>
+        }
+
+      } @else {
+        <!-- ── Add mode: direct editable current stock ── -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Current Stock</mat-label>
+            <mat-icon matPrefix>warehouse</mat-icon>
+            <input
+              matInput
+              type="number"
+              min="0"
+              step="1"
+              formControlName="currentStock"
+              placeholder="0"
+            />
+            @if (form.get('currentStock')?.invalid && form.get('currentStock')?.touched) {
+              <mat-error>Enter a valid stock quantity</mat-error>
             }
-          </mat-select>
-        </mat-form-field>
-      </div>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Stock Reorder Level</mat-label>
+            <mat-icon matPrefix>loop</mat-icon>
+            <mat-select formControlName="stockReorderLevel">
+              @for (opt of reorderLevelOptions; track opt.value) {
+                <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      }
 
       <!-- Image URL (optional) -->
       <mat-form-field appearance="outline" class="full-field">
