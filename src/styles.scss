@@ -301,6 +301,21 @@ body {
   background: var(--color-text-light);
 }
 
+// ─── Dialog mobile fix: allow SVH on small screens ───────────────────────────
+@media (max-width: 479px) {
+  .cdk-overlay-pane {
+    max-width: 100vw !important;
+    max-height: 100svh !important;
+  }
+
+  .mat-mdc-dialog-container,
+  .mdc-dialog__container,
+  .mdc-dialog__surface {
+    max-height: 100svh !important;
+    overflow: visible !important;
+  }
+}
+
 // Page fade-in animation
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
