@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { Product } from '../../../core/models/product.model';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import {
@@ -20,6 +21,8 @@ import { productStore } from '../../../store/products/product.store';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import { RbacAllow } from '../../../core/directives/rbac-allow';
 import { RAW_STOCK_CATEGORIES } from './raw-stock-form-modal/raw-stock-form-modal.component';
+import { requisitionStore } from '../../../store/requisitions/requisition.store';
+import { authStore } from '../../../store/auth/auth.store';
 
 @Component({
   selector: 'app-raw-stock',
@@ -41,9 +44,24 @@ export class RawStockComponent implements OnInit {
   private readonly store = inject(productStore);
   private readonly dialog = inject(MatDialog);
   private readonly sweetAlert = inject(SweetAlertService);
+  private readonly reqStore = inject(requisitionStore);
+  private readonly auth = inject(authStore);
+  private readonly route = inject(ActivatedRoute);
+
+  /** Active stock-status filter (driven by query param or pill clicks). */
+  readonly stockFilter = signal<'all' | 'low' | 'critical'>('all');
 
   ngOnInit(): void {
     this.store.loadProducts();
+    const filterParam = this.route.snapshot.queryParamMap.get('filter');
+    if (filterParam === 'low' || filterParam === 'critical') {
+      this.stockFilter.set(filterParam);
+    }
+  }
+
+  setStockFilter(f: 'all' | 'low' | 'critical'): void {
+    this.stockFilter.set(f);
+    this.pageIndex.set(0);
   }
 
   /** Only raw-stock tagged products. */
@@ -65,13 +83,18 @@ export class RawStockComponent implements OnInit {
 
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
-    return q
-      ? this.rawProducts().filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.category.toLowerCase().includes(q),
-        )
-      : this.rawProducts();
+    const f = this.stockFilter();
+    let products = this.rawProducts();
+
+    if (f === 'low') products = products.filter((p) => p.stockReorderStatus === 'low');
+    else if (f === 'critical') products = products.filter((p) => p.stockReorderStatus === 'critical');
+
+    if (q) {
+      products = products.filter(
+        (p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q),
+      );
+    }
+    return products;
   });
 
   // ── Pagination ──────────────────────────────────────────
@@ -128,6 +151,16 @@ export class RawStockComponent implements OnInit {
     );
     ref.afterClosed().subscribe((updated) => {
       if (updated) {
+        const stockDelta = updated.currentStock - (product.currentStock ?? 0);
+        if (stockDelta > 0) {
+          this.reqStore.addRequisition({
+            productId: updated._id ?? '',
+            productName: updated.name,
+            quantity: stockDelta,
+            addedBy: this.auth.user()?._id,
+            addedAt: new Date(),
+          });
+        }
         this.store.updateProduct(updated);
         this.sweetAlert.success(`"${updated.name}" updated`);
       }

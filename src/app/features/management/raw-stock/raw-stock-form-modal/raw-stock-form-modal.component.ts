@@ -1,6 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { Product, ReorderLevel } from '../../../../core/models/product.model';
+import { Product, ReorderLevel, StockUnit } from '../../../../core/models/product.model';
 
 export interface RawStockFormData {
   product?: Product;
@@ -22,12 +22,53 @@ const REORDER_LEVEL_OPTIONS: { value: ReorderLevel; label: string }[] = [
   { value: 20, label: '20' },
 ];
 
+export const UNIT_GROUPS: { group: string; options: { value: StockUnit; label: string }[] }[] = [
+  {
+    group: 'Volume',
+    options: [
+      { value: 'L', label: 'Litre (L)' },
+      { value: 'mL', label: 'Millilitre (mL)' },
+      { value: 'cL', label: 'Centilitre (cL)' },
+      { value: 'fl oz', label: 'Fl. Oz' },
+    ],
+  },
+  {
+    group: 'Weight',
+    options: [
+      { value: 'kg', label: 'Kilogram (kg)' },
+      { value: 'g', label: 'Gram (g)' },
+      { value: 'mg', label: 'Milligram (mg)' },
+      { value: 'lb', label: 'Pound (lb)' },
+      { value: 'oz', label: 'Ounce (oz)' },
+    ],
+  },
+  {
+    group: 'Count',
+    options: [
+      { value: 'pcs', label: 'Piece (pcs)' },
+      { value: 'dozen', label: 'Dozen' },
+      { value: 'pack', label: 'Pack' },
+      { value: 'bag', label: 'Bag' },
+      { value: 'box', label: 'Box' },
+    ],
+  },
+  {
+    group: 'Other',
+    options: [
+      { value: 'portion', label: 'Portion' },
+      { value: 'tray', label: 'Tray' },
+    ],
+  },
+];
+
 /** Raw stock category → subcategory items map. */
 const RAW_SUBCATEGORY_MAP: Record<string, { value: string; label: string }[]> = {
   grains: [
     { value: 'wheat_flour', label: 'Wheat Flour' },
     { value: 'maize_flour', label: 'Maize Flour' },
     { value: 'rice', label: 'Rice' },
+    { value: 'maize', label: 'Maize' },
+    { value: 'beans', label: 'Beans' },
     { value: 'oats', label: 'Oats' },
     { value: 'semolina', label: 'Semolina' },
   ],
@@ -68,6 +109,14 @@ const RAW_SUBCATEGORY_MAP: Record<string, { value: string; label: string }[]> = 
     { value: 'turmeric', label: 'Turmeric' },
     { value: 'bay_leaves', label: 'Bay Leaves' },
   ],
+  meat: [
+    { value: 'chicken', label: 'Chicken' },
+    { value: 'beef', label: 'Beef' },
+    { value: 'pork', label: 'Pork' },
+    { value: 'lamb', label: 'Lamb' },
+    { value: 'fish', label: 'Fish' },
+    { value: 'seafood', label: 'Seafood' },
+  ],
   others: [
     { value: 'baking_powder', label: 'Baking Powder' },
     { value: 'vinegar', label: 'Vinegar' },
@@ -84,6 +133,7 @@ export const RAW_STOCK_CATEGORIES: { value: string; label: string }[] = [
   { value: 'oils', label: 'Oils & Fats' },
   { value: 'vegetables', label: 'Vegetables' },
   { value: 'spices', label: 'Spices & Herbs' },
+  { value: 'meat', label: 'Meat & Seafood' },
   { value: 'others', label: 'Others' },
 ];
 
@@ -111,6 +161,22 @@ export class RawStockFormModalComponent {
   readonly isEdit = computed(() => !!this.data?.product);
   readonly categories = RAW_STOCK_CATEGORIES;
   readonly reorderLevelOptions = REORDER_LEVEL_OPTIONS;
+  readonly unitGroups = UNIT_GROUPS;
+
+  /** Units to add on top of existing stock (edit mode only). */
+  readonly addToStock = new FormControl<number | null>(null, [Validators.min(0)]);
+
+  private readonly addToStockValue = toSignal(
+    this.addToStock.valueChanges.pipe(startWith(this.addToStock.value)),
+    { initialValue: this.addToStock.value },
+  );
+
+  /** Live preview of new stock total. */
+  readonly newStockTotal = computed(() => {
+    const current = this.data?.product?.currentStock ?? 0;
+    const add = Number(this.addToStockValue()) || 0;
+    return current + add;
+  });
 
   readonly form = this.fb.group({
     name: [this.data?.product?.name ?? '', [Validators.required, Validators.minLength(2)]],
@@ -120,6 +186,7 @@ export class RawStockFormModalComponent {
       this.data?.product?.buyingPrice ?? null,
       [Validators.required, Validators.min(0)],
     ],
+    unit: [(this.data?.product?.unit ?? 'kg') as StockUnit, Validators.required],
     currentStock: [
       this.data?.product?.currentStock ?? null,
       [Validators.required, Validators.min(0)],
@@ -128,16 +195,27 @@ export class RawStockFormModalComponent {
   });
 
   private readonly categoryValue = toSignal(
-    this.form.controls.category.valueChanges.pipe(
-      startWith(this.form.controls.category.value),
-    ),
+    this.form.controls.category.valueChanges.pipe(startWith(this.form.controls.category.value)),
     { initialValue: this.form.controls.category.value },
+  );
+
+  /** Reactive unit abbreviation — drives the suffix displayed on stock fields. */
+  readonly unitValue = toSignal(
+    this.form.controls.unit.valueChanges.pipe(startWith(this.form.controls.unit.value)),
+    { initialValue: this.form.controls.unit.value },
   );
 
   readonly availableSubCategories = computed(() => {
     const cat = (this.categoryValue() ?? '').toLowerCase();
     return RAW_SUBCATEGORY_MAP[cat] ?? [];
   });
+
+  constructor() {
+    // In edit mode, lock currentStock — users must use "Add to Stock"
+    if (this.isEdit()) {
+      this.form.controls.currentStock.disable();
+    }
+  }
 
   close() {
     this.dialogRef.close();
@@ -159,10 +237,13 @@ export class RawStockFormModalComponent {
       subCategory: v.subCategory!,
       buyingPrice: Number(v.buyingPrice),
       sellingPrice: 0, // Raw stock is not sold directly
-      currentStock: Number(v.currentStock),
+      currentStock: this.isEdit()
+        ? (this.data?.product?.currentStock ?? 0) + (Number(this.addToStock.value) || 0)
+        : Number(v.currentStock),
       stockReorderLevel: v.stockReorderLevel as ReorderLevel,
       imageUrl: `https://picsum.photos/seed/${encodeURIComponent(name)}/60/60`,
       productType: 'raw-stock',
+      unit: v.unit as StockUnit,
     };
     this.dialogRef.close(product);
   }

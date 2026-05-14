@@ -131,16 +131,29 @@ export class ManagementShellComponent implements OnInit {
   /** Controls the mobile slide-out sidebar. Always open on desktop (handled via CSS). */
   readonly sidebarOpen = signal(false);
 
-  /** Products with low or critical stock, sorted critical-first. */
-  readonly stockAlerts = computed(() =>
-    this.productStore
-      .products()
+  /** Helper: sort low/critical products with critical first. */
+  private sortAlerts(products: ReturnType<typeof this.productStore.products>) {
+    return products
       .filter((p) => p.stockReorderStatus === 'low' || p.stockReorderStatus === 'critical')
       .sort((a, b) => {
         if (a.stockReorderStatus === 'critical' && b.stockReorderStatus !== 'critical') return -1;
         if (b.stockReorderStatus === 'critical' && a.stockReorderStatus !== 'critical') return 1;
         return a.name.localeCompare(b.name);
-      }),
+      });
+  }
+
+  /** Menu products with low or critical stock. */
+  readonly menuStockAlerts = computed(() =>
+    this.sortAlerts(
+      this.productStore.products().filter((p) => !p.productType || p.productType === 'menu'),
+    ),
+  );
+
+  /** Raw-stock products with low or critical stock. */
+  readonly rawStockAlerts = computed(() =>
+    this.sortAlerts(
+      this.productStore.products().filter((p) => p.productType === 'raw-stock'),
+    ),
   );
 
   /** Users awaiting approval. */
@@ -150,7 +163,7 @@ export class ManagementShellComponent implements OnInit {
 
   /** Total unread notification count. */
   readonly notificationCount = computed(
-    () => this.stockAlerts().length + this.pendingUsers().length,
+    () => this.menuStockAlerts().length + this.rawStockAlerts().length + this.pendingUsers().length,
   );
 
   toggleSidebar(): void {
@@ -191,6 +204,11 @@ export class ManagementShellComponent implements OnInit {
   navigateToInventory(status: string): void {
     const filter = status === 'critical' ? 'critical' : 'low';
     this.router.navigate(['/management/inventory'], { queryParams: { filter } });
+  }
+
+  navigateToRawStock(status: string): void {
+    const filter = status === 'critical' ? 'critical' : 'low';
+    this.router.navigate(['/management/raw-stock'], { queryParams: { filter } });
   }
 
   navigateToStaff(): void {

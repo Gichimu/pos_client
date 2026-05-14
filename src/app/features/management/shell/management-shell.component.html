@@ -150,10 +150,10 @@
             </div>
           }
 
-          <!-- Stock alerts section -->
-          @if (stockAlerts().length > 0) {
-            <div class="notif-section-label">Stock Alerts</div>
-            @for (item of stockAlerts().slice(0, 5); track item._id) {
+          <!-- Menu stock alerts section -->
+          @if (menuStockAlerts().length > 0) {
+            <div class="notif-section-label">Menu Stock Alerts</div>
+            @for (item of menuStockAlerts().slice(0, 4); track item._id) {
               <button mat-menu-item class="notif-item" (click)="navigateToInventory(item.stockReorderStatus!)">
                 <mat-icon [class]="'notif-icon notif-icon--' + item.stockReorderStatus">
                   {{ item.stockReorderStatus === 'critical' ? 'dangerous' : 'warning_amber' }}
@@ -166,16 +166,39 @@
                 </span>
               </button>
             }
-            @if (stockAlerts().length > 5) {
+            @if (menuStockAlerts().length > 4) {
               <button mat-menu-item class="notif-more" (click)="navigateToInventory('low')">
-                +{{ stockAlerts().length - 5 }} more stock alerts — view all
+                +{{ menuStockAlerts().length - 4 }} more menu alerts — view all
+              </button>
+            }
+          }
+
+          <!-- Raw stock alerts section -->
+          @if (rawStockAlerts().length > 0) {
+            <div class="notif-section-label" [class.notif-section-label--bordered]="menuStockAlerts().length > 0">Raw Stock Alerts</div>
+            @for (item of rawStockAlerts().slice(0, 4); track item._id) {
+              <button mat-menu-item class="notif-item" (click)="navigateToRawStock(item.stockReorderStatus!)">
+                <mat-icon [class]="'notif-icon notif-icon--' + item.stockReorderStatus">
+                  {{ item.stockReorderStatus === 'critical' ? 'dangerous' : 'warning_amber' }}
+                </mat-icon>
+                <span class="notif-item__text">
+                  <span class="notif-item__name">{{ item.name }}</span>
+                  <span class="notif-item__desc">
+                    {{ item.stockReorderStatus === 'critical' ? 'Critical stock' : 'Low stock' }} · {{ item.currentStock }} {{ item.unit ?? '' }} left
+                  </span>
+                </span>
+              </button>
+            }
+            @if (rawStockAlerts().length > 4) {
+              <button mat-menu-item class="notif-more" (click)="navigateToRawStock('low')">
+                +{{ rawStockAlerts().length - 4 }} more raw stock alerts — view all
               </button>
             }
           }
 
           <!-- Pending users section -->
           @if (pendingUsers().length > 0) {
-            <div class="notif-section-label" [class.notif-section-label--bordered]="stockAlerts().length > 0">Pending Users</div>
+            <div class="notif-section-label" [class.notif-section-label--bordered]="menuStockAlerts().length > 0 || rawStockAlerts().length > 0">Pending Users</div>
             @for (user of pendingUsers().slice(0, 3); track user._id) {
               <button mat-menu-item class="notif-item" (click)="navigateToStaff()">
                 <mat-icon class="notif-icon notif-icon--pending">person_outline</mat-icon>
