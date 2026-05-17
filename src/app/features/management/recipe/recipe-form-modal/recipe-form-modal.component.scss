@@ -276,6 +276,25 @@ $accent-border: #c4b5fd;
   }
 }
 
+// ─── Autocomplete panel theming ───────────────────────────────────────────────
+::ng-deep .mat-mdc-autocomplete-panel {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
+
+  .mat-mdc-option {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+
+    &.mdc-list-item--selected,
+    &:hover:not(.mdc-list-item--disabled) {
+      background: $accent-light !important;
+      color: $accent !important;
+    }
+
+    .mdc-list-item__primary-text { color: inherit !important; }
+  }
+}
+
 // ─── Mobile (<480px) ─────────────────────────────────────────────────────────
 @media (max-width: 479px) {
   .rec-modal {

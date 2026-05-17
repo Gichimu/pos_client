@@ -21,19 +21,35 @@
   <div class="rec-modal__body">
     <form [formGroup]="form" class="rec-form">
 
-      <!-- Menu item selector -->
+      <!-- Menu item autocomplete -->
       <mat-form-field appearance="outline" class="full-field">
         <mat-label>Menu Item</mat-label>
         <mat-icon matPrefix>restaurant_menu</mat-icon>
-        <mat-select formControlName="menuItemId">
-          @for (item of menuItems(); track item._id) {
-            <mat-option [value]="item._id">{{ item.name }}</mat-option>
+        <input
+          matInput
+          [formControl]="menuItemSearch"
+          [matAutocomplete]="menuItemAuto"
+          (input)="onMenuItemSearchInput()"
+          placeholder="Search menu items…"
+          autocomplete="off"
+          aria-label="Search and select a menu item"
+        />
+        <mat-autocomplete
+          #menuItemAuto="matAutocomplete"
+          [displayWith]="displayMenuItem"
+          (optionSelected)="onMenuItemSelected($event.option.value)"
+        >
+          @for (item of filteredMenuItems(); track item._id) {
+            <mat-option [value]="item">{{ item.name }}</mat-option>
           }
-        </mat-select>
+          @if (filteredMenuItems().length === 0) {
+            <mat-option disabled>No matching menu items</mat-option>
+          }
+        </mat-autocomplete>
         @if (form.get('menuItemId')?.invalid && form.get('menuItemId')?.touched) {
-          <mat-error>Please select a menu item</mat-error>
+          <mat-error>Select a valid menu item from the list</mat-error>
         }
-        <mat-hint>The finished dish this recipe produces</mat-hint>
+        <mat-hint>Type to filter, then pick a dish from the list</mat-hint>
       </mat-form-field>
 
       <!-- Ingredients section -->

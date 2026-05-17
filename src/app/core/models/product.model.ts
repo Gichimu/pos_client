@@ -37,7 +37,7 @@ export type foodSubCategory =
   | 'chicken'
   | 'pork'
   | 'seafood'
-  | 'vegetarian';
+  | 'Matumbo';
 export type otherSubCategory = 'sachets' | 'package' | 'supplies';
 
 export interface Product {

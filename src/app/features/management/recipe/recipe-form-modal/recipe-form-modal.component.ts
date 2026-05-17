@@ -4,6 +4,7 @@ import {
   ReactiveFormsModule,
   FormBuilder,
   FormArray,
+  FormControl,
   FormGroup,
   Validators,
 } from '@angular/forms';
@@ -13,9 +14,11 @@ import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { Product } from '../../../../core/models/product.model';
 import { Recipe, RecipeIngredient } from '../../../../core/models/recipe.model';
 import { productStore } from '../../../../store/products/product.store';
 
@@ -33,6 +36,7 @@ export interface RecipeFormData {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatAutocompleteModule,
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
@@ -58,12 +62,51 @@ export class RecipeFormModalComponent {
     this.pStore.products().filter((p) => p.productType === 'raw-stock'),
   );
 
+  // ── Autocomplete for menu item ──────────────────────────────────────────────
+
+  /**
+   * Input control for the autocomplete.
+   * Angular Material sets this to the full Product object on selection,
+   * so we type it accordingly and use displayWith to render the name.
+   */
+  readonly menuItemSearch = new FormControl<Product | string | null>(
+    this.data?.recipe?.menuItemName ?? '',
+  );
+
+  /**
+   * Converts the autocomplete value (Product object or typed string) to a
+   * display string. Used by mat-autocomplete [displayWith].
+   */
+  readonly displayMenuItem = (value: Product | string | null): string => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    return value.name;
+  };
+
+  /** Reactive snapshot of the search value — drives filtering. */
+  private readonly menuItemSearchValue = toSignal(
+    this.menuItemSearch.valueChanges.pipe(startWith(this.menuItemSearch.value ?? '')),
+    { initialValue: this.menuItemSearch.value ?? '' as Product | string | null },
+  );
+
+  /** Menu items filtered by the current search text (handles both string and Product). */
+  readonly filteredMenuItems = computed(() => {
+    const raw = this.menuItemSearchValue();
+    // Extract the text to filter by — may be a Product (on selection) or typed string
+    const text =
+      typeof raw === 'string'
+        ? raw.toLowerCase().trim()
+        : (raw as Product | null)?.name?.toLowerCase().trim() ?? '';
+    if (!text) return this.menuItems();
+    return this.menuItems().filter((p) => p.name.toLowerCase().includes(text));
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+
   readonly form = this.fb.group({
     menuItemId: [this.data?.recipe?.menuItemId ?? '', Validators.required],
     notes: [this.data?.recipe?.notes ?? ''],
-    ingredients: this.fb.array(
-      (this.data?.recipe?.ingredients ?? []).map((i) => this.buildRow(i)),
-    ),
+    ingredients: this.fb.array((this.data?.recipe?.ingredients ?? []).map((i) => this.buildRow(i))),
   });
 
   get ingredientsArray(): FormArray {
@@ -115,6 +158,17 @@ export class RecipeFormModalComponent {
     return this.rawStockItems().find((p) => p._id === ingredientId)?.unit ?? '';
   }
 
+  /** Called when the user picks a suggestion from the autocomplete panel. */
+  onMenuItemSelected(product: Product): void {
+    // Store the ID in the form group; displayWith handles the display text.
+    this.form.controls['menuItemId'].setValue(product._id ?? '');
+  }
+
+  /** Called on every keystroke in the search input — clears the stored ID until a valid option is selected. */
+  onMenuItemSearchInput(): void {
+    this.form.controls['menuItemId'].setValue('');
+  }
+
   /** Auto-fill ingredient name (and keep unit form control in sync) when a raw stock item is selected. */
   onIngredientSelect(index: number, ingredientId: string): void {
     const product = this.rawStockItems().find((p) => p._id === ingredientId);
@@ -148,7 +202,9 @@ export class RecipeFormModalComponent {
         ingredientName: i.ingredientName,
         quantity: Number(i.quantity),
         // Always derive unit from the live raw-stock product (source of truth)
-        unit: (this.getIngredientUnit(i.ingredientId) || i.unit || 'pcs') as RecipeIngredient['unit'],
+        unit: (this.getIngredientUnit(i.ingredientId) ||
+          i.unit ||
+          'pcs') as RecipeIngredient['unit'],
       })) as RecipeIngredient[],
       notes: v.notes ?? '',
     };

@@ -49,7 +49,7 @@ const SUBCATEGORY_MAP: Record<string, { value: string; label: string }[]> = {
     { value: 'chicken', label: 'Chicken' },
     { value: 'pork', label: 'Pork' },
     { value: 'seafood', label: 'Seafood' },
-    { value: 'vegetarian', label: 'Vegetarian' },
+    { value: 'matumbo', label: 'Matumbo' },
   ],
   others: [
     { value: 'sachets', label: 'Sachets' },
