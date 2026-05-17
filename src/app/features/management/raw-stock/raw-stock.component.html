@@ -102,8 +102,8 @@
               <span class="stock-cell">
                 <span
                   class="stock-val"
-                  [class.stock-val--low]="p.currentStock > 0 && p.currentStock < 5"
-                  [class.stock-val--out]="p.currentStock === 0"
+                  [class.stock-val--low]="p.stockReorderStatus === 'low'"
+                  [class.stock-val--out]="p.stockReorderStatus === 'critical'"
                   >{{ p.currentStock }}</span
                 >
                 @if (p.unit) {

@@ -17,7 +17,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { productStore } from '../../../store/products/product.store';
+import { productStore, calculateReorderStatusValue } from '../../../store/products/product.store';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import { RbacAllow } from '../../../core/directives/rbac-allow';
 import { RAW_STOCK_CATEGORIES } from './raw-stock-form-modal/raw-stock-form-modal.component';
@@ -64,17 +64,28 @@ export class RawStockComponent implements OnInit {
     this.pageIndex.set(0);
   }
 
-  /** Only raw-stock tagged products. */
+  /**
+   * Only raw-stock products, with stockReorderStatus guaranteed.
+   * Recalculates locally from currentStock + stockReorderLevel as a safety
+   * net in case the API response doesn't include the computed field.
+   */
   private readonly rawProducts = computed(() =>
-    this.store.products().filter((p) => p.productType === 'raw-stock'),
+    this.store.products()
+      .filter((p) => p.productType === 'raw-stock')
+      .map((p) => ({
+        ...p,
+        stockReorderStatus:
+          p.stockReorderStatus ??
+          calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
+      })),
   );
 
   readonly totalCount = computed(() => this.rawProducts().length);
   readonly lowStockCount = computed(
-    () => this.rawProducts().filter((p) => p.currentStock < 5).length,
+    () => this.rawProducts().filter((p) => p.stockReorderStatus === 'low').length,
   );
   readonly outOfStock = computed(
-    () => this.rawProducts().filter((p) => p.currentStock === 0).length,
+    () => this.rawProducts().filter((p) => p.stockReorderStatus === 'critical').length,
   );
 
   readonly displayedColumns = ['name', 'category', 'buyingPrice', 'currentStock', 'stockReorderStatus', 'actions'];

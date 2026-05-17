@@ -12,11 +12,13 @@ export type ProductState = {
 
 export const calculateReorderStatusValue = (
   currentStock: number,
-  reorderLevel: number,
+  reorderLevel: number | null | undefined,
 ): StockReorderStatus => {
-  if (currentStock <= reorderLevel * 0.2) {
+  // Guard: treat null/undefined/0 reorderLevel as a sensible default (5)
+  const level = Number(reorderLevel) > 0 ? Number(reorderLevel) : 5;
+  if (currentStock <= level * 0.2) {
     return 'critical';
-  } else if (currentStock <= reorderLevel) {
+  } else if (currentStock <= level) {
     return 'low';
   } else {
     return 'good';

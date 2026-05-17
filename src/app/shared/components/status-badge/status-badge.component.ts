@@ -32,10 +32,14 @@ import { StockReorderStatus } from '../../../core/models/product.model';
   ],
 })
 export class StatusBadgeComponent {
-  @Input() status: StockReorderStatus = 'good';
+  @Input() status: StockReorderStatus | undefined = 'good';
+
+  private get safeStatus(): StockReorderStatus {
+    return this.status ?? 'good';
+  }
 
   get badgeClass(): string {
-    return `badge--${this.status}`;
+    return `badge--${this.safeStatus}`;
   }
 
   get label(): string {
@@ -44,6 +48,6 @@ export class StatusBadgeComponent {
       critical: 'Critical',
       good: 'Good',
     };
-    return labels[this.status];
+    return labels[this.safeStatus];
   }
 }
