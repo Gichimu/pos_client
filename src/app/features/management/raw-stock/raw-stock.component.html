@@ -71,7 +71,6 @@
     } @else {
       <div class="rs-table-scroll">
         <table mat-table [dataSource]="pagedProducts()" class="rs-table">
-
           <!-- Name -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Item</th>
@@ -134,7 +133,7 @@
                 >
                   <span class="material-icons">edit</span>
                 </button>
-                <button
+                <!-- <button
                   *rbacAllow="['superAdmin']"
                   mat-icon-button
                   class="action-icon action-icon--delete"
@@ -142,7 +141,7 @@
                   matTooltip="Remove item"
                 >
                   <span class="material-icons">delete_outline</span>
-                </button>
+                </button> -->
               </div>
             </td>
           </ng-container>

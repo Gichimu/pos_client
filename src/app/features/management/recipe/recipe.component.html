@@ -64,7 +64,6 @@
     } @else {
       <div class="recipe-table-scroll">
         <table mat-table [dataSource]="pagedRecipes()" class="recipe-table">
-
           <!-- Menu item -->
           <ng-container matColumnDef="menuItem">
             <th mat-header-cell *matHeaderCellDef>Menu Item</th>
@@ -106,7 +105,7 @@
                 >
                   <span class="material-icons">edit</span>
                 </button>
-                <button
+                <!-- <button
                   *rbacAllow="['superAdmin']"
                   mat-icon-button
                   class="action-icon action-icon--delete"
@@ -114,7 +113,7 @@
                   matTooltip="Delete recipe"
                 >
                   <span class="material-icons">delete_outline</span>
-                </button>
+                </button> -->
               </div>
             </td>
           </ng-container>
