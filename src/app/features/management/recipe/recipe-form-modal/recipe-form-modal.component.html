@@ -1,0 +1,142 @@
+<div class="rec-modal">
+  <!-- Header -->
+  <div class="rec-modal__header">
+    <div class="rec-modal__header-left">
+      <div class="rec-modal__icon">
+        <mat-icon>{{ isEdit() ? 'edit' : 'menu_book' }}</mat-icon>
+      </div>
+      <div>
+        <h2 class="rec-modal__title">{{ isEdit() ? 'Edit Recipe' : 'Create Recipe' }}</h2>
+        <p class="rec-modal__subtitle">
+          {{ isEdit() ? 'Update ingredients for this dish' : 'Link a menu item to its raw ingredients' }}
+        </p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="rec-modal__body">
+    <form [formGroup]="form" class="rec-form">
+
+      <!-- Menu item selector -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Menu Item</mat-label>
+        <mat-icon matPrefix>restaurant_menu</mat-icon>
+        <mat-select formControlName="menuItemId">
+          @for (item of menuItems(); track item._id) {
+            <mat-option [value]="item._id">{{ item.name }}</mat-option>
+          }
+        </mat-select>
+        @if (form.get('menuItemId')?.invalid && form.get('menuItemId')?.touched) {
+          <mat-error>Please select a menu item</mat-error>
+        }
+        <mat-hint>The finished dish this recipe produces</mat-hint>
+      </mat-form-field>
+
+      <!-- Ingredients section -->
+      <div class="ingredients-header">
+        <span class="section-label">Ingredients</span>
+        <button
+          mat-stroked-button
+          type="button"
+          class="add-ingredient-btn"
+          (click)="addIngredient()"
+        >
+          <mat-icon>add</mat-icon>
+          Add Ingredient
+        </button>
+      </div>
+
+      @if (ingredientsArray.length === 0) {
+        <div class="ingredients-empty">
+          <mat-icon>kitchen</mat-icon>
+          <p>No ingredients yet — click <strong>Add Ingredient</strong> to begin.</p>
+        </div>
+      }
+
+      <div formArrayName="ingredients" class="ingredients-list">
+        @for (ctrl of ingredientsArray.controls; track $index) {
+          <div [formGroupName]="$index" class="ingredient-row">
+
+            <!-- Ingredient select -->
+            <mat-form-field appearance="outline" class="ingredient-select">
+              <mat-label>Ingredient</mat-label>
+              <mat-icon matPrefix>kitchen</mat-icon>
+              <mat-select
+                formControlName="ingredientId"
+                (selectionChange)="onIngredientSelect($index, $event.value)"
+              >
+                @for (raw of rawStockItems(); track raw._id) {
+                  <mat-option [value]="raw._id">{{ raw.name }}</mat-option>
+                }
+              </mat-select>
+              @if (ctrl.get('ingredientId')?.invalid && ctrl.get('ingredientId')?.touched) {
+                <mat-error>Required</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Quantity -->
+            <mat-form-field appearance="outline" class="ingredient-qty">
+              <mat-label>Qty</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0.01"
+                step="0.01"
+                formControlName="quantity"
+                placeholder="0"
+              />
+              <span
+                matSuffix
+                class="unit-badge"
+                [class.unit-badge--placeholder]="!getIngredientUnit(getRowIngredientId($index))"
+              >
+                {{ getIngredientUnit(getRowIngredientId($index)) || 'unit' }}
+              </span>
+              @if (ctrl.get('quantity')?.invalid && ctrl.get('quantity')?.touched) {
+                <mat-error>Enter qty</mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Remove -->
+            <button
+              mat-icon-button
+              type="button"
+              class="remove-btn"
+              (click)="removeIngredient($index)"
+              matTooltip="Remove ingredient"
+              aria-label="Remove ingredient"
+            >
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Notes (optional) -->
+      <mat-form-field appearance="outline" class="full-field">
+        <mat-label>Notes <span class="optional">(optional)</span></mat-label>
+        <mat-icon matPrefix>notes</mat-icon>
+        <textarea
+          matInput
+          formControlName="notes"
+          rows="2"
+          placeholder="Preparation notes, portion size, cooking tips…"
+        ></textarea>
+      </mat-form-field>
+
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div class="rec-modal__footer">
+    <button mat-stroked-button class="cancel-btn" (click)="close()">Cancel</button>
+    <button mat-flat-button class="save-btn" (click)="save()">
+      <mat-icon>{{ isEdit() ? 'save' : 'add' }}</mat-icon>
+      {{ isEdit() ? 'Save Changes' : 'Create Recipe' }}
+    </button>
+  </div>
+</div>

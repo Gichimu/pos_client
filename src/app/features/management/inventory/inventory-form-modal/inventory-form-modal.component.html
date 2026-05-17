@@ -26,7 +26,6 @@
   <!-- Body -->
   <div class="inv-modal__body">
     <form [formGroup]="form" class="inv-form">
-
       <!-- Row 1: Product Name (full width) -->
       <mat-form-field appearance="outline" class="full-field">
         <mat-label>Product Name</mat-label>
@@ -74,7 +73,8 @@
 
       <!-- Row 3: Buying + Selling price -->
       <div class="form-row">
-        <mat-form-field appearance="outline" class="flex-field">
+        <!-- We are not collecting buying price at the moment -->
+        <!-- <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Buying Price (Ksh.)</mat-label>
           <mat-icon matPrefix>attach_money</mat-icon>
           <input
@@ -88,7 +88,7 @@
           @if (form.get('buyingPrice')?.invalid && form.get('buyingPrice')?.touched) {
             <mat-error>Enter a valid price</mat-error>
           }
-        </mat-form-field>
+        </mat-form-field> -->
 
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Selling Price (Ksh.)</mat-label>
@@ -158,12 +158,11 @@
           <div class="stock-preview">
             <mat-icon>check_circle</mat-icon>
             <span>
-            Stock will update from <strong>{{ data.product?.currentStock ?? 0 }}</strong> →
+              Stock will update from <strong>{{ data.product?.currentStock ?? 0 }}</strong> →
               <strong>{{ newStockTotal() }} units</strong> on save
             </span>
           </div>
         }
-
       } @else {
         <!-- ── Add mode: direct editable current stock ── -->
         <div class="form-row">
@@ -205,7 +204,6 @@
           placeholder="https://… or leave blank for auto"
         />
       </mat-form-field>
-
     </form>
   </div>
 

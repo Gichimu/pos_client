@@ -1,0 +1,329 @@
+// Accent colour for the recipe modal (violet to distinguish from blue=inventory / green=raw-stock)
+$accent: #7c3aed;
+$accent-light: #ede9fe;
+$accent-border: #c4b5fd;
+
+.rec-modal {
+  background: var(--color-surface);
+  border-radius: 16px;
+  overflow: hidden;
+  width: 580px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 24px 24px 20px;
+    border-bottom: 1px solid var(--color-border);
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  &__header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: $accent-light;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    mat-icon { font-size: 22px; width: 22px; height: 22px; color: $accent; }
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0 0 2px;
+  }
+
+  &__subtitle {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  &__body {
+    padding: 20px 24px;
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--color-border);
+    flex-shrink: 0;
+  }
+}
+
+.close-btn {
+  flex-shrink: 0;
+  color: var(--color-text-muted) !important;
+  width: 32px !important;
+  height: 32px !important;
+}
+
+.rec-form { display: flex; flex-direction: column; gap: 0; }
+
+.full-field { width: 100%; }
+
+.optional {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+}
+
+// ─── Ingredients section header ───────────────────────────────────────────────
+.ingredients-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-text-muted);
+}
+
+.add-ingredient-btn {
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  color: $accent !important;
+  border-color: $accent-border !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &:hover {
+    background: $accent-light !important;
+  }
+}
+
+// ─── Empty ingredients placeholder ───────────────────────────────────────────
+.ingredients-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 24px 0 16px;
+  color: var(--color-text-muted);
+  text-align: center;
+
+  mat-icon { font-size: 36px; width: 36px; height: 36px; opacity: 0.4; }
+  p { font-size: 0.875rem; margin: 0; }
+  strong { color: $accent; }
+}
+
+// ─── Ingredient rows ──────────────────────────────────────────────────────────
+.ingredients-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 1fr 120px 36px;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ingredient-select { width: 100%; }
+.ingredient-qty    { width: 100%; }
+
+.unit-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $accent;
+  background: $accent-light;
+  border: 1px solid $accent-border;
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-left: 2px;
+  flex-shrink: 0;
+  line-height: 1.4;
+
+  &--placeholder {
+    color: var(--color-text-light);
+    background: var(--color-bg);
+    border-color: var(--color-border);
+    font-weight: 400;
+  }
+}
+
+.remove-btn {
+  color: #ef4444 !important;
+  width: 32px !important;
+  height: 32px !important;
+  margin-top: 6px;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover { background: #fee2e2 !important; }
+}
+
+// ─── Footer buttons ───────────────────────────────────────────────────────────
+.cancel-btn {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+  border-radius: 8px !important;
+  &:hover {
+    background: $accent-light !important;
+    border-color: $accent-border !important;
+    color: $accent !important;
+  }
+}
+
+.save-btn {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  border-radius: 8px !important;
+  background-color: $accent !important;
+  color: #fff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+}
+
+// ─── Material form-field overrides ────────────────────────────────────────────
+::ng-deep .rec-form {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--color-border) !important;
+  }
+
+  .mdc-notched-outline__leading  { border-radius: 8px 0 0 8px !important; min-width: 8px !important; }
+  .mdc-notched-outline__trailing { border-radius: 0 8px 8px 0 !important; }
+
+  .mat-mdc-form-field.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: $accent !important;
+      border-width: 1.5px !important;
+    }
+    .mdc-floating-label { color: $accent !important; }
+  }
+
+  .mat-mdc-form-field.mat-form-field-invalid {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #ef4444 !important;
+      border-width: 1.5px !important;
+    }
+  }
+
+  .mat-mdc-form-field-icon-prefix mat-icon {
+    color: var(--color-text-muted) !important;
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-right: 4px;
+  }
+
+  .mdc-floating-label {
+    font-family: 'Inter', sans-serif !important;
+    color: var(--color-text-muted) !important;
+  }
+
+  .mat-mdc-input-element,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-placeholder {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.875rem !important;
+  }
+
+  .mat-mdc-form-field-error {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.75rem !important;
+  }
+
+  mat-hint, .mat-mdc-form-field-hint {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.75rem !important;
+    color: var(--color-text-muted) !important;
+  }
+}
+
+// ─── Mobile (<480px) ─────────────────────────────────────────────────────────
+@media (max-width: 479px) {
+  .rec-modal {
+    width: 100%;
+    border-radius: 12px;
+    max-height: 100svh;
+
+    &__header { padding: 16px 16px 14px; }
+    &__body   { padding: 14px 16px; }
+    &__footer {
+      padding: 12px 16px;
+      gap: 8px;
+      flex-shrink: 0;
+      // Stack buttons vertically on very small screens
+      flex-direction: column-reverse;
+      .cancel-btn, .save-btn { width: 100% !important; justify-content: center; }
+    }
+  }
+
+  .ingredients-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .add-ingredient-btn {
+    // Shrink label to icon-only on very tight widths if needed
+    white-space: nowrap;
+  }
+
+  // Ingredient row: 2-row layout — select spans full width,
+  // qty input and remove button share the second row
+  .ingredient-row {
+    grid-template-columns: 1fr 32px;
+    grid-template-rows: auto auto;
+    gap: 4px;
+
+    // First child: ingredient select — full width
+    & > :first-child { grid-column: 1 / -1; }
+
+    // Second child: qty field — takes remaining space in row 2
+    & > :nth-child(2) { grid-column: 1 / 2; }
+
+    // Third child: remove button — aligns with qty on row 2
+    & > :nth-child(3) {
+      grid-column: 2 / 3;
+      grid-row: 2;
+      margin-top: 6px;
+      align-self: center;
+    }
+  }
+}

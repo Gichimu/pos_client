@@ -3,12 +3,31 @@ export type ReorderLevel = 3 | 5 | 10 | 20;
 export type ProductType = 'menu' | 'raw-stock';
 /** Unit of measurement for raw-stock quantities. */
 export type StockUnit =
-  | 'L' | 'mL' | 'cL' | 'fl oz'        // Volume
-  | 'kg' | 'g' | 'mg' | 'lb' | 'oz'    // Weight
-  | 'pcs' | 'dozen' | 'pack' | 'bag' | 'box'  // Count
-  | 'portion' | 'tray';                  // Other
+  | 'L'
+  | 'mL'
+  | 'cL'
+  | 'fl oz' // Volume
+  | 'kg'
+  | 'g'
+  | 'mg'
+  | 'lb'
+  | 'oz' // Weight
+  | 'pcs'
+  | 'dozen'
+  | 'pack'
+  | 'bag'
+  | 'box' // Count
+  | 'portion'
+  | 'tray'; // Other
 export type ProductCategory = 'breakfast' | 'drinks' | 'food' | 'others';
-export type RawStockCategory = 'grains' | 'dairy' | 'sweeteners' | 'oils' | 'vegetables' | 'spices' | 'others';
+export type RawStockCategory =
+  | 'grains'
+  | 'dairy'
+  | 'sweeteners'
+  | 'oils'
+  | 'vegetables'
+  | 'spices'
+  | 'others';
 export type breakfastSubCategory = 'snacks' | 'pastries' | 'sandwiches';
 export type drinkSubCategory = 'hot' | 'cold' | 'alcoholic';
 export type foodSubCategory =

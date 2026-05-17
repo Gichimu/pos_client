@@ -51,7 +51,7 @@ export class ProductTableComponent implements OnChanges {
   displayedColumns = [
     'select',
     'sku',
-    'buyingPrice',
+    // 'buyingPrice',
     'sellingPrice',
     'currentStock',
     'stockReorderStatus',

@@ -1,0 +1,141 @@
+<div class="recipe-page page-enter">
+  <!-- Header -->
+  <div class="recipe-page__header">
+    <div class="recipe-page__header-left">
+      <h2 class="recipe-page__title">Recipes</h2>
+      <div class="recipe-stats">
+        <span class="stat-pill stat-pill--total">
+          <span class="material-icons">menu_book</span>
+          {{ filteredRecipes().length }} Recipes
+        </span>
+      </div>
+    </div>
+
+    <div class="recipe-page__header-right">
+      <div class="search-box">
+        <span class="material-icons search-box__icon">search</span>
+        <input
+          class="search-box__input"
+          type="text"
+          placeholder="Search by dish or ingredient…"
+          [value]="searchQuery()"
+          (input)="onSearch($any($event.target).value)"
+          aria-label="Search recipes"
+        />
+      </div>
+      <button class="add-btn" (click)="openCreateDialog()" aria-label="Create recipe">
+        <span class="material-icons">add_box</span>
+        Create Recipe
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="recipe-table-wrap">
+    @if (loading()) {
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <span class="material-icons">hourglass_empty</span>
+        </div>
+        <p class="empty-state__title">Loading recipes…</p>
+      </div>
+    } @else if (filteredRecipes().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <span class="material-icons">menu_book</span>
+        </div>
+        <p class="empty-state__title">
+          {{ searchQuery() ? 'No recipes found' : 'No recipes yet' }}
+        </p>
+        <p class="empty-state__desc">
+          {{
+            searchQuery()
+              ? 'Try a different search term.'
+              : 'Create your first recipe to link menu items to their raw ingredients.'
+          }}
+        </p>
+        @if (!searchQuery()) {
+          <button class="add-btn add-btn--lg" (click)="openCreateDialog()">
+            <span class="material-icons">add_box</span>
+            Create First Recipe
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="recipe-table-scroll">
+        <table mat-table [dataSource]="pagedRecipes()" class="recipe-table">
+
+          <!-- Menu item -->
+          <ng-container matColumnDef="menuItem">
+            <th mat-header-cell *matHeaderCellDef>Menu Item</th>
+            <td mat-cell *matCellDef="let r">
+              <div class="dish-cell">
+                <span class="dish-icon material-icons">restaurant_menu</span>
+                <span class="dish-name">{{ r.menuItemName }}</span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Ingredients summary -->
+          <ng-container matColumnDef="ingredients">
+            <th mat-header-cell *matHeaderCellDef>Ingredients</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="ingredient-count-badge">{{ r.ingredients.length }}</span>
+              <span class="ingredient-preview">{{ ingredientSummary(r) }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Notes -->
+          <ng-container matColumnDef="notes">
+            <th mat-header-cell *matHeaderCellDef>Notes</th>
+            <td mat-cell *matCellDef="let r">
+              <span class="notes-cell">{{ r.notes || '—' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let r">
+              <div class="row-actions">
+                <button
+                  mat-icon-button
+                  class="action-icon action-icon--edit"
+                  (click)="openEditDialog(r)"
+                  matTooltip="Edit recipe"
+                >
+                  <span class="material-icons">edit</span>
+                </button>
+                <button
+                  *rbacAllow="['superAdmin']"
+                  mat-icon-button
+                  class="action-icon action-icon--delete"
+                  (click)="confirmDelete(r)"
+                  matTooltip="Delete recipe"
+                >
+                  <span class="material-icons">delete_outline</span>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="recipe-row"></tr>
+        </table>
+      </div>
+
+      @if (filteredRecipes().length > PAGE_SIZE) {
+        <mat-paginator
+          class="recipe-paginator"
+          [length]="filteredRecipes().length"
+          [pageSize]="PAGE_SIZE"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[10, 20, 50]"
+          [showFirstLastButtons]="true"
+          (page)="onPageChange($event)"
+          aria-label="Select page"
+        ></mat-paginator>
+      }
+    }
+  </div>
+</div>

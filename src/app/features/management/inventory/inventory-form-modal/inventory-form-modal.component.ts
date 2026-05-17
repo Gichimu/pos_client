@@ -110,10 +110,10 @@ export class InventoryFormModalComponent {
     name: [this.data?.product?.name ?? '', [Validators.required, Validators.minLength(2)]],
     category: [this.data?.product?.category ?? '', Validators.required],
     subCategory: [this.data?.product?.subCategory ?? '', Validators.required],
-    buyingPrice: [
-      this.data?.product?.buyingPrice ?? null,
-      [Validators.required, Validators.min(0)],
-    ],
+    // buyingPrice: [
+    //   this.data?.product?.buyingPrice ?? null,
+    //   [Validators.required, Validators.min(0)],
+    // ],
     sellingPrice: [
       this.data?.product?.sellingPrice ?? null,
       [Validators.required, Validators.min(0)],
@@ -128,9 +128,7 @@ export class InventoryFormModalComponent {
 
   // ── Reactive subcategory options based on selected category ─────────────
   private readonly categoryValue = toSignal(
-    this.form.controls.category.valueChanges.pipe(
-      startWith(this.form.controls.category.value),
-    ),
+    this.form.controls.category.valueChanges.pipe(startWith(this.form.controls.category.value)),
     { initialValue: this.form.controls.category.value },
   );
 
@@ -179,10 +177,11 @@ export class InventoryFormModalComponent {
       name,
       category: v.category! as Product['category'],
       subCategory: v.subCategory!,
-      buyingPrice: Number(v.buyingPrice),
+      buyingPrice: 0,
       sellingPrice: Number(v.sellingPrice),
       currentStock,
       stockReorderLevel: v.stockReorderLevel as ReorderLevel,
+      productType: 'menu',
       imageUrl:
         v.imageUrl?.trim() || `https://picsum.photos/seed/${encodeURIComponent(name)}/60/60`,
     };

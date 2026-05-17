@@ -76,7 +76,7 @@ export class InventoryComponent implements OnInit {
     'image',
     'name',
     'category',
-    'buyingPrice',
+    // 'buyingPrice',
     'sellingPrice',
     'currentStock',
     'stockReorderStatus',
@@ -94,7 +94,8 @@ export class InventoryComponent implements OnInit {
 
     // Apply stock filter
     if (f === 'low') products = products.filter((p) => p.stockReorderStatus === 'low');
-    else if (f === 'critical') products = products.filter((p) => p.stockReorderStatus === 'critical');
+    else if (f === 'critical')
+      products = products.filter((p) => p.stockReorderStatus === 'critical');
 
     // Apply search query
     if (q) {

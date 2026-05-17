@@ -72,6 +72,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'recipe',
+        data: { title: 'Recipes' },
+        loadComponent: () =>
+          import('./features/management/recipe/recipe.component').then(
+            (m) => m.RecipeComponent,
+          ),
+      },
+      {
         path: 'reports',
         data: { title: 'Reports' },
         loadComponent: () =>
