@@ -194,6 +194,7 @@ export class PosComponent implements OnInit {
           grandTotal: total,
         });
         this.store.clearCart();
+        this.logout();
         this.sweetAlert.success(`Payment of Ksh.${total.toFixed(2)} processed!`);
       },
       error: () => {
@@ -208,7 +209,7 @@ export class PosComponent implements OnInit {
 
   logout() {
     this.authStore.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/cashier-login']);
   }
 
   formatCurrency(value: number): string {

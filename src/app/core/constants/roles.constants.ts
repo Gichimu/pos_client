@@ -80,7 +80,7 @@ export const MOCK_USERS: Array<{
     name: 'Esther U.',
     email: 'esther@user.com',
     password: 'esther@123',
-    role: 'cashier',
+    role: 'superAdmin',
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=esther',
     store: 'Delect',
