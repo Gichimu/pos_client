@@ -1,5 +1,5 @@
 import { Component, inject, Signal, signal, computed, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +27,7 @@ export type PinPadKey = (typeof PIN_PAD_KEYS)[number];
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
 
   store = inject(userStore);
@@ -112,6 +113,14 @@ export class LoginComponent implements OnInit {
         console.warn('Failed to load users from API. Falling back to mock data.');
       },
     });
+
+    // If a preselectedRole is provided via route data (e.g. /cashier-login),
+    // skip role selection and jump straight to the credential step.
+    const preselectedRole = this.route.snapshot.data['preselectedRole'] as UserRole | undefined;
+    if (preselectedRole) {
+      this.selectRole(preselectedRole);
+      this.proceed();
+    }
   }
 
   // ── Step navigation ─────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { UserRole } from './core/models/user.model';
 
 export const routes: Routes = [
   {
@@ -10,6 +11,12 @@ export const routes: Routes = [
   },
   {
     path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'cashier-login',
+    data: { preselectedRole: 'cashier' as UserRole },
     loadComponent: () =>
       import('./features/auth/login/login.component').then((m) => m.LoginComponent),
   },
