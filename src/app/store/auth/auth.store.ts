@@ -45,6 +45,26 @@ export const authStore = signalStore(
         }),
       );
     },
+
+    /** Authenticate a cashier using only their 5-digit PIN. */
+    loginWithPin(pin: string) {
+      return authService.loginWithPin(pin).pipe(
+        tap((response) => {
+          const authenticatedUser: User = response.user;
+          localStorage.setItem('token', response.token);
+          localStorage.setItem('refreshToken', response.refreshToken);
+          patchState(store, {
+            user: authenticatedUser,
+            isAuthenticated: true,
+            pendingUser: null,
+          });
+        }),
+        catchError((error) => {
+          console.error('Cashier PIN login failed', error);
+          return throwError(() => error);
+        }),
+      );
+    },
     confirmAccount(newPassword: string) {
       const pendingUser = store.pendingUser();
       if (!pendingUser?._id) return throwError(() => new Error('No pending user'));

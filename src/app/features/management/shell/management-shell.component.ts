@@ -157,14 +157,12 @@ export class ManagementShellComponent implements OnInit {
 
   /** Raw-stock products with low or critical stock. */
   readonly rawStockAlerts = computed(() =>
-    this.sortAlerts(
-      this.productStore.products().filter((p) => p.productType === 'raw-stock'),
-    ),
+    this.sortAlerts(this.productStore.products().filter((p) => p.productType === 'raw-stock')),
   );
 
   /** Users awaiting approval. */
   readonly pendingUsers = computed(() =>
-    this.usersStore.users().filter((u) => u.status === 'pending'),
+    this.usersStore.users().filter((u) => u?.status === 'pending'),
   );
 
   /** Total unread notification count. */

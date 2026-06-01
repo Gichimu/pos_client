@@ -36,6 +36,10 @@ export class AuthService {
     });
   }
 
+  loginWithPin(pin: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/auth/cashier-login`, { pin });
+  }
+
   logout(refresh: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/auth/logout`, { refreshToken: refresh });
   }

@@ -42,6 +42,7 @@ export const userStore = signalStore(
       return userService.addUser(user).pipe(
         tap((newUser: User) => {
           console.log('added user', newUser);
+          // add new user to
           const currentUsers = store.users() as User[];
           patchState(store, { users: [...currentUsers, newUser] });
         }),

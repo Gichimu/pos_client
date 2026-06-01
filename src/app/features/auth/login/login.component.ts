@@ -64,6 +64,8 @@ export class LoginComponent implements OnInit {
   pin = signal('');
   showPassword = signal(false);
   error = signal<string | null>(null);
+  /** True while the cashier PIN API call is in flight. */
+  pinLoading = signal(false);
 
   // ── Derived state ───────────────────────────────────────────────────────
 
@@ -154,7 +156,7 @@ export class LoginComponent implements OnInit {
   // ── Cashier PIN pad ─────────────────────────────────────────────────────
 
   onPinKey(digit: string) {
-    if (this.pin().length >= 5) return;
+    if (this.pin().length >= 5 || this.pinLoading()) return;
     this.pin.update((p) => p + digit);
     this.error.set(null);
     if (this.pin().length === 5) {
@@ -163,6 +165,7 @@ export class LoginComponent implements OnInit {
   }
 
   onPinBackspace() {
+    if (this.pinLoading()) return;
     this.pin.update((p) => p.slice(0, -1));
     this.error.set(null);
   }
@@ -206,24 +209,23 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // Cashier PIN path
-    // if (this.pin() !== MOCK_CREDENTIALS.cashier) {
-    //   this.error.set('Incorrect PIN. Hint: 12345');
-    //   this.pin.set('');
-    //   return;
-    // }
+    // Cashier PIN path — verified via API
+    const pin = this.pin();
+    if (pin.length < 5) return;
 
-    const user = this.selectedUser();
-    console.log('authenticating user', user);
-    if (user) {
-      this.authStore.login(user).subscribe({
-        next: () => {
-          this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
-        },
-        error: (error) => {
-          this.error.set('Login failed. Please check your credentials.');
-        },
-      });
-    }
+    this.pinLoading.set(true);
+    this.error.set(null);
+
+    this.authStore.loginWithPin(pin).subscribe({
+      next: () => {
+        this.pinLoading.set(false);
+        this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
+      },
+      error: () => {
+        this.pinLoading.set(false);
+        this.pin.set('');
+        this.error.set('Incorrect PIN. Please try again.');
+      },
+    });
   }
 }

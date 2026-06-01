@@ -214,25 +214,27 @@
 
         <!-- ── Cashier: PIN Pad ── -->
         @if (selectedRole() === 'cashier') {
-          <!-- PIN dots -->
+          <!-- PIN dots — pulse when loading, error-tinted on failure -->
           <div class="pin-dots" aria-label="PIN entry" role="group">
             @for (filled of pinFilled(); track $index) {
               <div
                 class="pin-dot"
-                [class.pin-dot--filled]="filled"
+                [class.pin-dot--filled]="filled && !pinLoading()"
+                [class.pin-dot--loading]="pinLoading()"
                 [attr.aria-label]="'Digit ' + ($index + 1) + (filled ? ' entered' : ' empty')"
               ></div>
             }
           </div>
 
-          <!-- Numeric keypad -->
-          <div class="pin-pad-wrap">
+          <!-- Numeric keypad — disabled while API call is in flight -->
+          <div class="pin-pad-wrap" [class.pin-pad-wrap--loading]="pinLoading()">
             <div class="pin-pad">
               @for (key of PIN_PAD_KEYS; track $index) {
                 @if (key === 'back') {
                   <button
                     class="pin-key pin-key--action"
                     matRipple
+                    [disabled]="pinLoading()"
                     (click)="onPinBackspace()"
                     aria-label="Backspace"
                   >
@@ -244,6 +246,7 @@
                   <button
                     class="pin-key"
                     matRipple
+                    [disabled]="pinLoading()"
                     (click)="onPinKey(key)"
                     [attr.aria-label]="'Digit ' + key"
                   >
@@ -265,11 +268,16 @@
           <button
             mat-flat-button
             class="login-btn"
-            [disabled]="pin().length < 5"
+            [disabled]="pin().length < 5 || pinLoading()"
             (click)="authenticate()"
           >
-            <mat-icon>login</mat-icon>
-            Sign In
+            @if (pinLoading()) {
+              <span class="pin-spinner" aria-hidden="true"></span>
+              Verifying…
+            } @else {
+              <mat-icon>login</mat-icon>
+              Sign In
+            }
           </button>
         }
       </div>
