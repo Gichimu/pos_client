@@ -123,6 +123,7 @@ const RAW_SUBCATEGORY_MAP: Record<string, { value: string; label: string }[]> = 
     { value: 'soy_sauce', label: 'Soy Sauce' },
     { value: 'stock_cubes', label: 'Stock Cubes' },
     { value: 'yeast', label: 'Yeast' },
+    { value: 'sachets', label: 'Sachets' },
   ],
 };
 
