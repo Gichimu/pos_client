@@ -66,6 +66,8 @@ export class LoginComponent implements OnInit {
   error = signal<string | null>(null);
   /** True while the cashier PIN API call is in flight. */
   pinLoading = signal(false);
+  /** True while the superAdmin / manager API call is in flight. */
+  credLoading = signal(false);
 
   // ── Derived state ───────────────────────────────────────────────────────
 
@@ -194,8 +196,10 @@ export class LoginComponent implements OnInit {
       //   return;
       // }
 
+      this.credLoading.set(true);
       this.authStore.login({ email, password } as User).subscribe({
         next: () => {
+          this.credLoading.set(false);
           if (this.authStore.pendingUser()) {
             this.router.navigate(['/confirm-account']);
           } else if (this.authStore.isAuthenticated()) {
@@ -203,6 +207,7 @@ export class LoginComponent implements OnInit {
           }
         },
         error: () => {
+          this.credLoading.set(false);
           this.error.set('Login failed. Please check your credentials.');
         },
       });

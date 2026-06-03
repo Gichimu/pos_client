@@ -205,9 +205,14 @@
               </div>
             }
 
-            <button mat-flat-button type="submit" class="login-btn" [disabled]="adminForm.invalid">
-              <mat-icon>login</mat-icon>
-              Sign In
+            <button mat-flat-button type="submit" class="login-btn" [disabled]="adminForm.invalid || credLoading()">
+              @if (credLoading()) {
+                <span class="pin-spinner" aria-hidden="true"></span>
+                Signing in…
+              } @else {
+                <mat-icon>login</mat-icon>
+                Sign In
+              }
             </button>
           </form>
         }
