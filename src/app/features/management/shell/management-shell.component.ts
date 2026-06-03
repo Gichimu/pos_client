@@ -129,6 +129,25 @@ export class ManagementShellComponent implements OnInit {
       roles: ['superAdmin'] as UserRole[],
       path: '/management/reports',
     },
+    {
+      label: 'Logs',
+      icon: 'history',
+      roles: ['superAdmin'] as UserRole[],
+      children: [
+        {
+          label: 'System Logs',
+          icon: 'monitor_heart',
+          roles: ['superAdmin'] as UserRole[],
+          path: '/management/logs/system',
+        },
+        {
+          label: 'Inventory Adjustments',
+          icon: 'inventory',
+          roles: ['superAdmin'] as UserRole[],
+          path: '/management/logs/inventory',
+        },
+      ],
+    },
   ];
 
   /** Set of group labels that are currently expanded in the sidebar. */
@@ -200,6 +219,13 @@ export class ManagementShellComponent implements OnInit {
       this.expandedGroups.update((s) => {
         const next = new Set(s);
         next.add('Inventory');
+        return next;
+      });
+    }
+    if (url.includes('/management/logs')) {
+      this.expandedGroups.update((s) => {
+        const next = new Set(s);
+        next.add('Logs');
         return next;
       });
     }

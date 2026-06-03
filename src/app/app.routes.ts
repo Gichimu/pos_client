@@ -92,6 +92,24 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/management/reports/reports.component').then((m) => m.ReportsComponent),
       },
+      {
+        path: 'logs',
+        children: [
+          { path: '', redirectTo: 'system', pathMatch: 'full' },
+          {
+            path: 'system',
+            data: { title: 'System Logs', logCategory: 'activity' },
+            loadComponent: () =>
+              import('./features/management/logs/logs.component').then((m) => m.LogsComponent),
+          },
+          {
+            path: 'inventory',
+            data: { title: 'Inventory Adjustments', logCategory: 'mutation' },
+            loadComponent: () =>
+              import('./features/management/logs/logs.component').then((m) => m.LogsComponent),
+          },
+        ],
+      },
     ],
   },
   {
