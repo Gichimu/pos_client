@@ -44,7 +44,7 @@
         <span class="cat-card__label">All</span>
       </button>
 
-      @for (cat of categoryStore.categories(); track cat._id) {
+      @for (cat of categoryStore.categories() | sortAlphabetical: 'name'; track cat._id) {
         <button
           class="cat-card"
           [class.cat-card--active]="selectedCategory() === cat.name"
@@ -91,7 +91,7 @@
 
       <!-- Product grid -->
       <div class="product-grid">
-        @for (product of filteredProducts(); track product._id) {
+        @for (product of filteredProducts() | sortAlphabetical: 'name'; track product._id) {
           <button
             class="product-card"
             (click)="addToCart(product)"

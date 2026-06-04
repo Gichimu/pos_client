@@ -352,9 +352,7 @@ export class ReceiptService {
   private buildKotBody(data: PrintReceiptData): string {
     const { sale, cashier, shift, cartSnapshot, grandTotal } = data;
 
-    const waiterName = cashier
-      ? `${cashier.firstName} ${cashier.lastName ?? ''}`.trim().toUpperCase()
-      : 'CASHIER';
+    const waiterName = cashier ? `${cashier.firstName}`.trim().toUpperCase() : 'CASHIER';
     const orderNo = sale.saleId ? sale.saleId.slice(-5).toUpperCase() : '00000';
     const now = new Date();
     const shiftDate = shift ? this.formatDate(new Date(shift.startTime)) : this.formatDate(now);
@@ -430,7 +428,9 @@ export class ReceiptService {
     const cashierName = cashier ? `${cashier.firstName}`.toUpperCase() : 'CASHIER';
     const billNo = sale.saleId ? sale.saleId.slice(-5).toUpperCase() : '00000';
     const now = new Date();
-    const shiftDate = shift ? this.formatDate(new Date((shift as any).startTime)) : this.formatDate(now);
+    const shiftDate = shift
+      ? this.formatDate(new Date((shift as any).startTime))
+      : this.formatDate(now);
     const saleTime = this.formatTime(now);
 
     const vatRate = 0.16;
@@ -449,9 +449,7 @@ export class ReceiptService {
         // productId may arrive as a populated object { _id, name } from the API
         const rawProductId = (item as any).productId;
         const resolvedName =
-          (typeof rawProductId === 'object' && rawProductId !== null
-            ? rawProductId.name
-            : null) ??
+          (typeof rawProductId === 'object' && rawProductId !== null ? rawProductId.name : null) ??
           item.productName ??
           'ITEM';
         const name = resolvedName.toUpperCase();

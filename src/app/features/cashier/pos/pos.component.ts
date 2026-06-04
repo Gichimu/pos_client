@@ -21,6 +21,7 @@ import { shiftStore } from '../../../store/shifts/shift.store';
 import { CategoryStore } from '../../../store/categories/category.store';
 import { ReceiptService } from '../../../core/services/receipt.service';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
+import { SortAlphabeticalPipe } from '../../../pipes/sort-alphabetical-pipe';
 
 @Component({
   selector: 'app-pos',
@@ -33,6 +34,7 @@ import { SweetAlertService } from '../../../core/services/sweet-alert.service';
     MatFormFieldModule,
     MatTooltipModule,
     MatDividerModule,
+    SortAlphabeticalPipe,
   ],
   templateUrl: './pos.component.html',
   styleUrl: './pos.component.scss',

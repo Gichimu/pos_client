@@ -25,6 +25,7 @@ import {
   PaymentMethodDialogData,
   PaymentMethodDialogResult,
 } from './payment-method-dialog.component';
+import moment from 'moment';
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
 
@@ -157,10 +158,13 @@ export class SalesComponent implements OnInit {
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit(): void {
+    const startDate = moment().startOf('week').toISOString();
+    const endDate = moment().endOf('week').toISOString();
+
     this.filterStatus.set('all');
     this.filterCashierId.set(null);
     this.pageIndex.set(0);
-    this.salesStore.loadSales();
+    this.salesStore.loadSales({ startDate, endDate });
   }
 
   // ── Filter helpers ───────────────────────────────────────────────────────
