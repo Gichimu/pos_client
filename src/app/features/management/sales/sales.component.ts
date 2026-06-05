@@ -100,10 +100,40 @@ export class SalesComponent implements OnInit {
     })),
   );
 
+  // readonly filteredItems = computed(() => {
+  //   const status = this.filterStatus();
+  //   const cashierId = this.filterCashierId();
+  //   let result = this.salesStore.items();
+  //   if (cashierId) {
+  //     result = result.filter((sale) => {
+  //       const c = (sale as any).cashierId;
+  //       const id = typeof c === 'string' ? c : c?._id;
+  //       return id === cashierId;
+  //     });
+  //   }
+  //   if (status === 'confirmed') return result.filter((s) => s.confirmed);
+  //   if (status === 'pending') return result.filter((s) => !s.confirmed);
+
+  //   result = result.filter((s) => s.shiftId === this.activeShift()?._id);
+
+  //   return result;
+  // });
   readonly filteredItems = computed(() => {
+    const currentShift = this.activeShift();
+
+    // Hard Gate: If there is no active shift running right now, return an empty array instantly
+    if (!currentShift || !currentShift._id) {
+      return [];
+    }
+
     const status = this.filterStatus();
     const cashierId = this.filterCashierId();
     let result = this.salesStore.items();
+
+    // 1. ALWAYS filter by the active open shift FIRST (No early returns can bypass this now)
+    result = result.filter((s) => s.shiftId === currentShift._id);
+
+    // 2. Filter by Cashier ID if selected
     if (cashierId) {
       result = result.filter((sale) => {
         const c = (sale as any).cashierId;
@@ -111,10 +141,14 @@ export class SalesComponent implements OnInit {
         return id === cashierId;
       });
     }
-    if (status === 'confirmed') return result.filter((s) => s.confirmed);
-    if (status === 'pending') return result.filter((s) => !s.confirmed);
 
-    result = result.filter((s) => s.shiftId === this.activeShift()?._id);
+    // 3. Finally, apply status variations right at the end of the pipeline
+    if (status === 'confirmed') {
+      return result.filter((s) => s.confirmed);
+    }
+    if (status === 'pending') {
+      return result.filter((s) => !s.confirmed);
+    }
 
     return result;
   });
