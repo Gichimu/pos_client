@@ -34,7 +34,15 @@ interface PaymentOption {
 @Component({
   selector: 'app-payment-method-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatDialogModule, MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+  ],
   template: `
     <div class="pmDialog__header" mat-dialog-title>
       <div class="pmDialog__header-icon-wrap">
@@ -122,14 +130,24 @@ interface PaymentOption {
           </div>
 
           <!-- Balance indicator -->
-          <div class="pmDialog__split-balance" [class.pmDialog__split-balance--ok]="splitValid()" [class.pmDialog__split-balance--err]="!splitValid()">
-            <span class="material-icons">{{ splitValid() ? 'check_circle' : 'error_outline' }}</span>
+          <div
+            class="pmDialog__split-balance"
+            [class.pmDialog__split-balance--ok]="splitValid()"
+            [class.pmDialog__split-balance--err]="!splitValid()"
+          >
+            <span class="material-icons">{{
+              splitValid() ? 'check_circle' : 'error_outline'
+            }}</span>
             @if (splitValid()) {
               <span>Amounts match &mdash; {{ formatCurrency(data.totalAmount) }}</span>
             } @else {
               <span>
                 Total entered: {{ formatCurrency(splitTotal()) }} &mdash;
-                {{ splitRemaining() > 0 ? formatCurrency(splitRemaining()) + ' remaining' : formatCurrency(-splitRemaining()) + ' over' }}
+                {{
+                  splitRemaining() > 0
+                    ? formatCurrency(splitRemaining()) + ' remaining'
+                    : formatCurrency(-splitRemaining()) + ' over'
+                }}
               </span>
             }
           </div>
@@ -207,7 +225,10 @@ interface PaymentOption {
         background: #f9fafb;
         cursor: pointer;
         position: relative;
-        transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+        transition:
+          border-color 0.18s,
+          background 0.18s,
+          box-shadow 0.18s;
         font-family: inherit;
       }
 
@@ -238,7 +259,9 @@ interface PaymentOption {
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.18s, border-color 0.18s;
+        transition:
+          background 0.18s,
+          border-color 0.18s;
       }
 
       .pmDialog__option-icon-wrap--selected {
@@ -297,8 +320,14 @@ interface PaymentOption {
       }
 
       @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-6px); }
-        to   { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .pmDialog__split-header {
@@ -310,7 +339,10 @@ interface PaymentOption {
         color: #92400e;
         margin-bottom: 14px;
 
-        .material-icons { font-size: 18px; color: #d97706; }
+        .material-icons {
+          font-size: 18px;
+          color: #d97706;
+        }
       }
 
       .pmDialog__split-fields {
@@ -345,20 +377,25 @@ interface PaymentOption {
         font-size: 0.8rem;
         font-weight: 600;
 
-        .material-icons { font-size: 16px; }
-
+        .material-icons {
+          font-size: 16px;
+        }
       }
 
       .pmDialog__split-balance--ok {
         background: #d1fae5;
         color: #065f46;
-        .material-icons { color: #10b981; }
+        .material-icons {
+          color: #10b981;
+        }
       }
 
       .pmDialog__split-balance--err {
         background: #fee2e2;
         color: #991b1b;
-        .material-icons { color: #ef4444; }
+        .material-icons {
+          color: #ef4444;
+        }
       }
     `,
   ],
@@ -385,21 +422,25 @@ export class PaymentMethodDialogComponent {
   });
 
   readonly paymentOptions: PaymentOption[] = [
-    { method: 'Cash',   icon: 'payments',      label: 'Cash',   description: 'Physical cash' },
-    { method: 'M-Pesa', icon: 'phone_android',  label: 'M-Pesa', description: 'Mobile money' },
-    { method: 'PDQ',    icon: 'credit_card',    label: 'PDQ',    description: 'Card / terminal' },
-    { method: 'Split',  icon: 'call_split',     label: 'Split',  description: 'Cash + M-Pesa' },
+    { method: 'Cash', icon: 'payments', label: 'Cash', description: 'Physical cash' },
+    { method: 'M-Pesa', icon: 'phone_android', label: 'M-Pesa', description: 'Mobile money' },
+    { method: 'PDQ', icon: 'credit_card', label: 'PDQ', description: 'Card / terminal' },
+    { method: 'Split', icon: 'call_split', label: 'Split', description: 'Cash + M-Pesa' },
   ];
 
   /** In bulk mode, Split is hidden since amounts can't be split per-sale. */
   get availableOptions(): PaymentOption[] {
-    return this.data.isBulk
-      ? this.paymentOptions.filter((o) => o.method !== 'Split')
-      : this.paymentOptions;
+    // return this.data.isBulk
+    //   ? this.paymentOptions.filter((o) => o.method !== 'Split')
+    //   : this.paymentOptions;
+    return this.paymentOptions;
   }
 
   constructor(
-    private readonly dialogRef: MatDialogRef<PaymentMethodDialogComponent, PaymentMethodDialogResult>,
+    private readonly dialogRef: MatDialogRef<
+      PaymentMethodDialogComponent,
+      PaymentMethodDialogResult
+    >,
     @Inject(MAT_DIALOG_DATA) public readonly data: PaymentMethodDialogData,
   ) {}
 
