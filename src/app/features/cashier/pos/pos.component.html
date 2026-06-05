@@ -238,7 +238,7 @@
         <button
           mat-flat-button
           class="pay-btn"
-          [disabled]="cartItems().length === 0 || !activeShift()"
+          [disabled]="cartItems().length === 0 || !activeShift() || isProcessingPayment()"
           (click)="processPayment()"
           [matTooltip]="!activeShift() ? 'Open a shift before processing payments' : ''"
         >

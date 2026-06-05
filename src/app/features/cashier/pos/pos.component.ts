@@ -56,6 +56,8 @@ export class PosComponent implements OnInit {
   private readonly sweetAlert = inject(SweetAlertService);
   private readonly receiptService = inject(ReceiptService);
 
+  isProcessingPayment = signal(false);
+
   readonly currentUser = this.authStore.user as Signal<User | null>;
 
   searchQuery = signal('');
@@ -181,8 +183,14 @@ export class PosComponent implements OnInit {
       confirmed: false,
     };
 
+    this.isProcessingPayment.set(true);
+
     this.saleStore.addSale(sale).subscribe({
       next: (newSale) => {
+        if (!newSale || !newSale.saleId) {
+          this.sweetAlert.error('Server saved a broken transaction records. Printing halted.');
+          return;
+        }
         // Decrement inventory for every item in the completed sale
         cartSnapshot.forEach((item: CartItem) => {
           this.productStore.adjustStock(item.product._id!, -item.quantity);
@@ -196,6 +204,7 @@ export class PosComponent implements OnInit {
           grandTotal: total,
         });
         this.store.clearCart();
+        this.isProcessingPayment.set(false);
         this.logout();
         this.sweetAlert.success(`Payment of Ksh.${total.toFixed(2)} processed!`);
       },

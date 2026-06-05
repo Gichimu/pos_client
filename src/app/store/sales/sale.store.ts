@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withHooks } from '@ngrx/signals';
 import { PaymentMethod, SaleItem } from '../../core/models/sale.model';
 import { SalesService } from '../../core/services/sales-service';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, catchError, forkJoin, tap, throwError } from 'rxjs';
 
 export type SaleConfirmStatus = 'pending' | 'confirmed';
 
@@ -26,23 +26,36 @@ export const saleStore = signalStore(
     },
 
     addSale(sale: SaleItem): Observable<SaleItem> {
-      return new Observable((observer) => {
-        salesService.addSale(sale).subscribe({
-          next: (newSale) => {
-            patchState(store, { items: [...store.items(), newSale] });
-            observer.next(newSale);
-            observer.complete();
-          },
-          error: (err) => observer.error(err),
-        });
-      });
+      // return new Observable((observer) => {
+      //   salesService.addSale(sale).subscribe({
+      //     next: (newSale) => {
+      //       patchState(store, { items: [...store.items(), newSale] });
+      //       observer.next(newSale);
+      //       observer.complete();
+      //     },
+      //     error: (err) => observer.error(err),
+      //   });
+      // });
+      return salesService.addSale(sale).pipe(
+        tap((newSale) => {
+          patchState(store, { items: [...store.items(), newSale] });
+        }),
+        catchError((err) => {
+          console.error('Error adding sale:', err);
+          return throwError(() => err);
+        }),
+      );
     },
 
     /**
      * Fetch all sales from the API, optionally filtered by date range and/or cashier.
      * Replaces the full items list — no server-side pagination.
      */
-    loadSales(options?: { cashierId?: string | null; startDate?: string | null; endDate?: string | null }): void {
+    loadSales(options?: {
+      cashierId?: string | null;
+      startDate?: string | null;
+      endDate?: string | null;
+    }): void {
       patchState(store, { isLoading: true });
       salesService.getAll(options).subscribe({
         next: (response: any) => {
@@ -211,7 +224,7 @@ export const saleStore = signalStore(
       });
     },
   })),
-    withHooks({
+  withHooks({
     onInit(store) {
       // Initial load with no filters; the report component will re-fetch with date params
       store.loadSales();
