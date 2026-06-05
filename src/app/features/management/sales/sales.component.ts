@@ -113,6 +113,9 @@ export class SalesComponent implements OnInit {
     }
     if (status === 'confirmed') return result.filter((s) => s.confirmed);
     if (status === 'pending') return result.filter((s) => !s.confirmed);
+
+    result = result.filter((s) => s.shiftId === this.activeShift()?._id);
+
     return result;
   });
 
@@ -160,7 +163,7 @@ export class SalesComponent implements OnInit {
   ngOnInit(): void {
     const startDate = moment().startOf('week').toISOString();
     const endDate = moment().endOf('week').toISOString();
-
+    console.log('loading sales with active shift filter:', this.activeShift());
     this.filterStatus.set('all');
     this.filterCashierId.set(null);
     this.pageIndex.set(0);
