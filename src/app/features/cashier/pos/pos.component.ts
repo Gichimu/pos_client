@@ -22,6 +22,7 @@ import { CategoryStore } from '../../../store/categories/category.store';
 import { ReceiptService } from '../../../core/services/receipt.service';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import { SortAlphabeticalPipe } from '../../../pipes/sort-alphabetical-pipe';
+import { exhaustMap, map, Subject, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-pos',
@@ -55,6 +56,13 @@ export class PosComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly sweetAlert = inject(SweetAlertService);
   private readonly receiptService = inject(ReceiptService);
+
+  private checkoutStream$ = new Subject<{
+    sale: SaleItem;
+    cartSnapshot: CartItem[];
+    total: number;
+  }>();
+  private checkoutSubscription!: Subscription;
 
   isProcessingPayment = signal(false);
 
@@ -113,6 +121,57 @@ export class PosComponent implements OnInit {
 
   ngOnInit() {
     this.productStore.loadProducts();
+
+    // Set up the isolated transaction listener
+    this.checkoutSubscription = this.checkoutStream$
+      .pipe(
+        exhaustMap(({ sale, cartSnapshot, total }) => {
+          // Lock down the interface immediately
+          this.isProcessingPayment.set(true);
+
+          // Forward the HTTP stream directly from your store execution action
+          return this.saleStore.addSale(sale).pipe(
+            // Wrap variables cleanly so they remain immutable during transit
+            map((newSale) => ({ newSale, cartSnapshot, total })),
+          );
+        }),
+      )
+      .subscribe({
+        next: ({ newSale, cartSnapshot, total }) => {
+          // Defensive hard gate checking for sequence generation matching your setup
+          if (!newSale || !newSale.saleId) {
+            this.sweetAlert.error('Server saved a broken transaction record. Printing halted.');
+            this.isProcessingPayment.set(false);
+            return;
+          }
+
+          // Decrement inventory for every item in the completed sale locally
+          cartSnapshot.forEach((item: CartItem) => {
+            this.productStore.adjustStock(item.product._id!, -item.quantity);
+          });
+
+          // Print receipt in duplicate (opens browser print dialog) using server verified object
+          this.receiptService.print({
+            sale: newSale,
+            cashier: this.currentUser(),
+            shift: this.activeShift(),
+            cartSnapshot,
+            grandTotal: total,
+          });
+
+          // State settlement and session termination loop
+          this.store.clearCart();
+          this.isProcessingPayment.set(false);
+          this.sweetAlert.success(`Payment of Ksh. ${total.toFixed(2)} processed!`);
+
+          // Final isolated execution block: purges memory profiles
+          this.logout();
+        },
+        error: (err) => {
+          this.isProcessingPayment.set(false);
+          this.sweetAlert.error('Payment failed. Please try again.');
+        },
+      });
   }
   onSearchChange(value: string) {
     this.searchQuery.set(value);
@@ -183,35 +242,36 @@ export class PosComponent implements OnInit {
       confirmed: false,
     };
 
-    this.isProcessingPayment.set(true);
+    // this.isProcessingPayment.set(true);
 
-    this.saleStore.addSale(sale).subscribe({
-      next: (newSale) => {
-        if (!newSale || !newSale.saleId) {
-          this.sweetAlert.error('Server saved a broken transaction records. Printing halted.');
-          return;
-        }
-        // Decrement inventory for every item in the completed sale
-        cartSnapshot.forEach((item: CartItem) => {
-          this.productStore.adjustStock(item.product._id!, -item.quantity);
-        });
-        // Print receipt in duplicate (opens browser print dialog)
-        this.receiptService.print({
-          sale: newSale,
-          cashier: this.currentUser(),
-          shift: this.activeShift(),
-          cartSnapshot,
-          grandTotal: total,
-        });
-        this.store.clearCart();
-        this.isProcessingPayment.set(false);
-        this.logout();
-        this.sweetAlert.success(`Payment of Ksh.${total.toFixed(2)} processed!`);
-      },
-      error: () => {
-        this.sweetAlert.error('Payment failed. Please try again.');
-      },
-    });
+    // this.saleStore.addSale(sale).subscribe({
+    //   next: (newSale) => {
+    //     if (!newSale || !newSale.saleId) {
+    //       this.sweetAlert.error('Server saved a broken transaction records. Printing halted.');
+    //       return;
+    //     }
+    //     // Decrement inventory for every item in the completed sale
+    //     cartSnapshot.forEach((item: CartItem) => {
+    //       this.productStore.adjustStock(item.product._id!, -item.quantity);
+    //     });
+    //     // Print receipt in duplicate (opens browser print dialog)
+    //     this.receiptService.print({
+    //       sale: newSale,
+    //       cashier: this.currentUser(),
+    //       shift: this.activeShift(),
+    //       cartSnapshot,
+    //       grandTotal: total,
+    //     });
+    //     this.store.clearCart();
+    //     this.isProcessingPayment.set(false);
+    //     this.logout();
+    //     this.sweetAlert.success(`Payment of Ksh.${total.toFixed(2)} processed!`);
+    //   },
+    //   error: () => {
+    //     this.sweetAlert.error('Payment failed. Please try again.');
+    //   },
+    // });
+    this.checkoutStream$.next({ sale, cartSnapshot, total });
   }
 
   goToManagement() {
