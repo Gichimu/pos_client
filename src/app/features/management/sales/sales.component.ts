@@ -195,8 +195,8 @@ export class SalesComponent implements OnInit {
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    const startDate = moment().startOf('week').toISOString();
-    const endDate = moment().endOf('week').toISOString();
+    const startDate = moment().subtract(2, 'day').startOf('day').toISOString();
+    const endDate = moment().endOf('day').toISOString();
     console.log('loading sales with active shift filter:', this.activeShift());
     this.filterStatus.set('all');
     this.filterCashierId.set(null);
