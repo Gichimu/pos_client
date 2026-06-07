@@ -9,12 +9,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { Product, ReorderLevel, StockReorderStatus } from '../../../../core/models/product.model';
+import { Product, ProductType, ReorderLevel, StockReorderStatus, StockUnit } from '../../../../core/models/product.model';
 import { CategoryStore } from '../../../../store/categories/category.store';
 import { Category } from '../../../../core/models/category.model';
 
 export interface ProductFormData {
   product?: Product;
+  productType?: ProductType;
 }
 
 const REORDER_OPTIONS: { value: StockReorderStatus; label: string }[] = [
@@ -28,6 +29,10 @@ const REORDER_LEVEL_OPTIONS: { value: ReorderLevel; label: string }[] = [
   { value: 5, label: '5' },
   { value: 10, label: '10' },
   { value: 20, label: '20' },
+];
+
+const UNIT_OPTIONS: StockUnit[] = [
+  'L', 'mL', 'kg', 'g', 'pcs', 'dozen', 'pack', 'bag', 'box', 'portion', 'tray'
 ];
 
 /** Subcategory options keyed by lowercase category name. */
@@ -90,6 +95,7 @@ export class InventoryFormModalComponent {
   readonly categories = this.categoryStore.categories as Signal<Category[]>;
   readonly reorderOptions = REORDER_OPTIONS;
   readonly reorderLevelOptions = REORDER_LEVEL_OPTIONS;
+  readonly unitOptions = UNIT_OPTIONS;
 
   /** Units to add on top of existing stock (edit mode only). */
   readonly addToStock = new FormControl<number | null>(null, [Validators.min(0)]);
@@ -124,6 +130,8 @@ export class InventoryFormModalComponent {
     ],
     stockReorderLevel: [this.data?.product?.stockReorderLevel ?? 5, Validators.required],
     imageUrl: [this.data?.product?.imageUrl ?? ''],
+    productType: [this.data?.product?.productType ?? this.data?.productType ?? 'menu'],
+    unit: [this.data?.product?.unit ?? 'pcs'],
   });
 
   // ── Reactive subcategory options based on selected category ─────────────
@@ -181,7 +189,8 @@ export class InventoryFormModalComponent {
       sellingPrice: Number(v.sellingPrice),
       currentStock,
       stockReorderLevel: v.stockReorderLevel as ReorderLevel,
-      productType: 'menu',
+      productType: v.productType as ProductType,
+      unit: v.unit as StockUnit,
       imageUrl:
         v.imageUrl?.trim() || `https://picsum.photos/seed/${encodeURIComponent(name)}/60/60`,
     };

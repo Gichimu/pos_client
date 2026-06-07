@@ -1,0 +1,39 @@
+<div class="dashboard">
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-icon stat-icon--total">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Total Items</p>
+          <p class="stat-value">{{ totalItems() }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card" (click)="navigateToStock('low')" style="cursor: pointer">
+      <mat-card-content>
+        <div class="stat-icon stat-icon--low">
+          <mat-icon>warning_amber</mat-icon>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Low Stock</p>
+          <p class="stat-value">{{ lowStockItems() }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card" (click)="navigateToStock('critical')" style="cursor: pointer">
+      <mat-card-content>
+        <div class="stat-icon stat-icon--critical">
+          <mat-icon>dangerous</mat-icon>
+        </div>
+        <div class="stat-info">
+          <p class="stat-label">Critical Stock</p>
+          <p class="stat-value">{{ criticalStockItems() }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

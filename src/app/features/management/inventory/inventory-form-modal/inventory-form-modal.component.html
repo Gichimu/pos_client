@@ -71,24 +71,15 @@
         </mat-form-field>
       </div>
 
-      <!-- Row 3: Buying + Selling price -->
+      <!-- Row 3: Product Type + Selling price -->
       <div class="form-row">
-        <!-- We are not collecting buying price at the moment -->
-        <!-- <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Buying Price (Ksh.)</mat-label>
-          <mat-icon matPrefix>attach_money</mat-icon>
-          <input
-            matInput
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="buyingPrice"
-            placeholder="0.00"
-          />
-          @if (form.get('buyingPrice')?.invalid && form.get('buyingPrice')?.touched) {
-            <mat-error>Enter a valid price</mat-error>
-          }
-        </mat-form-field> -->
+        <mat-form-field appearance="outline" class="flex-field">
+          <mat-label>Product Type</mat-label>
+          <mat-select formControlName="productType">
+            <mat-option value="menu">Menu Item</mat-option>
+            <mat-option value="raw-stock">Raw Stock</mat-option>
+          </mat-select>
+        </mat-form-field>
 
         <mat-form-field appearance="outline" class="flex-field">
           <mat-label>Selling Price (Ksh.)</mat-label>
@@ -123,6 +114,17 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Stock Unit</mat-label>
+            <mat-select formControlName="unit">
+              @for (unit of unitOptions; track unit) {
+                <mat-option [value]="unit">{{ unit }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-field">
             <mat-label>Stock Reorder Level</mat-label>
             <mat-icon matPrefix>loop</mat-icon>
             <mat-select formControlName="stockReorderLevel">
@@ -131,6 +133,7 @@
               }
             </mat-select>
           </mat-form-field>
+          <div class="flex-field"></div>
         </div>
 
         <!-- Add to Stock (full width, highlighted) -->
@@ -145,9 +148,9 @@
             [formControl]="addToStock"
             placeholder="0"
           />
-          <span matSuffix class="units-suffix">units</span>
+          <span matSuffix class="units-suffix">{{ form.get('unit')?.value }}</span>
           @if ((addToStock.value ?? 0) > 0) {
-            <mat-hint class="add-hint">↑ New total: {{ newStockTotal() }} units</mat-hint>
+            <mat-hint class="add-hint">↑ New total: {{ newStockTotal() }} {{ form.get('unit')?.value }}</mat-hint>
           } @else {
             <mat-hint>Enter units to add to current stock</mat-hint>
           }
@@ -183,6 +186,17 @@
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Stock Unit</mat-label>
+            <mat-select formControlName="unit">
+              @for (unit of unitOptions; track unit) {
+                <mat-option [value]="unit">{{ unit }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="flex-field">
             <mat-label>Stock Reorder Level</mat-label>
             <mat-icon matPrefix>loop</mat-icon>
             <mat-select formControlName="stockReorderLevel">
@@ -191,6 +205,7 @@
               }
             </mat-select>
           </mat-form-field>
+          <div class="flex-field"></div>
         </div>
       }
 

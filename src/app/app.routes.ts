@@ -71,22 +71,6 @@ export const routes: Routes = [
           import('./features/management/sales/sales.component').then((m) => m.SalesComponent),
       },
       {
-        path: 'raw-stock',
-        data: { title: 'Raw Stock' },
-        loadComponent: () =>
-          import('./features/management/raw-stock/raw-stock.component').then(
-            (m) => m.RawStockComponent,
-          ),
-      },
-      {
-        path: 'recipe',
-        data: { title: 'Recipes' },
-        loadComponent: () =>
-          import('./features/management/recipe/recipe.component').then(
-            (m) => m.RecipeComponent,
-          ),
-      },
-      {
         path: 'reports',
         data: { title: 'Reports' },
         loadComponent: () =>
@@ -109,6 +93,31 @@ export const routes: Routes = [
               import('./features/management/logs/logs.component').then((m) => m.LogsComponent),
           },
         ],
+      },
+    ],
+  },
+  {
+    path: 'store',
+    canActivate: [authGuard, roleGuard(['store', 'superAdmin'])],
+    loadComponent: () =>
+      import('./features/store/shell/store-shell.component').then((m) => m.StoreShellComponent),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        data: { title: 'Store Dashboard' },
+        loadComponent: () =>
+          import('./features/store/dashboard/store-dashboard.component').then(
+            (m) => m.StoreDashboardComponent,
+          ),
+      },
+      {
+        path: 'inventory',
+        data: { title: 'Inventory' },
+        loadComponent: () =>
+          import('./features/store/stock/stock-management.component').then(
+            (m) => m.StockManagementComponent,
+          ),
       },
     ],
   },

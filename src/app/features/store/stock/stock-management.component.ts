@@ -9,23 +9,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { Product } from '../../../core/models/product.model';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
-import {
-  RawStockFormModalComponent,
-  RawStockFormData,
-} from './raw-stock-form-modal/raw-stock-form-modal.component';
-import {
-  ConfirmDialogComponent,
-  ConfirmDialogData,
-} from '../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { productStore, calculateReorderStatusValue } from '../../../store/products/product.store';
-import { SweetAlertService } from '../../../core/services/sweet-alert.service';
-import { RbacAllow } from '../../../core/directives/rbac-allow';
-import { RAW_STOCK_CATEGORIES } from './raw-stock-form-modal/raw-stock-form-modal.component';
+import { productStore } from '../../../store/products/product.store';
 import { requisitionStore } from '../../../store/requisitions/requisition.store';
 import { authStore } from '../../../store/auth/auth.store';
+import { SweetAlertService } from '../../../core/services/sweet-alert.service';
+import { StockAdjustDialogComponent } from './stock-adjust-dialog.component';
+import { RawStockFormModalComponent, RawStockFormData } from './raw-stock-form-modal/raw-stock-form-modal.component';
+
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @Component({
-  selector: 'app-raw-stock',
+  selector: 'app-stock-management',
   standalone: true,
   imports: [
     CommonModule,
@@ -34,13 +28,14 @@ import { authStore } from '../../../store/auth/auth.store';
     MatIconModule,
     MatTooltipModule,
     MatPaginatorModule,
+    MatButtonToggleModule,
     StatusBadgeComponent,
-    RbacAllow,
+    RawStockFormModalComponent,
   ],
-  templateUrl: './raw-stock.component.html',
-  styleUrl: './raw-stock.component.scss',
+  templateUrl: './stock-management.component.html',
+  styleUrl: './stock-table.scss',
 })
-export class RawStockComponent implements OnInit {
+export class StockManagementComponent implements OnInit {
   private readonly store = inject(productStore);
   private readonly dialog = inject(MatDialog);
   private readonly sweetAlert = inject(SweetAlertService);
@@ -48,77 +43,71 @@ export class RawStockComponent implements OnInit {
   private readonly auth = inject(authStore);
   private readonly route = inject(ActivatedRoute);
 
-  /** Active stock-status filter (driven by query param or pill clicks). */
-  readonly stockFilter = signal<'all' | 'low' | 'critical'>('all');
+  readonly mode = signal<'add' | 'deduct'>('add');
 
   ngOnInit(): void {
     this.store.loadProducts();
+    
     const filterParam = this.route.snapshot.queryParamMap.get('filter');
     if (filterParam === 'low' || filterParam === 'critical') {
-      this.stockFilter.set(filterParam);
+      this.stockFilter.set(filterParam as 'low' | 'critical');
+    }
+
+    const modeParam = this.route.snapshot.queryParamMap.get('mode');
+    if (modeParam === 'add' || modeParam === 'deduct') {
+      this.mode.set(modeParam);
     }
   }
 
-  setStockFilter(f: 'all' | 'low' | 'critical'): void {
-    this.stockFilter.set(f);
-    this.pageIndex.set(0);
-  }
-
-  /**
-   * Only raw-stock products, with stockReorderStatus guaranteed.
-   * Recalculates locally from currentStock + stockReorderLevel as a safety
-   * net in case the API response doesn't include the computed field.
-   */
-  private readonly rawProducts = computed(() =>
-    this.store.products()
-      .filter((p) => p.productType === 'raw-stock')
-      .map((p) => ({
-        ...p,
-        stockReorderStatus:
-          p.stockReorderStatus ??
-          calculateReorderStatusValue(p.currentStock, p.stockReorderLevel),
-      })),
-  );
-
-  readonly totalCount = computed(() => this.rawProducts().length);
-  readonly lowStockCount = computed(
-    () => this.rawProducts().filter((p) => p.stockReorderStatus === 'low').length,
-  );
-  readonly outOfStock = computed(
-    () => this.rawProducts().filter((p) => p.stockReorderStatus === 'critical').length,
-  );
-
-  readonly displayedColumns = ['name', 'category', 'buyingPrice', 'currentStock', 'stockReorderStatus', 'actions'];
+  readonly displayedColumns = [
+    'name',
+    'category',
+    'currentStock',
+    'stockReorderStatus',
+    'actions',
+  ];
 
   searchQuery = signal('');
+  readonly stockFilter = signal<'all' | 'low' | 'critical'>('all');
+  readonly pageIndex = signal(0);
+  readonly PAGE_SIZE = 10;
 
   readonly filteredProducts = computed(() => {
     const q = this.searchQuery().toLowerCase();
     const f = this.stockFilter();
-    let products = this.rawProducts();
+    let products = this.store.products().filter((p) => p.productType === 'raw-stock');
 
     if (f === 'low') products = products.filter((p) => p.stockReorderStatus === 'low');
     else if (f === 'critical') products = products.filter((p) => p.stockReorderStatus === 'critical');
 
     if (q) {
       products = products.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q),
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          p.sku.toLowerCase().includes(q),
       );
     }
     return products;
   });
-
-  // ── Pagination ──────────────────────────────────────────
-  readonly pageIndex = signal(0);
-  readonly PAGE_SIZE = 10;
 
   readonly pagedProducts = computed(() => {
     const start = this.pageIndex() * this.PAGE_SIZE;
     return this.filteredProducts().slice(start, start + this.PAGE_SIZE);
   });
 
-  onSearch(value: string) {
+  setMode(m: 'add' | 'deduct') {
+    this.mode.set(m);
+    this.pageIndex.set(0);
+  }
+
+  onSearch(value: string): void {
     this.searchQuery.set(value);
+    this.pageIndex.set(0);
+  }
+
+  setStockFilter(filter: 'all' | 'low' | 'critical'): void {
+    this.stockFilter.set(filter);
     this.pageIndex.set(0);
   }
 
@@ -126,15 +115,7 @@ export class RawStockComponent implements OnInit {
     this.pageIndex.set(event.pageIndex);
   }
 
-  formatCurrency(v: number) {
-    return `Ksh.${v.toFixed(2)}`;
-  }
-
-  resolveCategoryLabel(categoryValue: string): string {
-    return RAW_STOCK_CATEGORIES.find((c) => c.value === categoryValue)?.label ?? categoryValue;
-  }
-
-  openAddDialog() {
+  openNewItemDialog() {
     const ref = this.dialog.open<RawStockFormModalComponent, RawStockFormData, Product>(
       RawStockFormModalComponent,
       { data: {}, maxWidth: '95vw' },
@@ -178,23 +159,36 @@ export class RawStockComponent implements OnInit {
     });
   }
 
-  confirmDelete(product: Product) {
-    const ref = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(
-      ConfirmDialogComponent,
-      {
-        data: {
-          title: 'Remove Raw Stock Item',
-          message: `Are you sure you want to remove "${product.name}" from raw stock? This cannot be undone.`,
-          confirmLabel: 'Remove',
-          danger: true,
-        },
-        width: '380px',
-      },
-    );
-    ref.afterClosed().subscribe((confirmed) => {
-      if (confirmed) {
-        this.store.deleteProduct(product._id!);
-        this.sweetAlert.success(`"${product.name}" removed`);
+  openAdjustDialog(product: Product) {
+    const mode = this.mode();
+    const ref = this.dialog.open(StockAdjustDialogComponent, {
+      data: { product, mode },
+      maxWidth: '95vw',
+    });
+
+    ref.afterClosed().subscribe((delta: number | undefined) => {
+      if (delta) {
+        const updatedProduct = {
+          ...product,
+          currentStock: (product.currentStock ?? 0) + delta,
+        };
+
+        if (mode === 'add') {
+          // Record requisition
+          this.reqStore.addRequisition({
+            productId: updatedProduct._id ?? '',
+            productName: updatedProduct.name,
+            quantity: delta,
+            addedBy: this.auth.user()?._id,
+            addedAt: new Date(),
+          });
+        }
+
+        this.store.updateProduct(updatedProduct);
+        const msg = mode === 'add' 
+          ? `Added ${delta} ${product.unit || ''} to ${product.name}`
+          : `Deducted ${Math.abs(delta)} ${product.unit || ''} from ${product.name}`;
+        this.sweetAlert.success(msg);
       }
     });
   }

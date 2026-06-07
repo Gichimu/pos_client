@@ -16,11 +16,11 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="sidebar__nav" aria-label="Main navigation">
+    <nav class="sidebar__nav" aria-label="Store navigation">
       @for (item of navItems; track item.label) {
         @if (item.children?.length) {
           <!-- Expandable group -->
-          <div class="nav-group" *rbacAllow="item.roles ?? []">
+          <div class="nav-group">
             <button
               class="nav-item nav-group__trigger"
               [class.nav-group__trigger--active]="isGroupExpanded(item.label)"
@@ -41,7 +41,6 @@
                     class="nav-item nav-item--child"
                     [routerLink]="child.path"
                     routerLinkActive="nav-item--active"
-                    *rbacAllow="child.roles ?? []"
                     [attr.aria-label]="child.label"
                     (click)="closeSidebar()"
                   >
@@ -59,7 +58,6 @@
             [routerLink]="item.path"
             routerLinkActive="nav-item--active"
             [matTooltip]="item.label"
-            *rbacAllow="item.roles ?? []"
             matTooltipPosition="right"
             [matTooltipDisabled]="true"
             [attr.aria-label]="item.label"
@@ -72,16 +70,16 @@
       }
     </nav>
 
-    <!-- Bottom: cashier switch -->
-    <div *rbacAllow="['superAdmin']" class="sidebar__footer">
+    <!-- Bottom: Sign Out -->
+    <div class="sidebar__footer">
       <button
         mat-button
         class="switch-btn"
-        (click)="goToCashier()"
-        matTooltip="Switch to Cashier View"
+        (click)="logout()"
+        matTooltip="Sign Out"
       >
-        <mat-icon>point_of_sale</mat-icon>
-        <span>Cashier View</span>
+        <mat-icon>logout</mat-icon>
+        <span>Sign Out</span>
       </button>
     </div>
   </aside>
@@ -103,21 +101,6 @@
       </div>
 
       <div class="header__actions">
-        <!-- Store selector -->
-        <!-- <button mat-stroked-button class="store-btn" [matMenuTriggerFor]="storeMenu">
-          {{ currentUser()?.store ?? 'Select store' }}
-          <mat-icon>keyboard_arrow_down</mat-icon>
-        </button>
-        <mat-menu #storeMenu="matMenu">
-          <button mat-menu-item>Delect</button>
-          <button mat-menu-item>Branch 2</button>
-        </mat-menu> -->
-
-        <!-- Help -->
-        <!-- <button mat-icon-button matTooltip="Help" aria-label="Help">
-          <mat-icon>help_outline</mat-icon>
-        </button> -->
-
         <!-- Notifications -->
         <button
           mat-icon-button
@@ -134,7 +117,6 @@
 
         <!-- Notification panel -->
         <mat-menu #notifMenu="matMenu" class="notif-panel" xPosition="before">
-          <!-- Panel header -->
           <div class="notif-panel__header">
             <span class="notif-panel__title">Notifications</span>
             @if (notificationCount() > 0) {
@@ -142,7 +124,6 @@
             }
           </div>
 
-          <!-- All clear -->
           @if (notificationCount() === 0) {
             <div class="notif-empty">
               <mat-icon>check_circle_outline</mat-icon>
@@ -150,44 +131,19 @@
             </div>
           }
 
-          <!-- Menu stock alerts section -->
-          @if (menuStockAlerts().length > 0) {
-            <div class="notif-section-label">Menu Stock Alerts</div>
-            @for (item of menuStockAlerts().slice(0, 4); track item._id) {
-              <button mat-menu-item class="notif-item" (click)="navigateToInventory(item.stockReorderStatus!)">
+          @if (stockAlerts().length > 0) {
+            <div class="notif-section-label">Stock Alerts</div>
+            @for (item of stockAlerts().slice(0, 5); track item._id) {
+              <button mat-menu-item class="notif-item" (click)="navigateToStock(item.stockReorderStatus!)">
                 <mat-icon [class]="'notif-icon notif-icon--' + item.stockReorderStatus">
                   {{ item.stockReorderStatus === 'critical' ? 'dangerous' : 'warning_amber' }}
                 </mat-icon>
                 <span class="notif-item__text">
                   <span class="notif-item__name">{{ item.name }}</span>
                   <span class="notif-item__desc">
-                    {{ item.stockReorderStatus === 'critical' ? 'Critical stock' : 'Low stock' }} · {{ item.currentStock }} left
+                    {{ item.stockReorderStatus === 'critical' ? 'Critical stock' : 'Low stock' }} · {{ item.currentStock }} {{ item.unit ?? '' }} left
                   </span>
                 </span>
-              </button>
-            }
-            @if (menuStockAlerts().length > 4) {
-              <button mat-menu-item class="notif-more" (click)="navigateToInventory('low')">
-                +{{ menuStockAlerts().length - 4 }} more menu alerts — view all
-              </button>
-            }
-          }
-
-          <!-- Pending users section -->
-          @if (pendingUsers().length > 0) {
-            <div class="notif-section-label" [class.notif-section-label--bordered]="menuStockAlerts().length > 0">Pending Users</div>
-            @for (user of pendingUsers().slice(0, 3); track user._id) {
-              <button mat-menu-item class="notif-item" (click)="navigateToStaff()">
-                <mat-icon class="notif-icon notif-icon--pending">person_outline</mat-icon>
-                <span class="notif-item__text">
-                  <span class="notif-item__name">{{ user.firstName }} {{ user.lastName }}</span>
-                  <span class="notif-item__desc">Pending approval</span>
-                </span>
-              </button>
-            }
-            @if (pendingUsers().length > 3) {
-              <button mat-menu-item class="notif-more" (click)="navigateToStaff()">
-                +{{ pendingUsers().length - 3 }} more pending users
               </button>
             }
           }

@@ -3,6 +3,7 @@
   border-radius: 16px;
   overflow: hidden;
   width: 560px;
+  max-width: 95vw;
   // ── Flex column so body scrolls and footer stays visible ──
   display: flex;
   flex-direction: column;

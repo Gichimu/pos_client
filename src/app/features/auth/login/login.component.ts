@@ -87,13 +87,19 @@ export class LoginComponent implements OnInit {
       }
       console.log('found users', this.users());
       const fromApi = this.users().find(
-        (u) => u.role === 'superAdmin' && u.email === emailVal && u.status === 'active',
+        (u) =>
+          (u.roles && u.roles.includes(role)) &&
+          u.email === emailVal &&
+          u.status === 'active',
       );
       console.log('from api', fromApi);
       return (
         fromApi ??
         MOCK_USERS.find(
-          (u) => u.role === 'superAdmin' && u.email === emailVal && u.status === 'active',
+          (u) =>
+            (u.roles && u.roles.includes(role)) &&
+            u.email === emailVal &&
+            u.status === 'active',
         ) ??
         null
       );
@@ -105,7 +111,7 @@ export class LoginComponent implements OnInit {
 
     console.log('selected cashier from API', this.users());
     const fromApi = null; // Disable API lookup for cashiers to avoid confusion during development when API is unavailable.
-    return fromApi ?? MOCK_USERS.find((u) => u.role === role && u.status === 'active') ?? null;
+    return fromApi ?? MOCK_USERS.find((u) => u.roles.includes(role) && u.status === 'active') ?? null;
   });
 
   /** Array of 5 booleans indicating which PIN dots are filled. */
@@ -178,7 +184,7 @@ export class LoginComponent implements OnInit {
     const role = this.selectedRole();
     if (!role) return;
 
-    if (role === 'superAdmin' || role === 'manager') {
+    if (role === 'superAdmin' || role === 'manager' || role === 'store') {
       // Surface all validation errors immediately
       this.adminForm.markAllAsTouched();
       if (this.adminForm.invalid) return;
@@ -203,7 +209,8 @@ export class LoginComponent implements OnInit {
           if (this.authStore.pendingUser()) {
             this.router.navigate(['/confirm-account']);
           } else if (this.authStore.isAuthenticated()) {
-            this.router.navigate(['/management']);
+            const target = role === 'store' ? '/store' : '/management';
+            this.router.navigate([target]);
           }
         },
         error: () => {

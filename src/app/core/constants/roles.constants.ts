@@ -16,7 +16,7 @@ export const MOCK_USERS: Array<{
   name: string;
   email: string;
   password?: string;
-  role: UserRole;
+  roles: UserRole[];
   status: 'active' | 'inactive';
   avatar: string;
   store: string;
@@ -25,7 +25,7 @@ export const MOCK_USERS: Array<{
     id: '1',
     name: 'Sarah J.',
     email: 'sarah@pos.com',
-    role: 'superAdmin',
+    roles: ['superAdmin'],
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=sarah',
     store: 'Delect',
@@ -34,7 +34,7 @@ export const MOCK_USERS: Array<{
     id: '2',
     name: 'John D.',
     email: 'john@pos.com',
-    role: 'cashier',
+    roles: ['cashier'],
     status: 'inactive',
     avatar: 'https://i.pravatar.cc/40?u=johnd',
     store: 'Delect',
@@ -43,7 +43,7 @@ export const MOCK_USERS: Array<{
     id: '3',
     name: 'Emma R.',
     email: 'emma@pos.com',
-    role: 'cashier',
+    roles: ['cashier'],
     status: 'inactive',
     avatar: 'https://i.pravatar.cc/40?u=emmar',
     store: 'Delect',
@@ -52,7 +52,7 @@ export const MOCK_USERS: Array<{
     id: '4',
     name: 'Mike T.',
     email: 'mike@pos.com',
-    role: 'cashier',
+    roles: ['cashier'],
     status: 'inactive',
     avatar: 'https://i.pravatar.cc/40?u=miket',
     store: 'Delect',
@@ -61,7 +61,7 @@ export const MOCK_USERS: Array<{
     id: '5',
     name: 'Lisa K.',
     email: 'lisa@pos.com',
-    role: 'superAdmin',
+    roles: ['superAdmin'],
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=lisak',
     store: 'Delect',
@@ -70,7 +70,7 @@ export const MOCK_USERS: Array<{
     id: '6',
     name: 'Eric A.',
     email: 'eric@user.com',
-    role: 'superAdmin',
+    roles: ['superAdmin'],
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=erica',
     store: 'Delect',
@@ -80,7 +80,7 @@ export const MOCK_USERS: Array<{
     name: 'Esther U.',
     email: 'esther@user.com',
     password: 'esther@123',
-    role: 'superAdmin',
+    roles: ['superAdmin'],
     status: 'active',
     avatar: 'https://i.pravatar.cc/40?u=esther',
     store: 'Delect',
