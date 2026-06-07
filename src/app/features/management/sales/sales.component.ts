@@ -191,35 +191,35 @@ export class SalesComponent implements OnInit {
   readonly totalRevenue = computed(() =>
     this.filteredItems().reduce((sum, s) => sum + s.totalAmount, 0),
   );
-  readonly cashRevenue = computed(() =>
-    this.filteredItems()
+  readonly cashRevenue = computed(() => {
+    return this.filteredItems()
       .filter((s) => s.confirmed)
       .reduce((sum, s) => {
         const pm = (s as any).paymentMethod;
         if (pm === 'Cash') return sum + s.totalAmount;
         if (pm === 'Split') return sum + ((s as any).splitAmounts?.cashAmount || 0);
         return sum;
-      }, 0),
-  );
-  readonly mpesaRevenue = computed(() =>
-    this.filteredItems()
+      }, 0);
+  });
+  readonly mpesaRevenue = computed(() => {
+    return this.filteredItems()
       .filter((s) => s.confirmed)
       .reduce((sum, s) => {
         const pm = (s as any).paymentMethod;
         if (pm === 'M-Pesa') return sum + s.totalAmount;
         if (pm === 'Split') return sum + ((s as any).splitAmounts?.mpesaAmount || 0);
         return sum;
-      }, 0),
-  );
-  readonly pdqRevenue = computed(() =>
-    this.filteredItems()
+      }, 0);
+  });
+  readonly pdqRevenue = computed(() => {
+    return this.filteredItems()
       .filter((s) => s.confirmed)
       .reduce((sum, s) => {
         const pm = (s as any).paymentMethod;
         if (pm === 'PDQ') return sum + s.totalAmount;
         return sum;
-      }, 0),
-  );
+      }, 0);
+  });
   readonly totalSalesCount = computed(() => this.filteredItems().length);
   readonly totalQty = computed(() =>
     this.filteredItems().reduce(
