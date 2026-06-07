@@ -113,6 +113,10 @@
           <span class="material-icons">close</span>
           Clear
         </button>
+        <button class="bulk-bar__view-btn" (click)="viewSelectedDetails()">
+          <span class="material-icons">list_alt</span>
+          View Details
+        </button>
         <button class="bulk-bar__confirm-btn" (click)="confirmSelection()">
           <span class="material-icons">check_circle</span>
           Confirm Selection
@@ -130,6 +134,38 @@
     }
 
     <div class="sales-table-scroll">
+      @if (showGlobalSelectPrompt() || isGlobalSelectionActive()) {
+        <div class="selection-banner">
+          @if (showGlobalSelectPrompt()) {
+            <mat-icon class="selection-banner__icon">info_outline</mat-icon>
+            <span class="selection-banner__text">
+              All {{ pendingOnPage().length }} pending sales on this page are selected.
+            </span>
+            <button
+              mat-button
+              color="primary"
+              class="selection-banner__btn"
+              (click)="selectAllGlobal()"
+            >
+              Select all {{ totalPendingFiltered() }} matching sales
+            </button>
+          } @else {
+            <mat-icon class="selection-banner__icon">task_alt</mat-icon>
+            <span class="selection-banner__text">
+              All {{ totalPendingFiltered() }} matching pending sales are selected.
+            </span>
+            <button
+              mat-button
+              color="primary"
+              class="selection-banner__btn"
+              (click)="clearSelection()"
+            >
+              Clear selection
+            </button>
+          }
+        </div>
+      }
+
       @if (filteredItems().length === 0 && !isLoading()) {
         <div class="empty-state">
           <div class="empty-state__icon">
@@ -195,11 +231,19 @@
             </td>
           </ng-container>
 
-          <!-- Item count (total units) -->
-          <ng-container matColumnDef="itemCount">
+          <!-- Details (replaces itemCount) -->
+          <ng-container matColumnDef="details">
             <th mat-header-cell *matHeaderCellDef>Items</th>
             <td mat-cell *matCellDef="let sale">
-              <span class="qty-badge">{{ getItemCount(sale) }} units</span>
+              <button
+                mat-button
+                class="details-row-btn"
+                (click)="openDetails(sale)"
+                matTooltip="View sale breakdown"
+              >
+                <span class="qty-count">{{ getItemCount(sale) }} units</span>
+                <mat-icon>chevron_right</mat-icon>
+              </button>
             </td>
           </ng-container>
 

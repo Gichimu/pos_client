@@ -25,6 +25,7 @@ import {
   PaymentMethodDialogData,
   PaymentMethodDialogResult,
 } from './payment-method-dialog.component';
+import { SaleDetailsDialogComponent } from './sale-details-dialog.component';
 import moment from 'moment';
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
@@ -91,6 +92,23 @@ export class SalesComponent implements OnInit {
   readonly somePendingOnPageSelected = computed(() => {
     const pending = this.pendingOnPage();
     return pending.some((s) => this.selectedIds().has(s._id!)) && !this.allPendingOnPageSelected();
+  });
+
+  readonly totalPendingFiltered = computed(
+    () => this.filteredItems().filter((s) => !s.confirmed).length,
+  );
+
+  readonly isGlobalSelectionActive = computed(() => {
+    const total = this.totalPendingFiltered();
+    return total > 0 && this.selectedIds().size === total;
+  });
+
+  readonly showGlobalSelectPrompt = computed(() => {
+    return (
+      this.allPendingOnPageSelected() &&
+      !this.isGlobalSelectionActive() &&
+      this.filteredItems().length > this.PAGE_SIZE
+    );
   });
 
   readonly cashierOptions = computed(() =>
@@ -164,7 +182,7 @@ export class SalesComponent implements OnInit {
 
   onPageChange(event: PageEvent): void {
     this.pageIndex.set(event.pageIndex);
-    this.clearSelection();
+    // Persist selection across pages
   }
 
   // ── Stat cards ───────────────────────────────────────────────────────────
@@ -186,7 +204,7 @@ export class SalesComponent implements OnInit {
     'select',
     'saleId',
     'cashier',
-    'itemCount',
+    'details',
     'total',
     'date',
     'status',
@@ -247,6 +265,29 @@ export class SalesComponent implements OnInit {
 
   getSaleIdLabel(sale: SaleItem): string {
     return sale.saleId ? `#${sale.saleId}` : `#${(sale._id ?? '').slice(-6).toUpperCase()}`;
+  }
+
+  // ── Details ─────────────────────────────────────────────────────────────
+
+  openDetails(sale: SaleItem): void {
+    this.dialog.open(SaleDetailsDialogComponent, {
+      data: { sales: [sale] },
+      width: '600px',
+      maxWidth: '95vw',
+    });
+  }
+
+  viewSelectedDetails(): void {
+    const ids = this.selectedIds();
+    const selectedSales = this.salesStore.items().filter((s) => s._id && ids.has(s._id));
+
+    console.log('Viewing details for selected sales:', selectedSales);
+
+    this.dialog.open(SaleDetailsDialogComponent, {
+      data: { sales: selectedSales },
+      width: '600px',
+      maxWidth: '95vw',
+    });
   }
 
   // ── Actions ──────────────────────────────────────────────────────────────
@@ -377,6 +418,14 @@ export class SalesComponent implements OnInit {
     this.selectedIds.set(next);
   }
 
+  selectAllGlobal(): void {
+    const next = new Set<string>();
+    this.filteredItems()
+      .filter((s) => !s.confirmed)
+      .forEach((s) => next.add(s._id!));
+    this.selectedIds.set(next);
+  }
+
   clearSelection(): void {
     this.selectedIds.set(new Set<string>());
   }
@@ -459,5 +508,10 @@ export class SalesComponent implements OnInit {
       month: 'long',
       day: 'numeric',
     });
+  }
+
+  getProductName(productId: string): string {
+    const p = this.productStore.products().find((product) => product._id === productId);
+    return p ? p.name : 'Unknown Product';
   }
 }
