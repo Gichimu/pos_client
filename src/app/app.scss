@@ -3,3 +3,27 @@
   display: block;
   height: 100vh;
 }
+
+// Default behavior for the screen viewport monitor
+.print-only-container {
+  display: none !important;
+}
+
+@media print {
+  // Hide the entire POS checkout panel grids from the printer
+  body * {
+    visibility: hidden;
+  }
+  
+  // Make only the specific receipt layout visible
+  #print-section-wrapper, #print-section-wrapper * {
+    visibility: visible;
+  }
+  
+  #print-section-wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
