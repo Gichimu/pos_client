@@ -55,7 +55,7 @@ export class LogsComponent implements OnInit {
   readonly isInventory = computed(() => this.logCategory() === 'mutation');
 
   readonly displayedColumns = computed<string[]>(() => {
-    const base = ['logType', 'user', 'role', 'action', 'description', 'timestamp'];
+    const base = ['logType', 'user', 'action', 'description', 'timestamp'];
     return this.isInventory() ? [...base, 'changes'] : base;
   });
 
