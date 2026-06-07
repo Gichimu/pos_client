@@ -105,7 +105,14 @@ export class ShiftReportService {
     const paymentTotals: Record<string, number> = {};
     confirmedSales.forEach((s) => {
       const pm = (s as any).paymentMethod ?? 'Unknown';
-      paymentTotals[pm] = (paymentTotals[pm] ?? 0) + s.totalAmount;
+      if (pm === 'Split') {
+        paymentTotals['Cash'] =
+          (paymentTotals['Cash'] ?? 0) + ((s as any).splitAmounts?.cashAmount || 0);
+        paymentTotals['M-Pesa'] =
+          (paymentTotals['M-Pesa'] ?? 0) + ((s as any).splitAmounts?.mpesaAmount || 0);
+      } else {
+        paymentTotals[pm] = (paymentTotals[pm] ?? 0) + s.totalAmount;
+      }
     });
     const paymentRows = Object.entries(paymentTotals)
       .sort((a, b) => b[1] - a[1])

@@ -866,3 +866,57 @@
   &__title { font-size: 1rem; font-weight: 600; color: var(--color-text); margin: 0; }
   &__desc  { font-size: 0.875rem; color: var(--color-text-muted); margin: 0; }
 }
+
+// ─── Payment breakdown ────────────────────────
+.payment-breakdown {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: -4px;
+}
+
+.payment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-family: 'Inter', sans-serif;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  &__value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  &--cash {
+    border-left: 4px solid #3b82f6;
+    mat-icon { color: #3b82f6; }
+  }
+
+  &--mpesa {
+    border-left: 4px solid #10b981;
+    mat-icon { color: #10b981; }
+  }
+
+  &--pdq {
+    border-left: 4px solid #8b5cf6;
+    mat-icon { color: #8b5cf6; }
+  }
+}

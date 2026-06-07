@@ -97,6 +97,27 @@
     </div>
   </div>
 
+  <!-- Payment breakdown (only in All tab) -->
+  @if (filterStatus() === 'all' && confirmedCount() > 0) {
+    <div class="payment-breakdown page-enter">
+      <div class="payment-chip" [class]="'payment-chip--' + 'cash'">
+        <mat-icon>payments</mat-icon>
+        <span class="payment-chip__label">Cash</span>
+        <span class="payment-chip__value">{{ formatCurrency(cashRevenue()) }}</span>
+      </div>
+      <div class="payment-chip" [class]="'payment-chip--' + 'mpesa'">
+        <mat-icon>phone_android</mat-icon>
+        <span class="payment-chip__label">M-Pesa</span>
+        <span class="payment-chip__value">{{ formatCurrency(mpesaRevenue()) }}</span>
+      </div>
+      <div class="payment-chip" [class]="'payment-chip--' + 'pdq'">
+        <mat-icon>credit_card</mat-icon>
+        <span class="payment-chip__label">PDQ/Card</span>
+        <span class="payment-chip__value">{{ formatCurrency(pdqRevenue()) }}</span>
+      </div>
+    </div>
+  }
+
   <!-- Bulk action bar -->
   @if (hasSelection()) {
     <div class="bulk-bar">

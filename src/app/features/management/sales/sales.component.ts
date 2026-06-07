@@ -144,6 +144,8 @@ export class SalesComponent implements OnInit {
       return [];
     }
 
+    console.log('Applying filters to sales items. Current shift:', currentShift);
+
     const status = this.filterStatus();
     const cashierId = this.filterCashierId();
     let result = this.salesStore.items();
@@ -189,6 +191,35 @@ export class SalesComponent implements OnInit {
   readonly totalRevenue = computed(() =>
     this.filteredItems().reduce((sum, s) => sum + s.totalAmount, 0),
   );
+  readonly cashRevenue = computed(() =>
+    this.filteredItems()
+      .filter((s) => s.confirmed)
+      .reduce((sum, s) => {
+        const pm = (s as any).paymentMethod;
+        if (pm === 'Cash') return sum + s.totalAmount;
+        if (pm === 'Split') return sum + ((s as any).splitAmounts?.cashAmount || 0);
+        return sum;
+      }, 0),
+  );
+  readonly mpesaRevenue = computed(() =>
+    this.filteredItems()
+      .filter((s) => s.confirmed)
+      .reduce((sum, s) => {
+        const pm = (s as any).paymentMethod;
+        if (pm === 'M-Pesa') return sum + s.totalAmount;
+        if (pm === 'Split') return sum + ((s as any).splitAmounts?.mpesaAmount || 0);
+        return sum;
+      }, 0),
+  );
+  readonly pdqRevenue = computed(() =>
+    this.filteredItems()
+      .filter((s) => s.confirmed)
+      .reduce((sum, s) => {
+        const pm = (s as any).paymentMethod;
+        if (pm === 'PDQ') return sum + s.totalAmount;
+        return sum;
+      }, 0),
+  );
   readonly totalSalesCount = computed(() => this.filteredItems().length);
   readonly totalQty = computed(() =>
     this.filteredItems().reduce(
@@ -198,6 +229,34 @@ export class SalesComponent implements OnInit {
   );
   readonly confirmedCount = computed(() => this.filteredItems().filter((s) => s.confirmed).length);
   readonly pendingCount = computed(() => this.filteredItems().filter((s) => !s.confirmed).length);
+
+  // ── Payment method totals ────────────────────────────────────────────────
+  readonly paymentTotals = computed(() => {
+    const items = this.filteredItems().filter((s) => s.confirmed);
+    const totals = {
+      Cash: 0,
+      'M-Pesa': 0,
+      PDQ: 0,
+    };
+
+    items.forEach((sale) => {
+      const pm = sale.paymentMethod;
+      if (!pm) return;
+
+      if (pm === 'Split') {
+        totals.Cash += (sale as any).splitAmounts.cashAmount || 0;
+        totals['M-Pesa'] += (sale as any).splitAmounts?.mpesaAmount || 0;
+      } else if (pm === 'Cash' || pm === 'M-Pesa' || pm === 'PDQ') {
+        totals[pm] += sale.totalAmount;
+      }
+    });
+
+    return [
+      { label: 'Cash', value: totals.Cash, icon: 'payments', class: 'cash' },
+      { label: 'M-Pesa', value: totals['M-Pesa'], icon: 'phone_android', class: 'mpesa' },
+      { label: 'PDQ/Card', value: totals.PDQ, icon: 'credit_card', class: 'pdq' },
+    ];
+  });
 
   // ── Columns ──────────────────────────────────────────────────────────────
   readonly displayedColumns = [
