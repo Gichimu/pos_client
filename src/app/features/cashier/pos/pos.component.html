@@ -96,11 +96,13 @@
             class="product-card"
             (click)="addToCart(product)"
             [class.product-card--in-cart]="getCartQuantity(product._id!) > 0"
-            [class.product-card--out-of-stock]="product.currentStock === 0"
-            [disabled]="product.currentStock === 0"
-            [attr.aria-disabled]="product.currentStock === 0"
+            [class.product-card--out-of-stock]="
+              product.currentStock === 0 || product.currentStock < 0
+            "
+            [disabled]="product.currentStock === 0 || product.currentStock < 0"
+            [attr.aria-disabled]="product.currentStock === 0 || product.currentStock < 0"
             [matTooltip]="
-              product.currentStock === 0
+              product.currentStock === 0 || product.currentStock < 0
                 ? 'Out of stock'
                 : product.name + ' — ' + formatCurrency(product.sellingPrice)
             "
@@ -115,7 +117,10 @@
             }
             <p class="product-card__name">{{ product.name }}</p>
             <p class="product-card__price">{{ formatCurrency(product.sellingPrice) }}</p>
-            <span class="product-card__stock" [class.out]="product.currentStock === 0">
+            <span
+              class="product-card__stock"
+              [class.out]="product.currentStock === 0 || product.currentStock < 0"
+            >
               {{ product.currentStock > 0 ? product.currentStock + ' left' : 'Out of stock' }}
             </span>
           </button>
