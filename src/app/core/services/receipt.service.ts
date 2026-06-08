@@ -21,39 +21,40 @@ export interface VoidReceiptData {
 
 @Injectable({ providedIn: 'root' })
 export class ReceiptService {
-  // print(data: PrintReceiptData): void {
-  //   const receiptHtml = this.buildReceiptHtml(data);
-  //   const win = window.open('', '_blank', 'width=400,height=700,toolbar=0,menubar=0,scrollbars=1');
-  //   if (!win) return; // popup blocked — silently skip
-
-  //   win.document.write(receiptHtml);
-  //   win.document.close();
-
-  //   // Wait for fonts/layout to settle, then print
-  //   win.onload = () => {
-  //     win.focus();
-  //     win.print();
-  //     // Close popup after print dialog is dismissed
-  //     win.onafterprint = () => win.close();
-  //   };
-  // }
-
-  print(data: PrintReceiptData) {
-    const printContainer = document.getElementById('print-section-wrapper');
-    if (!printContainer) return;
-
-    // Generate your receipt text template elements inline
+  print(data: PrintReceiptData): void {
     const receiptHtml = this.buildReceiptHtml(data);
+    const win = window.open('', '_blank', 'width=400,height=700,toolbar=0,menubar=0,scrollbars=1');
+    if (!win) return; // popup blocked — silently skip
 
-    // Swap HTML contents directly inside the active tab context
-    printContainer.innerHTML = receiptHtml;
+    win.document.write(receiptHtml);
 
-    // Trigger silent system background print
-    window.print();
-
-    // Instantly flush the temporary printing element contents out of DOM memory
-    printContainer.innerHTML = '';
+    // Wait for fonts/layout to settle, then print
+    win.onload = () => {
+      win.focus();
+      win.print();
+      // Close popup after print dialog is dismissed
+      // win.onafterprint = () => win.close();
+      win.close();
+    };
+    win.document.close();
   }
+
+  // print(data: PrintReceiptData) {
+  //   const printContainer = document.getElementById('print-section-wrapper');
+  //   if (!printContainer) return;
+
+  //   // Generate your receipt text template elements inline
+  //   const receiptHtml = this.buildReceiptHtml(data);
+
+  //   // Swap HTML contents directly inside the active tab context
+  //   printContainer.innerHTML = receiptHtml;
+
+  //   // Trigger silent system background print
+  //   window.print();
+
+  //   // Instantly flush the temporary printing element contents out of DOM memory
+  //   printContainer.innerHTML = '';
+  // }
 
   // ── HTML builder ────────────────────────────────────────────────────
   private buildReceiptHtml(data: PrintReceiptData): string {
