@@ -26,12 +26,13 @@ export class ShiftReportService {
     const win = window.open('', '_blank', 'width=460,height=900,toolbar=0,menubar=0,scrollbars=1');
     if (!win) return;
     win.document.write(html);
-    win.document.close();
     win.onload = () => {
       win.focus();
       win.print();
-      win.onafterprint = () => win.close();
+      // win.onafterprint = () => win.close();
+      win.close();
     };
+    win.document.close();
   }
 
   private mapProductNameById(id: string): string {

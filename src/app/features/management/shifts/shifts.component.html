@@ -83,7 +83,8 @@
         @if (pendingSalesInShift() > 0) {
           <div class="pending-sales-warning">
             <span class="material-icons">warning_amber</span>
-            {{ pendingSalesInShift() }} pending sale{{ pendingSalesInShift() === 1 ? '' : 's' }} — confirm all before closing
+            {{ pendingSalesInShift() }} pending sale{{ pendingSalesInShift() === 1 ? '' : 's' }} —
+            confirm all before closing
           </div>
         }
         <button
@@ -92,7 +93,11 @@
           [disabled]="pendingSalesInShift() > 0"
           (click)="openEndDialog()"
           aria-label="End shift"
-          [title]="pendingSalesInShift() > 0 ? 'Confirm all pending sales before closing the shift' : 'End this shift'"
+          [title]="
+            pendingSalesInShift() > 0
+              ? 'Confirm all pending sales before closing the shift'
+              : 'End this shift'
+          "
         >
           <span class="material-icons">stop_circle</span>
           End Shift
@@ -203,7 +208,12 @@
           <ng-container matColumnDef="revenue">
             <th mat-header-cell *matHeaderCellDef>Revenue</th>
             <td mat-cell *matCellDef="let shift">
-              <span class="revenue-value">{{ formatCurrency(shift.totalSales ?? 0) }}</span>
+              <!-- <span class="revenue-value">{{ formatCurrency(shift.totalSales ?? 0) }}</span> -->
+              <span class="revenue-value">{{
+                formatCurrency(
+                  shift.systemSales ? shift.systemSales.cash + shift.systemSales.mpesa : 0
+                )
+              }}</span>
             </td>
           </ng-container>
 
