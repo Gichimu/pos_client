@@ -82,6 +82,18 @@
   margin-bottom: 1.5em;
 }
 
+.toggle-row {
+  align-items: center;
+  padding-left: 4px;
+  
+  mat-slide-toggle {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text);
+  }
+}
+
 .flex-field, .full-field { width: 100%; }
 
 .optional {
@@ -199,6 +211,13 @@
   align-items: center;
   gap: 6px;
   mat-icon { font-size: 17px; width: 17px; height: 17px; }
+
+  &:disabled {
+    background-color: var(--color-border) !important;
+    color: var(--color-text-muted) !important;
+    cursor: not-allowed;
+    opacity: 1 !important;
+  }
 }
 
 // ─── Material form-field theme overrides (scoped) ────────────────────────────

@@ -56,4 +56,6 @@ export interface Product {
   productType?: ProductType;
   /** Unit of measurement — relevant for raw-stock items. */
   unit?: StockUnit;
+  /** Indicates if the product is active or discontinued. */
+  inUse?: boolean;
 }

@@ -98,6 +98,16 @@
         </mat-form-field>
       </div>
 
+      <!-- Row: In Use Toggle -->
+      <div class="form-row toggle-row">
+        <div class="flex-field">
+          <mat-slide-toggle formControlName="inUse" color="primary">
+            Product in Use
+          </mat-slide-toggle>
+        </div>
+        <div class="flex-field"></div>
+      </div>
+
       <!-- Row 4: Stock management — behaviour differs between edit and add mode -->
       @if (isEdit()) {
         <!-- ── Edit mode: locked current stock + "Add to Stock" ── -->
@@ -225,7 +235,7 @@
   <!-- Footer -->
   <div class="inv-modal__footer">
     <button mat-stroked-button class="cancel-btn" (click)="close()">Cancel</button>
-    <button mat-flat-button class="save-btn" (click)="save()">
+    <button mat-flat-button class="save-btn" (click)="save()" [disabled]="!canSave()">
       <mat-icon>{{ isEdit() ? 'save' : 'add_box' }}</mat-icon>
       {{ isEdit() ? 'Save Changes' : 'Add Product' }}
     </button>

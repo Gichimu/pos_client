@@ -112,6 +112,7 @@ export class PosComponent implements OnInit {
     if (catId) products = products.filter((p) => p.category === catId);
     if (subCat) products = products.filter((p) => p.subCategory === subCat);
     if (q) products = products.filter((p) => p.name.toLowerCase().includes(q));
+    products = products.filter((p) => p.inUse !== false && p.productType === 'menu'); // hide products marked as not in use and raw stock items
     return products;
   });
 

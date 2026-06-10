@@ -7,8 +7,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { startWith, map } from 'rxjs';
 import { Product, ProductType, ReorderLevel, StockReorderStatus, StockUnit } from '../../../../core/models/product.model';
 import { CategoryStore } from '../../../../store/categories/category.store';
 import { Category } from '../../../../core/models/category.model';
@@ -81,6 +82,7 @@ function resolveCategoryName(val: any): string {
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './inventory-form-modal.component.html',
   styleUrl: './inventory-form-modal.component.scss',
@@ -103,6 +105,11 @@ export class InventoryFormModalComponent {
   private readonly addToStockValue = toSignal(
     this.addToStock.valueChanges.pipe(startWith(this.addToStock.value)),
     { initialValue: this.addToStock.value },
+  );
+
+  private readonly addToStockStatus = toSignal(
+    this.addToStock.statusChanges.pipe(startWith(this.addToStock.status)),
+    { initialValue: this.addToStock.status },
   );
 
   /** Live preview of new stock total. */
@@ -132,6 +139,32 @@ export class InventoryFormModalComponent {
     imageUrl: [this.data?.product?.imageUrl ?? ''],
     productType: [this.data?.product?.productType ?? this.data?.productType ?? 'menu'],
     unit: [this.data?.product?.unit ?? 'pcs'],
+    inUse: [this.data?.product?.inUse ?? true],
+  });
+
+  private readonly formStatus = toSignal(
+    this.form.statusChanges.pipe(startWith(this.form.status)),
+    { initialValue: this.form.status },
+  );
+
+  private readonly isFormDirty = toSignal(
+    this.form.valueChanges.pipe(
+      map(() => this.form.dirty),
+      startWith(this.form.dirty),
+    ),
+    { initialValue: this.form.dirty },
+  );
+
+  readonly canSave = computed(() => {
+    const isInvalid = this.formStatus() === 'INVALID' || this.addToStockStatus() === 'INVALID';
+    if (isInvalid) return false;
+
+    if (this.isEdit()) {
+      const hasChanges = this.isFormDirty() || (Number(this.addToStockValue()) > 0);
+      return hasChanges;
+    }
+
+    return true;
   });
 
   // ── Reactive subcategory options based on selected category ─────────────
@@ -191,6 +224,7 @@ export class InventoryFormModalComponent {
       stockReorderLevel: v.stockReorderLevel as ReorderLevel,
       productType: v.productType as ProductType,
       unit: v.unit as StockUnit,
+      inUse: !!v.inUse,
       imageUrl:
         v.imageUrl?.trim() || `https://picsum.photos/seed/${encodeURIComponent(name)}/60/60`,
     };
