@@ -18,6 +18,7 @@ import { shiftStore } from '../../../store/shifts/shift.store';
 import { SaleItem } from '../../../core/models/sale.model';
 import { User } from '../../../core/models/user.model';
 import { Shift } from '../../../core/models/shift.model';
+import { MpesaMessage } from '../../../core/models/mpesa-message.model';
 import { ReceiptService } from '../../../core/services/receipt.service';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import {
@@ -26,6 +27,7 @@ import {
   PaymentMethodDialogResult,
 } from './payment-method-dialog.component';
 import { SaleDetailsDialogComponent } from './sale-details-dialog.component';
+import { MpesaMessageDialogComponent } from './mpesa-message-dialog.component';
 import moment from 'moment';
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
@@ -382,18 +384,47 @@ export class SalesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
-      const splitAmounts =
-        result.paymentMethod === 'Split'
-          ? { cashAmount: result.cashAmount!, mpesaAmount: result.mpesaAmount! }
-          : undefined;
 
-      this.salesStore.confirmSale(sale._id!, result.paymentMethod, splitAmounts).subscribe({
-        next: () =>
-          this.sweetAlert.success(
-            `Sale ${this.getSaleIdLabel(sale)} confirmed via ${result.paymentMethod}`,
-          ),
-        error: () => this.sweetAlert.error('Failed to confirm sale. Please try again.'),
-      });
+      const mpesaAmount =
+        result.paymentMethod === 'M-Pesa'
+          ? sale.totalAmount
+          : result.paymentMethod === 'Split'
+            ? result.mpesaAmount
+            : 0;
+
+      // if (mpesaAmount && mpesaAmount > 0) {
+      //   const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
+      //     data: { requiredAmount: mpesaAmount },
+      //     width: '560px',
+      //     disableClose: true
+      //   });
+
+      //   mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage | undefined) => {
+      //     if (!msg) return;
+      //     this.finalizeConfirm(sale, result, msg.transactionId);
+      //   });
+      // } else {
+      this.finalizeConfirm(sale, result);
+      // }
+    });
+  }
+
+  private finalizeConfirm(
+    sale: SaleItem,
+    result: PaymentMethodDialogResult,
+    mpesaId?: string,
+  ): void {
+    const splitAmounts =
+      result.paymentMethod === 'Split'
+        ? { cashAmount: result.cashAmount!, mpesaAmount: result.mpesaAmount! }
+        : undefined;
+
+    this.salesStore.confirmSale(sale._id!, result.paymentMethod, splitAmounts, mpesaId).subscribe({
+      next: () =>
+        this.sweetAlert.success(
+          `Sale ${this.getSaleIdLabel(sale)} confirmed via ${result.paymentMethod}`,
+        ),
+      error: () => this.sweetAlert.error('Failed to confirm sale. Please try again.'),
     });
   }
 

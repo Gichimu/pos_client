@@ -151,14 +151,15 @@ export const saleStore = signalStore(
       saleId: string,
       paymentMethod: PaymentMethod,
       splitAmounts?: { cashAmount: number; mpesaAmount: number },
+      mpesaTransactionId?: string,
     ): Observable<void> {
       return new Observable((observer) => {
-        salesService.confirmSale(saleId, paymentMethod, splitAmounts).subscribe({
+        salesService.confirmSale(saleId, paymentMethod, splitAmounts, mpesaTransactionId).subscribe({
           next: (updatedSale) => {
             patchState(store, {
               items: store
                 .items()
-                .map((s) => (s._id === saleId ? { ...s, confirmed: true, paymentMethod } : s)),
+                .map((s) => (s._id === saleId ? { ...s, confirmed: true, paymentMethod, mpesaTransactionId } : s)),
             });
             observer.next();
             observer.complete();

@@ -129,7 +129,9 @@
           matBadgeSize="small"
           [matMenuTriggerFor]="notifMenu"
         >
-          <mat-icon>{{ notificationCount() > 0 ? 'notifications' : 'notifications_none' }}</mat-icon>
+          <mat-icon>{{
+            notificationCount() > 0 ? 'notifications' : 'notifications_none'
+          }}</mat-icon>
         </button>
 
         <!-- Notification panel -->
@@ -154,14 +156,19 @@
           @if (menuStockAlerts().length > 0) {
             <div class="notif-section-label">Menu Stock Alerts</div>
             @for (item of menuStockAlerts().slice(0, 4); track item._id) {
-              <button mat-menu-item class="notif-item" (click)="navigateToInventory(item.stockReorderStatus!)">
+              <button
+                mat-menu-item
+                class="notif-item"
+                (click)="navigateToInventory(item.stockReorderStatus!)"
+              >
                 <mat-icon [class]="'notif-icon notif-icon--' + item.stockReorderStatus">
                   {{ item.stockReorderStatus === 'critical' ? 'dangerous' : 'warning_amber' }}
                 </mat-icon>
                 <span class="notif-item__text">
                   <span class="notif-item__name">{{ item.name }}</span>
                   <span class="notif-item__desc">
-                    {{ item.stockReorderStatus === 'critical' ? 'Critical stock' : 'Low stock' }} · {{ item.currentStock }} left
+                    {{ item.stockReorderStatus === 'critical' ? 'Critical stock' : 'Low stock' }} ·
+                    {{ item.currentStock }} left
                   </span>
                 </span>
               </button>
@@ -175,7 +182,12 @@
 
           <!-- Pending users section -->
           @if (pendingUsers().length > 0) {
-            <div class="notif-section-label" [class.notif-section-label--bordered]="menuStockAlerts().length > 0">Pending Users</div>
+            <div
+              class="notif-section-label"
+              [class.notif-section-label--bordered]="menuStockAlerts().length > 0"
+            >
+              Pending Users
+            </div>
             @for (user of pendingUsers().slice(0, 3); track user._id) {
               <button mat-menu-item class="notif-item" (click)="navigateToStaff()">
                 <mat-icon class="notif-icon notif-icon--pending">person_outline</mat-icon>
@@ -200,9 +212,7 @@
             [src]="currentUser()?.avatar || 'https://i.pravatar.cc/40?u=' + currentUser()?.email"
             [alt]="currentUser()?.firstName + ' ' + currentUser()?.lastName"
           />
-          <span class="user-btn__name"
-            >{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</span
-          >
+          <span class="user-btn__name">{{ currentUser()?.firstName }}</span>
           <mat-icon>keyboard_arrow_down</mat-icon>
         </button>
         <mat-menu #userMenu="matMenu" panelClass="user-menu" xPosition="before">
