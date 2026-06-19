@@ -25,6 +25,7 @@ import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import { requisitionStore } from '../../../store/requisitions/requisition.store';
 import { authStore } from '../../../store/auth/auth.store';
 import { RbacAllow } from '../../../core/directives/rbac-allow';
+import { ProductHistoryDialogComponent } from './product-history-dialog/product-history-dialog.component';
 
 @Component({
   selector: 'app-inventory',
@@ -37,6 +38,7 @@ import { RbacAllow } from '../../../core/directives/rbac-allow';
     MatPaginatorModule,
     StatusBadgeComponent,
     RbacAllow,
+    ProductHistoryDialogComponent,
   ],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
@@ -188,6 +190,14 @@ export class InventoryComponent implements OnInit {
         this.store.updateProduct(updated);
         this.sweetAlert.success(`${updated.name} updated`);
       }
+    });
+  }
+
+  openHistoryDialog(product: Product) {
+    this.dialog.open(ProductHistoryDialogComponent, {
+      data: { product },
+      width: '640px',
+      maxWidth: '95vw',
     });
   }
 

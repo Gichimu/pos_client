@@ -1,0 +1,77 @@
+<div class="history-modal">
+  <!-- Header -->
+  <div class="history-modal__header">
+    <div class="history-modal__header-left">
+      <div class="history-modal__icon">
+        <mat-icon>history</mat-icon>
+      </div>
+      <div>
+        <h2 class="history-modal__title">Item Change History</h2>
+        <p class="history-modal__subtitle">{{ data.product.name }} (SKU: {{ data.product.sku }})</p>
+      </div>
+    </div>
+    <button mat-icon-button class="close-btn" (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="history-modal__body">
+    @if (isLoading()) {
+      <div class="state-container">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Fetching history on demand...</p>
+      </div>
+    } @else if (error()) {
+      <div class="state-container error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-stroked-button (click)="fetchHistory()">Retry</button>
+      </div>
+    } @else if (logs().length === 0) {
+      <div class="state-container empty">
+        <mat-icon>info_outline</mat-icon>
+        <p>No change history recorded for this item.</p>
+      </div>
+    } @else {
+      <div class="timeline">
+        @for (log of logs(); track log._id) {
+          <div class="timeline-item">
+            <div class="timeline-item__marker">
+              <mat-icon>{{ getActionIcon(log.logType) }}</mat-icon>
+            </div>
+            <div class="timeline-item__content">
+              <div class="log-meta">
+                <span class="log-user">User: {{ mapUserIdToName(log.userId) }}</span>
+                <span class="log-date">{{ formatDate(log.timestamp) }}</span>
+              </div>
+              <p class="log-desc">{{ log.description }}</p>
+
+              @if (getChanges(log); as changes) {
+                @if (changes.length > 0) {
+                  <div class="log-changes">
+                    @for (change of changes; track change.field) {
+                      <div class="change-row">
+                        <span class="change-field">{{ change.field }}:</span>
+                        <span class="change-values">
+                          <span class="old">{{ change.old ?? 'None' }}</span>
+                          <mat-icon>arrow_forward</mat-icon>
+                          <span class="new">{{ change.new }}</span>
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Footer -->
+  <div class="history-modal__footer">
+    <button mat-flat-button color="primary" (click)="close()">Close</button>
+  </div>
+</div>

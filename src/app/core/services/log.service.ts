@@ -13,4 +13,10 @@ export class LogService {
       params: { type, from, to },
     });
   }
+
+  fetchLogsByTarget(targetId: string): Observable<ActivityLog[]> {
+    return this.http.get<ActivityLog[]>(`${environment.apiUrl}/logs`, {
+      params: { targetId },
+    });
+  }
 }

@@ -282,6 +282,10 @@
     color: var(--color-text-muted) !important;
     &:hover { color: var(--color-primary) !important; background: var(--color-primary-light) !important; }
   }
+  &--history {
+    color: var(--color-text-muted) !important;
+    &:hover { color: #6366f1 !important; background: #eef2ff !important; }
+  }
   &--delete {
     color: var(--color-text-muted) !important;
     &:hover { color: #ef4444 !important; background: #fee2e2 !important; }
