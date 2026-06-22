@@ -14,9 +14,14 @@ import { requisitionStore } from '../../../store/requisitions/requisition.store'
 import { authStore } from '../../../store/auth/auth.store';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import { StockAdjustDialogComponent } from './stock-adjust-dialog.component';
-import { RawStockFormModalComponent, RawStockFormData } from './raw-stock-form-modal/raw-stock-form-modal.component';
+import {
+  RawStockFormModalComponent,
+  RawStockFormData,
+} from './raw-stock-form-modal/raw-stock-form-modal.component';
 
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { ProductHistoryDialogComponent } from '../../management/inventory/product-history-dialog/product-history-dialog.component';
+import { RbacAllow } from '../../../core/directives/rbac-allow';
 
 @Component({
   selector: 'app-stock-management',
@@ -31,6 +36,8 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
     MatButtonToggleModule,
     StatusBadgeComponent,
     RawStockFormModalComponent,
+    ProductHistoryDialogComponent,
+    RbacAllow,
   ],
   templateUrl: './stock-management.component.html',
   styleUrl: './stock-table.scss',
@@ -47,7 +54,7 @@ export class StockManagementComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.loadProducts();
-    
+
     const filterParam = this.route.snapshot.queryParamMap.get('filter');
     if (filterParam === 'low' || filterParam === 'critical') {
       this.stockFilter.set(filterParam as 'low' | 'critical');
@@ -59,13 +66,7 @@ export class StockManagementComponent implements OnInit {
     }
   }
 
-  readonly displayedColumns = [
-    'name',
-    'category',
-    'currentStock',
-    'stockReorderStatus',
-    'actions',
-  ];
+  readonly displayedColumns = ['name', 'category', 'currentStock', 'stockReorderStatus', 'actions'];
 
   searchQuery = signal('');
   readonly stockFilter = signal<'all' | 'low' | 'critical'>('all');
@@ -78,7 +79,8 @@ export class StockManagementComponent implements OnInit {
     let products = this.store.products().filter((p) => p.productType === 'raw-stock');
 
     if (f === 'low') products = products.filter((p) => p.stockReorderStatus === 'low');
-    else if (f === 'critical') products = products.filter((p) => p.stockReorderStatus === 'critical');
+    else if (f === 'critical')
+      products = products.filter((p) => p.stockReorderStatus === 'critical');
 
     if (q) {
       products = products.filter(
@@ -104,6 +106,14 @@ export class StockManagementComponent implements OnInit {
   onSearch(value: string): void {
     this.searchQuery.set(value);
     this.pageIndex.set(0);
+  }
+
+  openHistoryDialog(product: Product) {
+    this.dialog.open(ProductHistoryDialogComponent, {
+      data: { product },
+      width: '640px',
+      maxWidth: '95vw',
+    });
   }
 
   setStockFilter(filter: 'all' | 'low' | 'critical'): void {
@@ -185,9 +195,10 @@ export class StockManagementComponent implements OnInit {
         }
 
         this.store.updateProduct(updatedProduct);
-        const msg = mode === 'add' 
-          ? `Added ${delta} ${product.unit || ''} to ${product.name}`
-          : `Deducted ${Math.abs(delta)} ${product.unit || ''} from ${product.name}`;
+        const msg =
+          mode === 'add'
+            ? `Added ${delta} ${product.unit || ''} to ${product.name}`
+            : `Deducted ${Math.abs(delta)} ${product.unit || ''} from ${product.name}`;
         this.sweetAlert.success(msg);
       }
     });

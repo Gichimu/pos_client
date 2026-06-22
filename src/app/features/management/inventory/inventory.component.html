@@ -157,6 +157,7 @@
                   <span class="material-icons">edit</span>
                 </button>
                 <button
+                  *rbacAllow="['superAdmin']"
                   mat-icon-button
                   class="action-icon action-icon--history"
                   (click)="openHistoryDialog(p)"
