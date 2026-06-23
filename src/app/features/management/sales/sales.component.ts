@@ -392,20 +392,21 @@ export class SalesComponent implements OnInit {
             ? result.mpesaAmount
             : 0;
 
-      // if (mpesaAmount && mpesaAmount > 0) {
-      //   const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
-      //     data: { requiredAmount: mpesaAmount },
-      //     width: '560px',
-      //     disableClose: true
-      //   });
+      if (mpesaAmount && mpesaAmount > 0) {
+        const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
+          data: { requiredAmount: mpesaAmount },
+          width: '560px',
+          disableClose: true,
+        });
 
-      //   mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage | undefined) => {
-      //     if (!msg) return;
-      //     this.finalizeConfirm(sale, result, msg.transactionId);
-      //   });
-      // } else {
-      this.finalizeConfirm(sale, result);
-      // }
+        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage | undefined) => {
+          if (!msg) return;
+          // this.finalizeConfirm(sale, result, msg.transactionId);
+          this.finalizeConfirm(sale, result, msg.mpesaCode);
+        });
+      } else {
+        this.finalizeConfirm(sale, result); //show this if no mpesa amount is required
+      }
     });
   }
 

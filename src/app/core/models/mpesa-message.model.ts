@@ -1,10 +1,20 @@
+// export interface MpesaMessage {
+//   _id: string;
+//   transactionId: string;
+//   amount: number;
+//   sender: string;
+//   phone: string;
+//   receivedAt: Date;
+//   rawText: string;
+//   isUsed: boolean;
+// }
+
 export interface MpesaMessage {
-  _id: string;
-  transactionId: string;
+  mpesaCode: string;
+  customerName: string;
   amount: number;
-  sender: string;
-  phone: string;
-  receivedAt: Date;
-  rawText: string;
+  Date: Date;
   isUsed: boolean;
+  transactionDate: string;
+  timestamp: string;
 }

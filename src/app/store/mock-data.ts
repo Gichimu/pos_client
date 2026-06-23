@@ -2,38 +2,37 @@ import { Product } from '../core/models/product.model';
 import { MpesaMessage } from '../core/models/mpesa-message.model';
 
 export const MOCK_MPESA_MESSAGES: MpesaMessage[] = [
-  {
-    _id: 'm1',
-    transactionId: 'RBF1234567',
-    amount: 1500,
-    sender: 'JOHN DOE',
-    phone: '254712345678',
-    receivedAt: new Date(),
-    rawText: 'RBF1234567 Confirmed. Ksh1,500.00 received from JOHN DOE 254712345678 on 10/6/26 at 9:30 AM. New M-PESA balance is Ksh15,400.00',
-    isUsed: false
-  },
-  {
-    _id: 'm2',
-    transactionId: 'RCG7654321',
-    amount: 450,
-    sender: 'JANE SMITH',
-    phone: '254787654321',
-    receivedAt: new Date(),
-    rawText: 'RCG7654321 Confirmed. Ksh450.00 received from JANE SMITH 254787654321 on 10/6/26 at 9:45 AM. New M-PESA balance is Ksh5,200.00',
-    isUsed: false
-  },
-  {
-    _id: 'm3',
-    transactionId: 'RDH9998887',
-    amount: 120,
-    sender: 'MIKE JONES',
-    phone: '254722222222',
-    receivedAt: new Date(),
-    rawText: 'RDH9998887 Confirmed. Ksh120.00 received from MIKE JONES 254722222222 on 10/6/26 at 10:00 AM. New M-PESA balance is Ksh1,100.00',
-    isUsed: false
-  }
+  // {
+  //   _id: 'm1',
+  //   transactionId: 'RBF1234567',
+  //   amount: 1500,
+  //   sender: 'JOHN DOE',
+  //   phone: '254712345678',
+  //   receivedAt: new Date(),
+  //   rawText: 'RBF1234567 Confirmed. Ksh1,500.00 received from JOHN DOE 254712345678 on 10/6/26 at 9:30 AM. New M-PESA balance is Ksh15,400.00',
+  //   isUsed: false
+  // },
+  // {
+  //   _id: 'm2',
+  //   transactionId: 'RCG7654321',
+  //   amount: 450,
+  //   sender: 'JANE SMITH',
+  //   phone: '254787654321',
+  //   receivedAt: new Date(),
+  //   rawText: 'RCG7654321 Confirmed. Ksh450.00 received from JANE SMITH 254787654321 on 10/6/26 at 9:45 AM. New M-PESA balance is Ksh5,200.00',
+  //   isUsed: false
+  // },
+  // {
+  //   _id: 'm3',
+  //   transactionId: 'RDH9998887',
+  //   amount: 120,
+  //   sender: 'MIKE JONES',
+  //   phone: '254722222222',
+  //   receivedAt: new Date(),
+  //   rawText: 'RDH9998887 Confirmed. Ksh120.00 received from MIKE JONES 254722222222 on 10/6/26 at 10:00 AM. New M-PESA balance is Ksh1,100.00',
+  //   isUsed: false
+  // }
 ];
-
 
 // export const MOCK_PRODUCTS: Product[] = [
 //   {

@@ -1,4 +1,4 @@
-import { Component, Inject, signal, computed } from '@angular/core';
+import { Component, Inject, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MpesaMessage } from '../../../core/models/mpesa-message.model';
 import { MOCK_MPESA_MESSAGES } from '../../../store/mock-data';
+import { SalesService } from '../../../core/services/sales-service';
 
 export interface MpesaMessageDialogData {
   requiredAmount: number;
@@ -53,15 +54,15 @@ export interface MpesaMessageDialogData {
           (selectionChange)="onSelectionChange($event)"
           class="mpesa-dialog__list"
         >
-          @for (msg of filteredMessages(); track msg._id) {
+          @for (msg of filteredMessages(); track msg.mpesaCode) {
             <mat-list-option
               [value]="msg"
               [class.mpesa-dialog__option--mismatch]="msg.amount !== data.requiredAmount"
             >
               <div class="mpesa-message">
                 <div class="mpesa-message__main">
-                  <span class="mpesa-message__id">{{ msg.transactionId }}</span>
-                  <span class="mpesa-message__sender">{{ msg.sender }}</span>
+                  <span class="mpesa-message__id">{{ msg.mpesaCode }}</span>
+                  <span class="mpesa-message__sender">{{ msg.customerName }}</span>
                 </div>
                 <div class="mpesa-message__meta">
                   <span
@@ -70,7 +71,7 @@ export interface MpesaMessageDialogData {
                   >
                     {{ formatCurrency(msg.amount) }}
                   </span>
-                  <span class="mpesa-message__time">{{ formatTime(msg.receivedAt) }}</span>
+                  <span class="mpesa-message__time">{{ msg.Date }}</span>
                 </div>
               </div>
             </mat-list-option>
@@ -230,20 +231,21 @@ export interface MpesaMessageDialogData {
     `,
   ],
 })
-export class MpesaMessageDialogComponent {
+export class MpesaMessageDialogComponent implements OnInit {
+  private readonly salesService = inject(SalesService);
   searchQuery = '';
   selectedMessage = signal<MpesaMessage | null>(null);
 
-  messages = signal<MpesaMessage[]>(MOCK_MPESA_MESSAGES);
+  messages = signal<MpesaMessage[]>([]);
 
   filteredMessages = computed(() => {
     const q = this.searchQuery.toLowerCase();
     return this.messages().filter(
       (m) =>
         !m.isUsed &&
-        (m.transactionId.toLowerCase().includes(q) ||
-          m.sender.toLowerCase().includes(q) ||
-          m.phone.includes(q)),
+        m.mpesaCode &&
+        (m.Date || m.timestamp || m.transactionDate) &&
+        (m.mpesaCode.toLowerCase().includes(q) || m.customerName.toLowerCase().includes(q)),
     );
   });
 
@@ -256,6 +258,24 @@ export class MpesaMessageDialogComponent {
     private readonly dialogRef: MatDialogRef<MpesaMessageDialogComponent, MpesaMessage>,
     @Inject(MAT_DIALOG_DATA) public readonly data: MpesaMessageDialogData,
   ) {}
+
+  ngOnInit() {
+    this.getAllMessages();
+  }
+
+  getAllMessages() {
+    this.salesService.getAllMpesaMessages().subscribe({
+      next: (data) => {
+        console.log('1. HTTP Payload arrived safely:', data);
+        data = data.filter((d) => d.Date);
+        this.messages.set(data);
+
+        // Accessing right after setting inside the callback works synchronously
+        console.log('2. Signal state after setter assignment:', this.messages());
+      },
+      error: (err) => console.log(err), //
+    });
+  }
 
   onSelectionChange(event: any) {
     this.selectedMessage.set(event.options[0].value);

@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment.development';
 import { Observable } from 'rxjs';
 import { LineItem, PaymentMethod, SaleItem } from '../models/sale.model';
+import { MpesaMessage } from '../models/mpesa-message.model';
 
 @Injectable({
   providedIn: 'root',
@@ -72,6 +73,10 @@ export class SalesService {
       mpesaTransactionId,
       ...(splitAmounts ?? {}),
     });
+  }
+
+  getAllMpesaMessages(): Observable<MpesaMessage[]> {
+    return this.http.get<MpesaMessage[]>(`${this.url}/payments/shift-payments`);
   }
 
   /** PATCH /sales/:saleId/unconfirm – reverts a confirmed sale to pending. */
