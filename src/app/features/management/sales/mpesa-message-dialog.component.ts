@@ -46,7 +46,12 @@ export interface MpesaMessageDialogData {
         <mat-form-field appearance="outline" class="mpesa-dialog__search">
           <mat-label>Search messages</mat-label>
           <mat-icon matPrefix>search</mat-icon>
-          <input matInput [(ngModel)]="searchQuery" placeholder="Search by name, phone or ID" />
+          <input
+            matInput
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Search by name, phone or ID"
+          />
         </mat-form-field>
 
         <mat-selection-list
@@ -233,19 +238,19 @@ export interface MpesaMessageDialogData {
 })
 export class MpesaMessageDialogComponent implements OnInit {
   private readonly salesService = inject(SalesService);
-  searchQuery = '';
+  searchQuery = signal('');
   selectedMessage = signal<MpesaMessage | null>(null);
 
   messages = signal<MpesaMessage[]>([]);
 
   filteredMessages = computed(() => {
-    const q = this.searchQuery.toLowerCase();
+    const q = this.searchQuery().toLowerCase();
     return this.messages().filter(
       (m) =>
         !m.isUsed &&
         m.mpesaCode &&
-        (m.Date || m.timestamp || m.transactionDate) &&
-        (m.mpesaCode.toLowerCase().includes(q) || m.customerName.toLowerCase().includes(q)),
+        m.Date &&
+        (m.mpesaCode?.toLowerCase().includes(q) || m.customerName?.toLowerCase().includes(q)),
     );
   });
 
@@ -267,7 +272,7 @@ export class MpesaMessageDialogComponent implements OnInit {
     this.salesService.getAllMpesaMessages().subscribe({
       next: (data) => {
         console.log('1. HTTP Payload arrived safely:', data);
-        data = data.filter((d) => d.Date);
+        data = data.filter((d) => d.Date && !d.isUsed);
         this.messages.set(data);
 
         // Accessing right after setting inside the callback works synchronously
