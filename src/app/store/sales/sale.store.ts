@@ -186,22 +186,67 @@ export const saleStore = signalStore(
     },
 
     /** Confirms multiple pending sales in parallel with a single payment method. */
-    confirmBulk(saleIds: string[], paymentMethod: PaymentMethod): Observable<void> {
+    confirmBulk(
+      saleIds: string[],
+      paymentMethod: PaymentMethod,
+      splitAmounts?: { cashAmount: number; mpesaAmount: number },
+      mpesaTransactionId?: string,
+    ): Observable<void> {
       return new Observable((observer) => {
         if (saleIds.length === 0) {
           observer.next();
           observer.complete();
           return;
         }
-        const calls = saleIds.map((id) => salesService.confirmSale(id, paymentMethod));
+
+        const selectedSales = store.items().filter((s) => s._id && saleIds.includes(s._id));
+        const totalBulkAmount = selectedSales.reduce((sum, s) => sum + s.totalAmount, 0);
+
+        const calls = selectedSales.map((sale) => {
+          let currentSplit = undefined;
+
+          if (paymentMethod === 'Split' && splitAmounts) {
+            // Distribute the split amounts proportionally based on the sale's total amount
+            const ratio = sale.totalAmount / totalBulkAmount;
+            currentSplit = {
+              cashAmount: splitAmounts.cashAmount * ratio,
+              mpesaAmount: splitAmounts.mpesaAmount * ratio,
+            };
+          }
+
+          return salesService.confirmSale(
+            sale._id!,
+            paymentMethod,
+            currentSplit,
+            mpesaTransactionId,
+          );
+        });
+
         forkJoin(calls).subscribe({
           next: () => {
             patchState(store, {
               items: store
                 .items()
-                .map((s) =>
-                  saleIds.includes(s._id!) ? { ...s, confirmed: true, paymentMethod } : s,
-                ),
+                .map((s) => {
+                  if (s._id && saleIds.includes(s._id)) {
+                    let sSplit = undefined;
+                    if (paymentMethod === 'Split' && splitAmounts) {
+                      const ratio = s.totalAmount / totalBulkAmount;
+                      sSplit = {
+                        cashAmount: splitAmounts.cashAmount * ratio,
+                        mpesaAmount: splitAmounts.mpesaAmount * ratio,
+                      };
+                    }
+                    return {
+                      ...s,
+                      confirmed: true,
+                      paymentMethod,
+                      splitAmounts: sSplit,
+                      mpesaTransactionId,
+                    };
+                  }
+                  return s;
+                }),
             });
             observer.next();
             observer.complete();

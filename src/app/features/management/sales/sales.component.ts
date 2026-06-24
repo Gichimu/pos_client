@@ -15,7 +15,7 @@ import { saleStore } from '../../../store/sales/sale.store';
 import { userStore } from '../../../store/users/user.store';
 import { productStore } from '../../../store/products/product.store';
 import { shiftStore } from '../../../store/shifts/shift.store';
-import { SaleItem } from '../../../core/models/sale.model';
+import { SaleItem, PaymentMethod } from '../../../core/models/sale.model';
 import { User } from '../../../core/models/user.model';
 import { Shift } from '../../../core/models/shift.model';
 import { MpesaMessage } from '../../../core/models/mpesa-message.model';
@@ -548,16 +548,52 @@ export class SalesComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.salesStore.confirmBulk(ids, result.paymentMethod).subscribe({
+
+      const mpesaAmount =
+        result.paymentMethod === 'M-Pesa'
+          ? combinedTotal
+          : result.paymentMethod === 'Split'
+            ? result.mpesaAmount
+            : 0;
+
+      if (mpesaAmount && mpesaAmount > 0) {
+        const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
+          data: { requiredAmount: mpesaAmount },
+          width: '560px',
+          disableClose: true,
+        });
+
+        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage | undefined) => {
+          if (!msg) return;
+          this.finalizeBulkConfirm(ids, result, msg.mpesaCode);
+        });
+      } else {
+        this.finalizeBulkConfirm(ids, result);
+      }
+    });
+  }
+
+  private finalizeBulkConfirm(
+    saleIds: string[],
+    result: PaymentMethodDialogResult,
+    mpesaTransactionId?: string,
+  ): void {
+    const splitAmounts =
+      result.paymentMethod === 'Split'
+        ? { cashAmount: result.cashAmount!, mpesaAmount: result.mpesaAmount! }
+        : undefined;
+
+    this.salesStore
+      .confirmBulk(saleIds, result.paymentMethod, splitAmounts, mpesaTransactionId)
+      .subscribe({
         next: () => {
           this.sweetAlert.success(
-            `${ids.length} sale${ids.length > 1 ? 's' : ''} confirmed via ${result.paymentMethod}`,
+            `${saleIds.length} sale${saleIds.length > 1 ? 's' : ''} confirmed via ${result.paymentMethod}`,
           );
           this.clearSelection();
         },
         error: () => this.sweetAlert.error('Some sales failed to confirm. Please try again.'),
       });
-    });
   }
 
   // ── Private helpers ───────────────────────────────────────────────────────

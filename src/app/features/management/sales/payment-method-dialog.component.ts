@@ -428,11 +428,8 @@ export class PaymentMethodDialogComponent {
     { method: 'Split', icon: 'call_split', label: 'Split', description: 'Cash + M-Pesa' },
   ];
 
-  /** In bulk mode, Split is hidden since amounts can't be split per-sale. */
+  /** available options for payment. */
   get availableOptions(): PaymentOption[] {
-    // return this.data.isBulk
-    //   ? this.paymentOptions.filter((o) => o.method !== 'Split')
-    //   : this.paymentOptions;
     return this.paymentOptions;
   }
 
