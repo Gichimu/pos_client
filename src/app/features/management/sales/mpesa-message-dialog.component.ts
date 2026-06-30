@@ -580,7 +580,26 @@ export class MpesaMessageDialogComponent implements OnInit {
   }
 
   onSelectionChange(event: MatSelectionListChange) {
-    this.selectedMessages.set(event.source.selectedOptions.selected.map((o) => o.value));
+    if (this.selectionMode() === 'single') {
+      this.selectedMessages.set(event.source.selectedOptions.selected.map((o) => o.value));
+      return;
+    }
+
+    const current = [...this.selectedMessages()];
+    event.options.forEach((opt) => {
+      const msg = opt.value as MpesaMessage;
+      if (opt.selected) {
+        if (!current.some((m) => m.mpesaCode === msg.mpesaCode)) {
+          current.push(msg);
+        }
+      } else {
+        const index = current.findIndex((m) => m.mpesaCode === msg.mpesaCode);
+        if (index !== -1) {
+          current.splice(index, 1);
+        }
+      }
+    });
+    this.selectedMessages.set(current);
   }
 
   isMessageSelected(mpesaCode: string): boolean {
@@ -589,8 +608,16 @@ export class MpesaMessageDialogComponent implements OnInit {
 
   selectAll() {
     if (this.selectionMode() === 'multiple') {
-      const all = this.filteredMessages();
-      this.selectedMessages.set(all);
+      const visible = this.filteredMessages();
+      const current = [...this.selectedMessages()];
+
+      visible.forEach((msg) => {
+        if (!current.some((m) => m.mpesaCode === msg.mpesaCode)) {
+          current.push(msg);
+        }
+      });
+
+      this.selectedMessages.set(current);
     }
   }
 
