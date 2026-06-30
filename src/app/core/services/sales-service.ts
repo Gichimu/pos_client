@@ -65,7 +65,7 @@ export class SalesService {
     saleId: string,
     paymentMethod: PaymentMethod,
     splitAmounts?: { cashAmount: number; mpesaAmount: number },
-    mpesaTransactionId?: string,
+    mpesaTransactionId?: string[],
   ): Observable<SaleItem> {
     return this.http.patch<SaleItem>(`${this.url}/sales/${saleId}/confirm`, {
       paymentMethod,

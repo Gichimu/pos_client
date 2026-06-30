@@ -91,6 +91,12 @@ export class ManagementShellComponent implements OnInit {
           roles: ['superAdmin', 'manager'] as UserRole[],
           path: '/management/inventory',
         },
+        {
+          label: 'Recipes',
+          icon: 'receipt_long',
+          roles: ['superAdmin', 'manager'] as UserRole[],
+          path: '/management/recipe',
+        },
       ],
     },
     {
@@ -197,7 +203,7 @@ export class ManagementShellComponent implements OnInit {
   }
 
   private autoExpandGroupForUrl(url: string): void {
-    const inventoryPaths = ['/management/inventory'];
+    const inventoryPaths = ['/management/inventory', '/management/recipe'];
     if (inventoryPaths.some((p) => url.includes(p))) {
       this.expandedGroups.update((s) => {
         const next = new Set(s);

@@ -151,21 +151,27 @@ export const saleStore = signalStore(
       saleId: string,
       paymentMethod: PaymentMethod,
       splitAmounts?: { cashAmount: number; mpesaAmount: number },
-      mpesaTransactionId?: string,
+      mpesaTransactionId?: string[],
     ): Observable<void> {
       return new Observable((observer) => {
-        salesService.confirmSale(saleId, paymentMethod, splitAmounts, mpesaTransactionId).subscribe({
-          next: (updatedSale) => {
-            patchState(store, {
-              items: store
-                .items()
-                .map((s) => (s._id === saleId ? { ...s, confirmed: true, paymentMethod, mpesaTransactionId } : s)),
-            });
-            observer.next();
-            observer.complete();
-          },
-          error: (err) => observer.error(err),
-        });
+        salesService
+          .confirmSale(saleId, paymentMethod, splitAmounts, mpesaTransactionId)
+          .subscribe({
+            next: (updatedSale) => {
+              patchState(store, {
+                items: store
+                  .items()
+                  .map((s) =>
+                    s._id === saleId
+                      ? { ...s, confirmed: true, paymentMethod, mpesaTransactionId }
+                      : s,
+                  ),
+              });
+              observer.next();
+              observer.complete();
+            },
+            error: (err) => observer.error(err),
+          });
       });
     },
 
@@ -190,7 +196,7 @@ export const saleStore = signalStore(
       saleIds: string[],
       paymentMethod: PaymentMethod,
       splitAmounts?: { cashAmount: number; mpesaAmount: number },
-      mpesaTransactionId?: string,
+      mpesaTransactionId?: string[],
     ): Observable<void> {
       return new Observable((observer) => {
         if (saleIds.length === 0) {
@@ -225,28 +231,26 @@ export const saleStore = signalStore(
         forkJoin(calls).subscribe({
           next: () => {
             patchState(store, {
-              items: store
-                .items()
-                .map((s) => {
-                  if (s._id && saleIds.includes(s._id)) {
-                    let sSplit = undefined;
-                    if (paymentMethod === 'Split' && splitAmounts) {
-                      const ratio = s.totalAmount / totalBulkAmount;
-                      sSplit = {
-                        cashAmount: splitAmounts.cashAmount * ratio,
-                        mpesaAmount: splitAmounts.mpesaAmount * ratio,
-                      };
-                    }
-                    return {
-                      ...s,
-                      confirmed: true,
-                      paymentMethod,
-                      splitAmounts: sSplit,
-                      mpesaTransactionId,
+              items: store.items().map((s) => {
+                if (s._id && saleIds.includes(s._id)) {
+                  let sSplit = undefined;
+                  if (paymentMethod === 'Split' && splitAmounts) {
+                    const ratio = s.totalAmount / totalBulkAmount;
+                    sSplit = {
+                      cashAmount: splitAmounts.cashAmount * ratio,
+                      mpesaAmount: splitAmounts.mpesaAmount * ratio,
                     };
                   }
-                  return s;
-                }),
+                  return {
+                    ...s,
+                    confirmed: true,
+                    paymentMethod,
+                    splitAmounts: sSplit,
+                    mpesaTransactionId,
+                  };
+                }
+                return s;
+              }),
             });
             observer.next();
             observer.complete();

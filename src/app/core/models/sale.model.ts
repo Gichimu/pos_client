@@ -25,7 +25,7 @@ export interface SaleItem {
   paymentMethod?: PaymentMethod | null;
   totalAmount: number;
   confirmed: boolean;
-  mpesaTransactionId?: string;
+  mpesaTransactionId?: string[];
   createdAt?: Date;
 }
 

@@ -395,14 +395,18 @@ export class SalesComponent implements OnInit {
       if (mpesaAmount && mpesaAmount > 0) {
         const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
           data: { requiredAmount: mpesaAmount },
-          width: '560px',
+          maxWidth: '600px',
+          width: '95vw',
           disableClose: true,
         });
 
-        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage | undefined) => {
+        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage[] | undefined) => {
           if (!msg) return;
           // this.finalizeConfirm(sale, result, msg.transactionId);
-          this.finalizeConfirm(sale, result, msg.mpesaCode);
+          const messages: string[] = [];
+          msg.map((m) => messages.push(m.mpesaCode));
+          console.log('show the mpesa msgs', messages);
+          this.finalizeConfirm(sale, result, messages);
         });
       } else {
         this.finalizeConfirm(sale, result); //show this if no mpesa amount is required
@@ -413,7 +417,7 @@ export class SalesComponent implements OnInit {
   private finalizeConfirm(
     sale: SaleItem,
     result: PaymentMethodDialogResult,
-    mpesaId?: string,
+    mpesaId?: string[],
   ): void {
     const splitAmounts =
       result.paymentMethod === 'Split'
@@ -559,13 +563,16 @@ export class SalesComponent implements OnInit {
       if (mpesaAmount && mpesaAmount > 0) {
         const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
           data: { requiredAmount: mpesaAmount },
-          width: '560px',
+          maxWidth: '600px',
+          width: '95vw',
           disableClose: true,
         });
 
-        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage | undefined) => {
+        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage[] | undefined) => {
           if (!msg) return;
-          this.finalizeBulkConfirm(ids, result, msg.mpesaCode);
+          const messages: string[] = [];
+          msg.map((m) => messages.push(m.mpesaCode));
+          this.finalizeBulkConfirm(ids, result, messages);
         });
       } else {
         this.finalizeBulkConfirm(ids, result);
@@ -576,7 +583,7 @@ export class SalesComponent implements OnInit {
   private finalizeBulkConfirm(
     saleIds: string[],
     result: PaymentMethodDialogResult,
-    mpesaTransactionId?: string,
+    mpesaTransactionId?: string[],
   ): void {
     const splitAmounts =
       result.paymentMethod === 'Split'
