@@ -63,7 +63,9 @@ export class InventoryComponent implements OnInit {
 
   /** Only show sellable menu products (exclude raw-stock items). */
   private readonly menuProducts = computed(() =>
-    this.store.products().filter((p) => !p.productType || p.productType === 'menu'),
+    this.store
+      .products()
+      .filter((p) => !p.productType || p.productType === 'menu' || p.productType === 'menu-stock'),
   );
 
   readonly totalCount = computed(() => this.menuProducts().length);

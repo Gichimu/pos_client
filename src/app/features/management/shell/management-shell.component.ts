@@ -92,6 +92,12 @@ export class ManagementShellComponent implements OnInit {
           path: '/management/inventory',
         },
         {
+          label: 'Stock',
+          icon: 'inventory',
+          roles: ['superAdmin', 'manager'] as UserRole[],
+          path: '/management/stock',
+        },
+        {
           label: 'Recipes',
           icon: 'receipt_long',
           roles: ['superAdmin', 'manager'] as UserRole[],
@@ -164,7 +170,11 @@ export class ManagementShellComponent implements OnInit {
   /** Menu products with low or critical stock. */
   readonly menuStockAlerts = computed(() =>
     this.sortAlerts(
-      this.productStore.products().filter((p) => !p.productType || p.productType === 'menu'),
+      this.productStore
+        .products()
+        .filter(
+          (p) => !p.productType || p.productType === 'menu' || p.productType === 'menu-stock',
+        ),
     ),
   );
 
@@ -203,7 +213,7 @@ export class ManagementShellComponent implements OnInit {
   }
 
   private autoExpandGroupForUrl(url: string): void {
-    const inventoryPaths = ['/management/inventory', '/management/recipe'];
+    const inventoryPaths = ['/management/inventory', '/management/recipe', '/management/stock'];
     if (inventoryPaths.some((p) => url.includes(p))) {
       this.expandedGroups.update((s) => {
         const next = new Set(s);

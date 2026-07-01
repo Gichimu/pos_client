@@ -1,0 +1,168 @@
+<div class="inv-page page-enter">
+  <div class="inv-page__header">
+    <div class="inv-page__header-left">
+      <h2 class="inv-page__title">Stock Management</h2>
+      <!-- <mat-button-toggle-group
+        [value]="mode()"
+        (change)="setMode($event.value)"
+        class="mode-toggle"
+        aria-label="Stock Action Mode"
+      >
+        <mat-button-toggle value="add"> <mat-icon>add</mat-icon> Add </mat-button-toggle>
+        <mat-button-toggle value="deduct"> <mat-icon>remove</mat-icon> Deduct </mat-button-toggle>
+      </mat-button-toggle-group> -->
+
+      <div class="inv-stats">
+        <button
+          class="stat-pill stat-pill--total"
+          [class.stat-pill--active]="stockFilter() === 'all'"
+          (click)="setStockFilter('all')"
+        >
+          <span class="material-icons">inventory_2</span>
+          All
+        </button>
+        <button
+          class="stat-pill stat-pill--low"
+          [class.stat-pill--active]="stockFilter() === 'low'"
+          (click)="setStockFilter('low')"
+        >
+          <span class="material-icons">warning_amber</span>
+          Low
+        </button>
+        <button
+          class="stat-pill stat-pill--out"
+          [class.stat-pill--active]="stockFilter() === 'critical'"
+          (click)="setStockFilter('critical')"
+        >
+          <span class="material-icons">dangerous</span>
+          Critical
+        </button>
+      </div>
+    </div>
+
+    <div class="inv-page__header-right">
+      <div class="search-box">
+        <span class="material-icons search-box__icon">search</span>
+        <input
+          class="search-box__input"
+          type="text"
+          placeholder="Search items…"
+          [value]="searchQuery()"
+          (input)="onSearch($any($event.target).value)"
+        />
+      </div>
+      @if (mode() === 'add') {
+        <button class="add-btn" (click)="openNewItemDialog()" aria-label="Add new item">
+          <mat-icon>add_box</mat-icon>
+          New Item
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="inv-table-wrap">
+    @if (filteredProducts().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon"><span class="material-icons">search_off</span></div>
+        <p class="empty-state__title">No items found</p>
+      </div>
+    } @else {
+      <div class="inv-table-scroll">
+        <table mat-table [dataSource]="pagedProducts()" class="inv-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Item</th>
+            <td mat-cell *matCellDef="let p">
+              <p class="product-name">{{ p.name }}</p>
+              <p class="product-sku">SKU: {{ p.sku }}</p>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="category">
+            <th mat-header-cell *matHeaderCellDef>Category</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="category-tag">{{ p.category }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="currentStock">
+            <th mat-header-cell *matHeaderCellDef>Current Stock</th>
+            <td mat-cell *matCellDef="let p">
+              <span
+                class="stock-val"
+                [class.stock-val--low]="p.stockReorderStatus === 'low'"
+                [class.stock-val--out]="p.stockReorderStatus === 'critical'"
+              >
+                {{ p.currentStock }} {{ p.unit || '' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="stockReorderStatus">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let p">
+              <app-status-badge [status]="p.stockReorderStatus" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let p">
+              <div class="row-actions">
+                @if (mode() === 'add') {
+                  <button
+                    mat-icon-button
+                    class="action-icon action-icon--edit"
+                    (click)="openEditDialog(p)"
+                    matTooltip="Edit item"
+                  >
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button
+                    *rbacAllow="['superAdmin']"
+                    mat-icon-button
+                    class="action-icon action-icon--history"
+                    (click)="openHistoryDialog(p)"
+                    matTooltip="Audit History"
+                  >
+                    <span class="material-icons">history</span>
+                  </button>
+                  <!-- <button
+                    mat-flat-button
+                    color="primary"
+                    class="action-btn"
+                    (click)="openAdjustDialog(p)"
+                  >
+                    <mat-icon>add</mat-icon> Add Stock
+                  </button> -->
+                } @else {
+                  <!-- <button
+                    mat-flat-button
+                    color="warn"
+                    class="action-btn"
+                    (click)="openAdjustDialog(p)"
+                    [disabled]="(p.currentStock || 0) <= 0"
+                  >
+                    <mat-icon>remove</mat-icon> Deduct Stock
+                  </button> -->
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="inv-row"></tr>
+        </table>
+      </div>
+
+      @if (filteredProducts().length > PAGE_SIZE) {
+        <mat-paginator
+          [length]="filteredProducts().length"
+          [pageSize]="PAGE_SIZE"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[10, 20, 50]"
+          (page)="onPageChange($event)"
+        ></mat-paginator>
+      }
+    }
+  </div>
+</div>

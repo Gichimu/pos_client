@@ -142,6 +142,12 @@ export class InventoryFormModalComponent {
     inUse: [this.data?.product?.inUse ?? true],
   });
 
+  private readonly productTypeValue = toSignal(
+    this.form.controls.productType.valueChanges.pipe(startWith(this.form.controls.productType.value)),
+    { initialValue: this.form.controls.productType.value },
+  );
+  readonly isMenuStock = computed(() => this.productTypeValue() === 'menu-stock');
+
   private readonly formStatus = toSignal(
     this.form.statusChanges.pipe(startWith(this.form.status)),
     { initialValue: this.form.status },
@@ -183,6 +189,14 @@ export class InventoryFormModalComponent {
     if (this.isEdit()) {
       this.form.controls.currentStock.disable();
     }
+
+    // Disable productType and set sellingPrice to 0 if menu-stock
+    effect(() => {
+      if (this.isMenuStock()) {
+        this.form.controls.productType.disable({ emitEvent: false });
+        this.form.controls.sellingPrice.setValue(0, { emitEvent: false });
+      }
+    });
 
     // Reset subCategory whenever category changes, unless existing value is still valid
     effect(() => {

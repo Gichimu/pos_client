@@ -1,6 +1,6 @@
 export type StockReorderStatus = 'good' | 'low' | 'critical';
 export type ReorderLevel = 3 | 5 | 10 | 20;
-export type ProductType = 'menu' | 'raw-stock';
+export type ProductType = 'menu' | 'menu-stock' | 'raw-stock';
 /** Unit of measurement for raw-stock quantities. */
 export type StockUnit =
   | 'L'

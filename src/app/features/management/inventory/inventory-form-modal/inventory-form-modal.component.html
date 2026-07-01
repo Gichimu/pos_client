@@ -77,36 +77,41 @@
           <mat-label>Product Type</mat-label>
           <mat-select formControlName="productType">
             <mat-option value="menu">Menu Item</mat-option>
+            <mat-option value="menu-stock">Menu Stock</mat-option>
             <mat-option value="raw-stock">Raw Stock</mat-option>
           </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="flex-field">
-          <mat-label>Selling Price (Ksh.)</mat-label>
-          <mat-icon matPrefix>sell</mat-icon>
-          <input
-            matInput
-            type="number"
-            min="0"
-            step="0.01"
-            formControlName="sellingPrice"
-            placeholder="0.00"
-          />
-          @if (form.get('sellingPrice')?.invalid && form.get('sellingPrice')?.touched) {
-            <mat-error>Enter a valid price</mat-error>
-          }
-        </mat-form-field>
+        @if (!isMenuStock()) {
+          <mat-form-field appearance="outline" class="flex-field">
+            <mat-label>Selling Price (Ksh.)</mat-label>
+            <mat-icon matPrefix>sell</mat-icon>
+            <input
+              matInput
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="sellingPrice"
+              placeholder="0.00"
+            />
+            @if (form.get('sellingPrice')?.invalid && form.get('sellingPrice')?.touched) {
+              <mat-error>Enter a valid price</mat-error>
+            }
+          </mat-form-field>
+        }
       </div>
 
       <!-- Row: In Use Toggle -->
-      <div class="form-row toggle-row">
-        <div class="flex-field">
-          <mat-slide-toggle formControlName="inUse" color="primary">
-            Product in Use
-          </mat-slide-toggle>
+      @if (!isMenuStock()) {
+        <div class="form-row toggle-row">
+          <div class="flex-field">
+            <mat-slide-toggle formControlName="inUse" color="primary">
+              Product in Use
+            </mat-slide-toggle>
+          </div>
+          <div class="flex-field"></div>
         </div>
-        <div class="flex-field"></div>
-      </div>
+      }
 
       <!-- Row 4: Stock management — behaviour differs between edit and add mode -->
       @if (isEdit()) {

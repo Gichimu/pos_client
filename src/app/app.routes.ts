@@ -53,6 +53,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'stock',
+        data: { title: 'Stock Management' },
+        loadComponent: () =>
+          import('./features/management/inventory/management-stock.component').then(
+            (m) => m.ManagementStockComponent,
+          ),
+      },
+      {
         path: 'recipe',
         data: { title: 'Recipes' },
         loadComponent: () =>

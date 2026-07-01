@@ -97,14 +97,16 @@
             (click)="addToCart(product)"
             [class.product-card--in-cart]="getCartQuantity(product._id!) > 0"
             [class.product-card--out-of-stock]="
-              product.currentStock === 0 || product.currentStock < 0
+              product.currentStock <= 0 || getCartQuantity(product._id!) >= product.currentStock
             "
-            [disabled]="product.currentStock === 0 || product.currentStock < 0"
-            [attr.aria-disabled]="product.currentStock === 0 || product.currentStock < 0"
+            [disabled]="product.currentStock <= 0 || getCartQuantity(product._id!) >= product.currentStock"
+            [attr.aria-disabled]="product.currentStock <= 0 || getCartQuantity(product._id!) >= product.currentStock"
             [matTooltip]="
-              product.currentStock === 0 || product.currentStock < 0
+              product.currentStock <= 0
                 ? 'Out of stock'
-                : product.name + ' — ' + formatCurrency(product.sellingPrice)
+                : getCartQuantity(product._id!) >= product.currentStock
+                  ? 'Stock limit reached in cart'
+                  : product.name + ' — ' + formatCurrency(product.sellingPrice)
             "
             [style.--card-bg]="getCardColor(product.name)"
             [style.--card-accent]="getCardAccent(product.name)"
@@ -199,6 +201,7 @@
                 mat-icon-button
                 class="qty-btn"
                 (click)="increment(item.product._id!)"
+                [disabled]="item.quantity >= (item.product.currentStock ?? 0)"
                 aria-label="Increase quantity"
               >
                 <mat-icon>add</mat-icon>

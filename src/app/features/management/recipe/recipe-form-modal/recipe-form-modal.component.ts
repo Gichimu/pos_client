@@ -54,12 +54,14 @@ export class RecipeFormModalComponent {
 
   /** Sellable menu items — the finished dish this recipe produces. */
   readonly menuItems = computed(() =>
-    this.pStore.products().filter((p) => !p.productType || p.productType === 'menu'),
+    this.pStore
+      .products()
+      .filter((p) => !p.productType || p.productType === 'menu' || p.productType === 'menu-stock'),
   );
 
   /** Raw-stock products — the ingredients. */
   readonly rawStockItems = computed(() =>
-    this.pStore.products().filter((p) => p.productType === 'raw-stock'),
+    this.pStore.products().filter((p) => p.productType === 'menu-stock'),
   );
 
   // ── Autocomplete for menu item ──────────────────────────────────────────────
@@ -86,7 +88,7 @@ export class RecipeFormModalComponent {
   /** Reactive snapshot of the search value — drives filtering. */
   private readonly menuItemSearchValue = toSignal(
     this.menuItemSearch.valueChanges.pipe(startWith(this.menuItemSearch.value ?? '')),
-    { initialValue: this.menuItemSearch.value ?? '' as Product | string | null },
+    { initialValue: this.menuItemSearch.value ?? ('' as Product | string | null) },
   );
 
   /** Menu items filtered by the current search text (handles both string and Product). */
@@ -96,7 +98,7 @@ export class RecipeFormModalComponent {
     const text =
       typeof raw === 'string'
         ? raw.toLowerCase().trim()
-        : (raw as Product | null)?.name?.toLowerCase().trim() ?? '';
+        : ((raw as Product | null)?.name?.toLowerCase().trim() ?? '');
     if (!text) return this.menuItems();
     return this.menuItems().filter((p) => p.name.toLowerCase().includes(text));
   });

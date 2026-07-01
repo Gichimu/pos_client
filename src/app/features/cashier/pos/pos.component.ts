@@ -112,7 +112,9 @@ export class PosComponent implements OnInit {
     if (catId) products = products.filter((p) => p.category === catId);
     if (subCat) products = products.filter((p) => p.subCategory === subCat);
     if (q) products = products.filter((p) => p.name.toLowerCase().includes(q));
-    products = products.filter((p) => p.inUse !== false && p.productType === 'menu'); // hide products marked as not in use and raw stock items
+    products = products.filter(
+      (p) => p.inUse !== false && (!p.productType || p.productType === 'menu'),
+    ); // hide products marked as not in use and raw stock items
     return products;
   });
 
@@ -188,10 +190,19 @@ export class PosComponent implements OnInit {
   }
 
   addToCart(product: Product) {
+    if (this.getCartQuantity(product._id!) >= (product.currentStock ?? 0)) {
+      this.sweetAlert.warning(`Cannot add more "${product.name}" — stock limit reached.`);
+      return;
+    }
     this.store.addToCart(product);
   }
 
   increment(productId: string) {
+    const item = this.cartItems().find((i) => i.product._id === productId);
+    if (item && item.quantity >= (item.product.currentStock ?? 0)) {
+      this.sweetAlert.warning(`Cannot add more "${item.product.name}" — stock limit reached.`);
+      return;
+    }
     this.store.incrementItem(productId);
   }
 
