@@ -303,6 +303,12 @@ export class PosComponent implements OnInit {
     return this.store.items().find((i) => i.product._id === productId)?.quantity ?? 0;
   }
 
+  refreshPage() {
+    this.productStore.loadProducts();
+    this.categoryStore.loadCategories();
+    this.shiftStore.loadShifts();
+  }
+
   /** Deterministic pastel background for a product tile based on its name. */
   getCardColor(name: string): string {
     const colors = [
