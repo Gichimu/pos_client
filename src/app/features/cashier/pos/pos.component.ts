@@ -291,6 +291,7 @@ export class PosComponent implements OnInit {
   }
 
   logout() {
+    this.clearCart();
     this.authStore.logout();
     this.router.navigate(['/cashier-login']);
   }
