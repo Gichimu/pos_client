@@ -62,7 +62,7 @@ export interface SaleDetailsDialogData {
 
           <div class="sale-footer">
             <span class="total-label">Sale Total</span>
-            <span class="total-val">{{ formatCurrency(sale.totalAmount) }}</span>
+            <span class="total-val">{{ formatCurrency(calculateSaleTotal(sale)) }}</span>
           </div>
         </div>
         @if (!$last) {
@@ -201,6 +201,10 @@ export class SaleDetailsDialogComponent {
 
   getSaleIdLabel(sale: SaleItem): string {
     return sale.saleId ? `#${sale.saleId}` : `#${(sale._id ?? '').slice(-6).toUpperCase()}`;
+  }
+
+  calculateSaleTotal(sale: SaleItem): number {
+    return sale.items.reduce((sum, item) => sum + item.subTotal, 0);
   }
 
   formatCurrency(v: number): string {

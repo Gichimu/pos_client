@@ -145,6 +145,21 @@
   }
 }
 
+.child-badge {
+  background: var(--color-warn);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .switch-btn {
   width: 100%;
   justify-content: flex-start;

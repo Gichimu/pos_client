@@ -9,11 +9,13 @@ export type SaleConfirmStatus = 'pending' | 'confirmed';
 interface SaleStoreState {
   /** Raw sale documents as returned by the API. */
   items: SaleItem[];
+  pendingReturns: any[];
   isLoading: boolean;
 }
 
 const initialState: SaleStoreState = {
   items: [],
+  pendingReturns: [],
   isLoading: false,
 };
 
@@ -273,11 +275,52 @@ export const saleStore = signalStore(
         });
       });
     },
+
+    loadPendingReturns(): void {
+      patchState(store, { isLoading: true });
+      salesService.getPendingReturns().subscribe({
+        next: (returns) => {
+          patchState(store, { pendingReturns: returns, isLoading: false });
+        },
+        error: () => {
+          patchState(store, { isLoading: false });
+        },
+      });
+    },
+
+    returnItem(saleId: string, itemId: string): Observable<SaleItem> {
+      return salesService.returnItem(saleId, itemId).pipe(
+        tap((updatedSale) => {
+          patchState(store, {
+            items: store
+              .items()
+              .map((s) => (s._id === saleId ? updatedSale : s))
+              .filter((s) => s.items.length > 0),
+          });
+          // Also reload returns to update the badge
+          salesService.getPendingReturns().subscribe((returns) => {
+            patchState(store, { pendingReturns: returns });
+          });
+        }),
+      );
+    },
+
+    confirmReturn(returnId: string): Observable<SaleItem> {
+      return salesService.confirmReturn(returnId).pipe(
+        tap((updatedSale) => {
+          patchState(store, {
+            pendingReturns: store.pendingReturns().filter((r) => r._id !== returnId),
+            items: store.items().map((s) => (s._id === updatedSale._id ? updatedSale : s)),
+          });
+        }),
+      );
+    },
   })),
   withHooks({
     onInit(store) {
       // Initial load with no filters; the report component will re-fetch with date params
       store.loadSales();
+      store.loadPendingReturns();
     },
   }),
 );

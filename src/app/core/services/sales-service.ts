@@ -86,4 +86,19 @@ export class SalesService {
       confirmed: false,
     });
   }
+
+  /** POST /sales/:saleId/items/:itemId/return – marks a line item for return. */
+  returnItem(saleId: string, itemId: string): Observable<SaleItem> {
+    return this.http.post<SaleItem>(`${this.url}/sales/${saleId}/items/${itemId}/return`, {});
+  }
+
+  /** GET /sales/returns – fetches all pending returns. */
+  getPendingReturns(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.url}/sales/returns`);
+  }
+
+  /** POST /sales/returns/:returnId/confirm – confirms a return. */
+  confirmReturn(returnId: string): Observable<SaleItem> {
+    return this.http.post<SaleItem>(`${this.url}/sales/returns/${returnId}/confirm`, {});
+  }
 }

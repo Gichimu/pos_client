@@ -27,6 +27,7 @@ import {
   PaymentMethodDialogResult,
 } from './payment-method-dialog.component';
 import { SaleDetailsDialogComponent } from './sale-details-dialog.component';
+import { ReturnItemsDialogComponent } from './return-items-dialog.component';
 import { MpesaMessageDialogComponent } from './mpesa-message-dialog.component';
 import moment from 'moment';
 
@@ -67,9 +68,6 @@ export class SalesComponent implements OnInit {
   filterStatus = signal<FilterStatus>('all');
   filterCashierId = signal<string | null>(null);
 
-  /** Sale _id awaiting the two-step delete confirmation. */
-  pendingDeleteSaleId = signal<string | null>(null);
-
   // ── Bulk selection ───────────────────────────────────────────────────────
   selectedIds = signal<Set<string>>(new Set<string>());
 
@@ -80,7 +78,7 @@ export class SalesComponent implements OnInit {
     return this.salesStore
       .items()
       .filter((s) => s._id && ids.has(s._id))
-      .reduce((sum, s) => sum + s.totalAmount, 0);
+      .reduce((sum, s) => sum + this.calculateSaleTotal(s), 0);
   });
 
   readonly pendingOnPage = computed(() => this.pagedItems().filter((s) => !s.confirmed));
@@ -181,6 +179,7 @@ export class SalesComponent implements OnInit {
 
   readonly pagedItems = computed(() => {
     const start = this.pageIndex() * this.PAGE_SIZE;
+    this.filteredItems().filter((s) => s.shiftId === this.activeShift()?._id);
     return this.filteredItems().slice(start, start + this.PAGE_SIZE);
   });
 
@@ -191,14 +190,14 @@ export class SalesComponent implements OnInit {
 
   // ── Stat cards ───────────────────────────────────────────────────────────
   readonly totalRevenue = computed(() =>
-    this.filteredItems().reduce((sum, s) => sum + s.totalAmount, 0),
+    this.filteredItems().reduce((sum, s) => sum + this.calculateSaleTotal(s), 0),
   );
   readonly cashRevenue = computed(() => {
     return this.filteredItems()
       .filter((s) => s.confirmed)
       .reduce((sum, s) => {
         const pm = (s as any).paymentMethod;
-        if (pm === 'Cash') return sum + s.totalAmount;
+        if (pm === 'Cash') return sum + this.calculateSaleTotal(s);
         if (pm === 'Split') return sum + ((s as any).splitAmounts?.cashAmount || 0);
         return sum;
       }, 0);
@@ -208,7 +207,7 @@ export class SalesComponent implements OnInit {
       .filter((s) => s.confirmed)
       .reduce((sum, s) => {
         const pm = (s as any).paymentMethod;
-        if (pm === 'M-Pesa') return sum + s.totalAmount;
+        if (pm === 'M-Pesa') return sum + this.calculateSaleTotal(s);
         if (pm === 'Split') return sum + ((s as any).splitAmounts?.mpesaAmount || 0);
         return sum;
       }, 0);
@@ -218,7 +217,7 @@ export class SalesComponent implements OnInit {
       .filter((s) => s.confirmed)
       .reduce((sum, s) => {
         const pm = (s as any).paymentMethod;
-        if (pm === 'PDQ') return sum + s.totalAmount;
+        if (pm === 'PDQ') return sum + this.calculateSaleTotal(s);
         return sum;
       }, 0);
   });
@@ -249,7 +248,7 @@ export class SalesComponent implements OnInit {
         totals.Cash += (sale as any).splitAmounts.cashAmount || 0;
         totals['M-Pesa'] += (sale as any).splitAmounts?.mpesaAmount || 0;
       } else if (pm === 'Cash' || pm === 'M-Pesa' || pm === 'PDQ') {
-        totals[pm] += sale.totalAmount;
+        totals[pm] += this.calculateSaleTotal(sale);
       }
     });
 
@@ -328,6 +327,10 @@ export class SalesComponent implements OnInit {
     return sale.saleId ? `#${sale.saleId}` : `#${(sale._id ?? '').slice(-6).toUpperCase()}`;
   }
 
+  calculateSaleTotal(sale: SaleItem): number {
+    return sale.items.reduce((sum, item) => sum + item.subTotal, 0);
+  }
+
   // ── Details ─────────────────────────────────────────────────────────────
 
   openDetails(sale: SaleItem): void {
@@ -376,7 +379,8 @@ export class SalesComponent implements OnInit {
       data: {
         saleId: sale._id!,
         saleIdLabel: this.getSaleIdLabel(sale),
-        totalAmount: sale.totalAmount,
+        // totalAmount: sale.totalAmount,
+        totalAmount: this.calculateSaleTotal(sale),
       },
       width: '560px',
       disableClose: true,
@@ -387,7 +391,7 @@ export class SalesComponent implements OnInit {
 
       const mpesaAmount =
         result.paymentMethod === 'M-Pesa'
-          ? sale.totalAmount
+          ? this.calculateSaleTotal(sale)
           : result.paymentMethod === 'Split'
             ? result.mpesaAmount
             : 0;
@@ -437,20 +441,18 @@ export class SalesComponent implements OnInit {
     return (sale as any).paymentMethod ?? null;
   }
 
-  deleteSale(sale: SaleItem): void {
-    if (this.pendingDeleteSaleId() === sale._id) {
-      this.pendingDeleteSaleId.set(null);
-      this.salesStore.deleteSale(sale._id!).subscribe({
-        next: () => this.sweetAlert.success('Sale deleted successfully'),
-        error: () => this.sweetAlert.error('Failed to delete sale. Please try again.'),
-      });
-    } else {
-      this.pendingDeleteSaleId.set(sale._id!);
-    }
-  }
-
-  cancelDelete(): void {
-    this.pendingDeleteSaleId.set(null);
+  openReturnDialog(sale: SaleItem): void {
+    const returnDialogRef = this.dialog.open(ReturnItemsDialogComponent, {
+      data: { sale },
+      width: '640px',
+      maxWidth: '95vw',
+      disableClose: false,
+    });
+    returnDialogRef.afterClosed().subscribe((result) => {
+      if (!result) return;
+      // reload table data to reflect the returned items
+      this.salesStore.loadSales();
+    });
   }
 
   voidSale(sale: SaleItem): void {
@@ -532,7 +534,7 @@ export class SalesComponent implements OnInit {
     const combinedTotal = this.salesStore
       .items()
       .filter((s) => s._id && ids.includes(s._id))
-      .reduce((sum, s) => sum + s.totalAmount, 0);
+      .reduce((sum, s) => sum + this.calculateSaleTotal(s), 0);
 
     const dialogRef = this.dialog.open<
       PaymentMethodDialogComponent,

@@ -47,6 +47,9 @@
                   >
                     <mat-icon class="nav-item__icon">{{ child.icon }}</mat-icon>
                     <span class="nav-item__label">{{ child.label }}</span>
+                    @if (child.label === 'Returns' && pendingReturnsCount() > 0) {
+                      <span class="child-badge">{{ pendingReturnsCount() }}</span>
+                    }
                   </a>
                 }
               </div>

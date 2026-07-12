@@ -81,8 +81,19 @@ export const routes: Routes = [
       {
         path: 'sales',
         data: { title: 'Sales' },
-        loadComponent: () =>
-          import('./features/management/sales/sales.component').then((m) => m.SalesComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/management/sales/sales.component').then((m) => m.SalesComponent),
+          },
+          {
+            path: 'returns',
+            data: { title: 'Returns' },
+            loadComponent: () =>
+              import('./features/management/sales/returns.component').then((m) => m.ReturnsComponent),
+          },
+        ],
       },
       {
         path: 'reports',

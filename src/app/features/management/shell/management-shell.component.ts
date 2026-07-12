@@ -18,10 +18,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../../../core/services/auth.service';
 import { MatDividerModule } from '@angular/material/divider';
 import { authStore } from '../../../store/auth/auth.store';
-import { User, UserRole } from '../../../core/models/user.model';
-import { RbacAllow } from '../../../core/directives/rbac-allow';
 import { productStore } from '../../../store/products/product.store';
 import { userStore } from '../../../store/users/user.store';
+import { saleStore } from '../../../store/sales/sale.store';
+import { User, UserRole } from '../../../core/models/user.model';
+import { RbacAllow } from '../../../core/directives/rbac-allow';
 
 interface NavItem {
   label: string;
@@ -56,6 +57,7 @@ export class ManagementShellComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly productStore = inject(productStore);
   private readonly usersStore = inject(userStore);
+  private readonly salesStore = inject(saleStore);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
 
@@ -121,7 +123,20 @@ export class ManagementShellComponent implements OnInit {
       label: 'Sales',
       icon: 'receipt_long',
       roles: ['superAdmin', 'manager'] as UserRole[],
-      path: '/management/sales',
+      children: [
+        {
+          label: 'Sales List',
+          icon: 'list',
+          roles: ['superAdmin', 'manager'] as UserRole[],
+          path: '/management/sales',
+        },
+        {
+          label: 'Returns',
+          icon: 'assignment_return',
+          roles: ['superAdmin', 'manager'] as UserRole[],
+          path: '/management/sales/returns',
+        },
+      ],
     },
     {
       label: 'Reports',
@@ -185,8 +200,13 @@ export class ManagementShellComponent implements OnInit {
 
   /** Total unread notification count. */
   readonly notificationCount = computed(
-    () => this.menuStockAlerts().length + this.pendingUsers().length,
+    () =>
+      this.menuStockAlerts().length +
+      this.pendingUsers().length +
+      this.salesStore.pendingReturns().length,
   );
+
+  readonly pendingReturnsCount = computed(() => this.salesStore.pendingReturns().length);
 
   toggleSidebar(): void {
     this.sidebarOpen.update((v) => !v);
@@ -225,6 +245,13 @@ export class ManagementShellComponent implements OnInit {
       this.expandedGroups.update((s) => {
         const next = new Set(s);
         next.add('Logs');
+        return next;
+      });
+    }
+    if (url.includes('/management/sales')) {
+      this.expandedGroups.update((s) => {
+        const next = new Set(s);
+        next.add('Sales');
         return next;
       });
     }
