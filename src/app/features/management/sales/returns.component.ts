@@ -223,11 +223,11 @@ export class ReturnsComponent implements OnInit {
     return p ? p.name : 'Unknown Product';
   }
 
-  getSaleNumber(ret: any): string {
+  getSaleNumber(ret: any): string | undefined {
     if (ret.saleIdLabel) return `#${ret.saleIdLabel}`;
     const s = this.salesStore.items().find((sale) => sale._id === ret.saleId);
     // return ret.saleId ? `#${s?.saleId.slice(-6).toUpperCase()}` : 'N/A';
-    return s ? s.saleId || 'N/A' : 'N/A';
+    return s ? s.saleId : 'N/A';
   }
 
   getTotal(ret: any): number {
