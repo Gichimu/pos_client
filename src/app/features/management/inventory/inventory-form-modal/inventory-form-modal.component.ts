@@ -10,7 +10,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith, map } from 'rxjs';
-import { Product, ProductType, ReorderLevel, StockReorderStatus, StockUnit } from '../../../../core/models/product.model';
+import {
+  Product,
+  ProductType,
+  ReorderLevel,
+  StockReorderStatus,
+  StockUnit,
+} from '../../../../core/models/product.model';
 import { CategoryStore } from '../../../../store/categories/category.store';
 import { Category } from '../../../../core/models/category.model';
 
@@ -33,7 +39,17 @@ const REORDER_LEVEL_OPTIONS: { value: ReorderLevel; label: string }[] = [
 ];
 
 const UNIT_OPTIONS: StockUnit[] = [
-  'L', 'mL', 'kg', 'g', 'pcs', 'dozen', 'pack', 'bag', 'box', 'portion', 'tray'
+  'L',
+  'mL',
+  'kg',
+  'g',
+  'pcs',
+  'dozen',
+  'pack',
+  'bag',
+  'box',
+  'portion',
+  'tray',
 ];
 
 /** Subcategory options keyed by lowercase category name. */
@@ -100,7 +116,10 @@ export class InventoryFormModalComponent {
   readonly unitOptions = UNIT_OPTIONS;
 
   /** Units to add on top of existing stock (edit mode only). */
-  readonly addToStock = new FormControl<number | null>(null, [Validators.min(0)]);
+  readonly addToStock = new FormControl<number | null>(
+    { value: null, disabled: this.data?.product?.hasRecipe! },
+    [Validators.min(0)],
+  );
 
   private readonly addToStockValue = toSignal(
     this.addToStock.valueChanges.pipe(startWith(this.addToStock.value)),
@@ -143,7 +162,9 @@ export class InventoryFormModalComponent {
   });
 
   private readonly productTypeValue = toSignal(
-    this.form.controls.productType.valueChanges.pipe(startWith(this.form.controls.productType.value)),
+    this.form.controls.productType.valueChanges.pipe(
+      startWith(this.form.controls.productType.value),
+    ),
     { initialValue: this.form.controls.productType.value },
   );
   readonly isMenuStock = computed(() => this.productTypeValue() === 'menu-stock');
@@ -166,7 +187,7 @@ export class InventoryFormModalComponent {
     if (isInvalid) return false;
 
     if (this.isEdit()) {
-      const hasChanges = this.isFormDirty() || (Number(this.addToStockValue()) > 0);
+      const hasChanges = this.isFormDirty() || Number(this.addToStockValue()) > 0;
       return hasChanges;
     }
 

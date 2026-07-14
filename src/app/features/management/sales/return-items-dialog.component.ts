@@ -12,6 +12,7 @@ import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import { ReceiptService } from '../../../core/services/receipt.service';
 import { shiftStore } from '../../../store/shifts/shift.store';
 import { userStore } from '../../../store/users/user.store';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-return-items-dialog',
@@ -25,13 +26,25 @@ import { userStore } from '../../../store/users/user.store';
     MatTooltipModule,
   ],
   template: `
-    <h2 mat-dialog-title class="dialog-title">
-      <mat-icon>assignment_return</mat-icon>
-      Partial Return - {{ getSaleIdLabel(data.sale) }}
-    </h2>
+    <div class="dialog-header">
+      <h2 mat-dialog-title class="dialog-title">
+        <mat-icon>assignment_return</mat-icon>
+        Partial Return - {{ getSaleIdLabel(data.sale) }}
+      </h2>
+      <!-- <button
+        mat-stroked-button
+        color="warn"
+        class="return-all-btn"
+        (click)="returnEntireSale()"
+        matTooltip="Return every item in this bill"
+      >
+        <mat-icon>assignment_return</mat-icon>
+        Return Entire Bill
+      </button> -->
+    </div>
     <mat-dialog-content class="details-content">
       <p class="dialog-desc">
-        Select an item to mark it for return. This will temporarily remove it from the sale.
+        Select an item to mark it for return or use the button above to return the entire bill.
       </p>
 
       <div class="table-container">
@@ -84,15 +97,26 @@ import { userStore } from '../../../store/users/user.store';
   `,
   styles: [
     `
+      .dialog-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-right: 24px;
+      }
       .dialog-title {
         display: flex;
         align-items: center;
         gap: 8px;
         font-weight: 700;
         color: var(--color-text);
+        margin: 0;
         mat-icon {
           color: var(--color-warn);
         }
+      }
+      .return-all-btn {
+        font-weight: 600;
+        border-width: 2px !important;
       }
       .dialog-desc {
         font-size: 0.9rem;
@@ -230,6 +254,29 @@ export class ReturnItemsDialogComponent {
       // complete: () => {
       //   this.dialogRef.close();
       // },
+    });
+  }
+
+  returnEntireSale() {
+    Swal.fire({
+      title: 'Return entire bill?',
+      text: 'This will mark every item in this sale as returned.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, return all',
+      confirmButtonColor: '#ef4444',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+
+      this.saleStore.returnEntireSale(this.data.sale._id!).subscribe({
+        next: () => {
+          this.sweetAlert.success('Entire bill marked for return');
+          this.close();
+        },
+        error: () => this.sweetAlert.error('Failed to return entire sale'),
+      });
     });
   }
 }

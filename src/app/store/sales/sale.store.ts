@@ -305,6 +305,20 @@ export const saleStore = signalStore(
       );
     },
 
+    returnEntireSale(saleId: string): Observable<SaleItem> {
+      return salesService.returnEntireSale(saleId).pipe(
+        tap(() => {
+          patchState(store, {
+            items: store.items().filter((s) => s._id !== saleId),
+          });
+          // Also reload returns to update the badge
+          salesService.getPendingReturns().subscribe((returns) => {
+            patchState(store, { pendingReturns: returns });
+          });
+        }),
+      );
+    },
+
     confirmReturn(returnId: string): Observable<SaleItem> {
       return salesService.confirmReturn(returnId).pipe(
         tap((updatedSale) => {

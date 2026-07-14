@@ -165,7 +165,9 @@
           />
           <span matSuffix class="units-suffix">{{ form.get('unit')?.value }}</span>
           @if ((addToStock.value ?? 0) > 0) {
-            <mat-hint class="add-hint">↑ New total: {{ newStockTotal() }} {{ form.get('unit')?.value }}</mat-hint>
+            <mat-hint class="add-hint"
+              >↑ New total: {{ newStockTotal() }} {{ form.get('unit')?.value }}</mat-hint
+            >
           } @else {
             <mat-hint>Enter units to add to current stock</mat-hint>
           }

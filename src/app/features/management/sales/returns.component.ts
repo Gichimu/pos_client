@@ -253,25 +253,34 @@ export class ReturnsComponent implements OnInit {
         const cashier = this.userStore.users().find((u) => u._id === updatedSale.cashierId) || null;
         const shift = this.shiftStore.shifts().find((s) => s._id === updatedSale.shiftId) || null;
 
-        this.receiptService.print({
-          sale: updatedSale,
-          cashier,
-          shift,
-          cartSnapshot: updatedSale.items.map((i: any) => ({
-            product: {
-              _id: i.productId,
-              name: i.productName,
-              sellingPrice: i.unitPrice,
-              sku: i.productSku,
-              imageUrl: '',
-              buyingPrice: 0,
-              currentStock: 0,
-              stockReorderLevel: 0,
-            } as any,
-            quantity: i.quantity,
-          })),
-          grandTotal: updatedSale.totalAmount,
-        });
+        updatedSale.items.length > 0 &&
+          this.receiptService.print({
+            sale: updatedSale,
+            cashier,
+            shift,
+            cartSnapshot: updatedSale.items.map((i: any) => ({
+              product: {
+                _id: i.productId,
+                name:
+                  i.productName ??
+                  this.productStore.products().find((product) => product._id === i.productId)
+                    ?.name ??
+                  'Unknown Product',
+                sellingPrice: i.unitPrice,
+                sku: i.productSku,
+                imageUrl: '',
+                buyingPrice: 0,
+                currentStock: 0,
+                stockReorderLevel: 0,
+              } as any,
+              quantity: i.quantity,
+            })),
+            // grandTotal: updatedSale.totalAmount,
+            grandTotal: updatedSale.items.reduce(
+              (sum: number, item: any) => sum + item.quantity * item.unitPrice,
+              0,
+            ),
+          });
 
         this.sweetAlert.success(`Return confirmed. Receipt reprinted.`);
       },

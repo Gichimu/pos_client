@@ -58,4 +58,5 @@ export interface Product {
   unit?: StockUnit;
   /** Indicates if the product is active or discontinued. */
   inUse?: boolean;
+  hasRecipe?: boolean;
 }

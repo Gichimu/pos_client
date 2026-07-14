@@ -92,6 +92,11 @@ export class SalesService {
     return this.http.post<SaleItem>(`${this.url}/sales/${saleId}/items/${itemId}/return`, {});
   }
 
+  /** POST /sales/:saleId/return-all – marks all items in a sale for return. */
+  returnEntireSale(saleId: string): Observable<SaleItem> {
+    return this.http.post<SaleItem>(`${this.url}/sales/${saleId}/return-all`, {});
+  }
+
   /** GET /sales/returns – fetches all pending returns. */
   getPendingReturns(): Observable<any[]> {
     return this.http.get<any[]>(`${this.url}/sales/returns`);
