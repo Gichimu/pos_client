@@ -85,24 +85,24 @@ export class ManagementShellComponent implements OnInit {
     {
       label: 'Inventory',
       icon: 'inventory_2',
-      roles: ['superAdmin', 'manager'] as UserRole[],
+      roles: ['superAdmin'] as UserRole[],
       children: [
         {
           label: 'Menu',
           icon: 'restaurant_menu',
-          roles: ['superAdmin', 'manager'] as UserRole[],
+          roles: ['superAdmin'] as UserRole[],
           path: '/management/inventory',
         },
         {
           label: 'Stock',
           icon: 'inventory',
-          roles: ['superAdmin', 'manager'] as UserRole[],
+          roles: ['superAdmin'] as UserRole[],
           path: '/management/stock',
         },
         {
           label: 'Recipes',
           icon: 'receipt_long',
-          roles: ['superAdmin', 'manager'] as UserRole[],
+          roles: ['superAdmin'] as UserRole[],
           path: '/management/recipe',
         },
       ],
@@ -116,7 +116,7 @@ export class ManagementShellComponent implements OnInit {
     {
       label: 'Shifts',
       icon: 'schedule',
-      roles: ['superAdmin', 'manager'] as UserRole[],
+      roles: ['superAdmin'] as UserRole[],
       path: '/management/shifts',
     },
     {
@@ -133,7 +133,7 @@ export class ManagementShellComponent implements OnInit {
         {
           label: 'Returns',
           icon: 'assignment_return',
-          roles: ['superAdmin', 'manager'] as UserRole[],
+          roles: ['superAdmin'] as UserRole[],
           path: '/management/sales/returns',
         },
       ],

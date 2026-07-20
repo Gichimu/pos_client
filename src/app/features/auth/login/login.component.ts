@@ -85,21 +85,14 @@ export class LoginComponent implements OnInit {
       if (!emailVal || this.emailCtrl.errors?.['email'] || this.emailCtrl.errors?.['required']) {
         return null;
       }
-      console.log('found users', this.users());
       const fromApi = this.users().find(
-        (u) =>
-          (u.roles && u.roles.includes(role)) &&
-          u.email === emailVal &&
-          u.status === 'active',
+        (u) => u.roles && u.roles.includes(role) && u.email === emailVal && u.status === 'active',
       );
       console.log('from api', fromApi);
       return (
         fromApi ??
         MOCK_USERS.find(
-          (u) =>
-            (u.roles && u.roles.includes(role)) &&
-            u.email === emailVal &&
-            u.status === 'active',
+          (u) => u.roles && u.roles.includes(role) && u.email === emailVal && u.status === 'active',
         ) ??
         null
       );
@@ -109,9 +102,10 @@ export class LoginComponent implements OnInit {
     //   (u) => u.roles.includes(role) && u.status === 'active' && u.pin === this.pin(),
     // );
 
-    console.log('selected cashier from API', this.users());
     const fromApi = null; // Disable API lookup for cashiers to avoid confusion during development when API is unavailable.
-    return fromApi ?? MOCK_USERS.find((u) => u.roles.includes(role) && u.status === 'active') ?? null;
+    return (
+      fromApi ?? MOCK_USERS.find((u) => u.roles.includes(role) && u.status === 'active') ?? null
+    );
   });
 
   /** Array of 5 booleans indicating which PIN dots are filled. */
@@ -184,7 +178,7 @@ export class LoginComponent implements OnInit {
     const role = this.selectedRole();
     if (!role) return;
 
-    if (role === 'superAdmin' || role === 'manager' || role === 'store') {
+    if (role === 'superAdmin' || role === 'store') {
       // Surface all validation errors immediately
       this.adminForm.markAllAsTouched();
       if (this.adminForm.invalid) return;
@@ -231,7 +225,10 @@ export class LoginComponent implements OnInit {
     this.authStore.loginWithPin(pin).subscribe({
       next: () => {
         this.pinLoading.set(false);
-        this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
+        // this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
+        this.authStore.isAuthenticated() && this.selectedRole() === 'manager'
+          ? this.router.navigate(['/management'])
+          : this.authStore.isAuthenticated() && this.router.navigate(['/cashier']);
       },
       error: () => {
         this.pinLoading.set(false);

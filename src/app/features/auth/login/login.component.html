@@ -107,14 +107,18 @@
           <div>
             <h1 class="login-card__title">
               {{
-                selectedRole() === 'superAdmin' || selectedRole() === 'manager' || selectedRole() === 'store'
+                selectedRole() === 'superAdmin' ||
+                selectedRole() === 'manager' ||
+                selectedRole() === 'store'
                   ? 'Enter Password'
                   : 'Enter PIN'
               }}
             </h1>
             <p class="login-card__subtitle">
               {{
-                selectedRole() === 'superAdmin' || selectedRole() === 'manager' || selectedRole() === 'store'
+                selectedRole() === 'superAdmin' ||
+                selectedRole() === 'manager' ||
+                selectedRole() === 'store'
                   ? 'Authenticate with your password'
                   : 'Enter your 5-digit PIN code'
               }}
@@ -148,7 +152,7 @@
         }
 
         <!-- ── SuperAdmin / Manager / Store: Reactive Form (Email + Password) ── -->
-        @if (selectedRole() === 'superAdmin' || selectedRole() === 'manager' || selectedRole() === 'store') {
+        @if (selectedRole() === 'superAdmin' || selectedRole() === 'store') {
           <form [formGroup]="adminForm" (ngSubmit)="authenticate()" novalidate>
             <!-- Email field -->
             <div
@@ -225,7 +229,12 @@
               </div>
             }
 
-            <button mat-flat-button type="submit" class="login-btn" [disabled]="adminForm.invalid || credLoading()">
+            <button
+              mat-flat-button
+              type="submit"
+              class="login-btn"
+              [disabled]="adminForm.invalid || credLoading()"
+            >
               @if (credLoading()) {
                 <span class="pin-spinner" aria-hidden="true"></span>
                 Signing in…
@@ -238,7 +247,7 @@
         }
 
         <!-- ── Cashier: PIN Pad ── -->
-        @if (selectedRole() === 'cashier') {
+        @if (selectedRole() === 'cashier' || selectedRole() === 'manager') {
           <!-- PIN dots — pulse when loading, error-tinted on failure -->
           <div class="pin-dots" aria-label="PIN entry" role="group">
             @for (filled of pinFilled(); track $index) {
