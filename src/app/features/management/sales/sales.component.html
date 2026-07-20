@@ -340,6 +340,7 @@
                   <button
                     mat-stroked-button
                     class="void-btn"
+                    *rbacAllow="['superAdmin']"
                     (click)="voidSale(sale)"
                     matTooltip="Void this sale and restore stock"
                     aria-label="Void sale"
@@ -347,10 +348,13 @@
                     <span class="material-icons">block</span>
                     Void
                   </button>
+                }
 
+                @if (!sale.confirmed) {
                   <!-- Return / Delete replacement -->
                   <button
                     mat-icon-button
+                    *rbacAllow="['superAdmin']"
                     class="delete-btn"
                     (click)="openReturnDialog(sale)"
                     matTooltip="Return items from this sale"

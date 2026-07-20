@@ -30,6 +30,7 @@ import { SaleDetailsDialogComponent } from './sale-details-dialog.component';
 import { ReturnItemsDialogComponent } from './return-items-dialog.component';
 import { MpesaMessageDialogComponent } from './mpesa-message-dialog.component';
 import moment from 'moment';
+import { RbacAllow } from '../../../core/directives/rbac-allow';
 
 type FilterStatus = 'all' | 'pending' | 'confirmed';
 
@@ -46,6 +47,7 @@ type FilterStatus = 'all' | 'pending' | 'confirmed';
     MatPaginatorModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
+    RbacAllow,
   ],
   templateUrl: './sales.component.html',
   styleUrl: './sales.component.scss',
