@@ -424,7 +424,7 @@ export class PaymentMethodDialogComponent {
   readonly paymentOptions: PaymentOption[] = [
     { method: 'Cash', icon: 'payments', label: 'Cash', description: 'Physical cash' },
     { method: 'M-Pesa', icon: 'phone_android', label: 'M-Pesa', description: 'Mobile money' },
-    { method: 'PDQ', icon: 'credit_card', label: 'PDQ', description: 'Card / terminal' },
+    // { method: 'PDQ', icon: 'credit_card', label: 'PDQ', description: 'Card / terminal' },
     { method: 'Split', icon: 'call_split', label: 'Split', description: 'Cash + M-Pesa' },
   ];
 
