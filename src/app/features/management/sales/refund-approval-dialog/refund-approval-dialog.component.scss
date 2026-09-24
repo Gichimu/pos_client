@@ -1,0 +1,134 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.refund-dialog {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 90vh;
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.refund-dialog__header {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.refund-dialog__content {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+  padding: 18px 24px 24px !important;
+  overflow-y: auto;
+}
+
+.refund-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: -18px -24px 0;
+  padding: 18px 24px 14px;
+  border-bottom: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.refund-notice > mat-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  color: #ea580c;
+  font-size: 20px;
+}
+
+.refund-notice__copy {
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.refund-notice__amount {
+  color: #9a3412;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.refund-dialog__summary {
+  display: block;
+}
+
+.identity-confirmation {
+  width: 100%;
+  max-width: 468px;
+  align-self: center;
+}
+
+.identity-confirmation h3 {
+  margin: 0 0 5px;
+  color: var(--color-text);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.identity-confirmation form {
+  margin-top: 10px;
+}
+
+.refund-dialog__request-error {
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff1f2;
+  color: #e11d48;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.refund-dialog__actions {
+  flex: 0 0 auto;
+  gap: 8px;
+  padding: 16px 24px !important;
+  border-top: 1px solid var(--color-border);
+}
+
+.refund-dialog__approve {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 479px) {
+  .refund-dialog__header {
+    padding: 16px;
+  }
+
+  .refund-dialog__content {
+    gap: 16px;
+    padding: 16px !important;
+  }
+
+  .refund-notice {
+    margin: -16px -16px 0;
+    padding: 16px;
+  }
+
+  .refund-dialog__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    padding: 12px 16px !important;
+  }
+
+  .refund-dialog__actions button {
+    width: 100%;
+    margin: 0 !important;
+  }
+}

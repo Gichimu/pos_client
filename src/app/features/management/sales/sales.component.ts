@@ -18,7 +18,8 @@ import { shiftStore } from '../../../store/shifts/shift.store';
 import { SaleItem, PaymentMethod } from '../../../core/models/sale.model';
 import { User } from '../../../core/models/user.model';
 import { Shift } from '../../../core/models/shift.model';
-import { MpesaMessage } from '../../../core/models/mpesa-message.model';
+import { RefundConfirmation } from '../../../core/models/refund.model';
+import { MpesaMessageDialogData, MpesaSelectionResult } from './refund-approval-dialog/refund-approval.models';
 import { ReceiptService } from '../../../core/services/receipt.service';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import {
@@ -399,20 +400,26 @@ export class SalesComponent implements OnInit {
             : 0;
 
       if (mpesaAmount && mpesaAmount > 0) {
-        const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
-          data: { requiredAmount: mpesaAmount },
+        const mpesaDialogRef = this.dialog.open<
+          MpesaMessageDialogComponent,
+          MpesaMessageDialogData,
+          MpesaSelectionResult
+        >(MpesaMessageDialogComponent, {
+          data: {
+            requiredAmount: mpesaAmount,
+            saleId: sale._id,
+            allowOverpaymentRefund: true,
+            expectedAmountLabel: result.paymentMethod === 'Split' ? 'M-Pesa amount due' : 'Sale total',
+          },
           maxWidth: '600px',
           width: '95vw',
           disableClose: true,
         });
 
-        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage[] | undefined) => {
-          if (!msg) return;
-          // this.finalizeConfirm(sale, result, msg.transactionId);
-          const messages: string[] = [];
-          msg.map((m) => messages.push(m.mpesaCode));
-          console.log('show the mpesa msgs', messages);
-          this.finalizeConfirm(sale, result, messages);
+        mpesaDialogRef.afterClosed().subscribe((selection) => {
+          if (!selection) return;
+          const messageCodes = selection.messages.map((message) => message.mpesaCode);
+          this.finalizeConfirm(sale, result, messageCodes, selection.refund);
         });
       } else {
         this.finalizeConfirm(sale, result); //show this if no mpesa amount is required
@@ -424,19 +431,30 @@ export class SalesComponent implements OnInit {
     sale: SaleItem,
     result: PaymentMethodDialogResult,
     mpesaId?: string[],
+    refund?: RefundConfirmation,
   ): void {
     const splitAmounts =
       result.paymentMethod === 'Split'
         ? { cashAmount: result.cashAmount!, mpesaAmount: result.mpesaAmount! }
         : undefined;
 
-    this.salesStore.confirmSale(sale._id!, result.paymentMethod, splitAmounts, mpesaId).subscribe({
-      next: () =>
-        this.sweetAlert.success(
-          `Sale ${this.getSaleIdLabel(sale)} confirmed via ${result.paymentMethod}`,
-        ),
-      error: () => this.sweetAlert.error('Failed to confirm sale. Please try again.'),
-    });
+    const mpesaMessageLabel = mpesaId?.length === 1 ? 'M-Pesa message' : 'M-Pesa messages';
+    this.salesStore
+      .confirmSale(sale._id!, result.paymentMethod, splitAmounts, mpesaId, refund)
+      .subscribe({
+        next: () =>
+          this.sweetAlert.success(
+            refund
+              ? `Refund of ${this.formatCurrency(refund.amount)} approved. Sale ${this.getSaleIdLabel(sale)} confirmed and ${mpesaId?.length ?? 0} ${mpesaMessageLabel} attached.`
+              : `Sale ${this.getSaleIdLabel(sale)} confirmed via ${result.paymentMethod}`,
+          ),
+        error: () =>
+          this.sweetAlert.error(
+            refund
+              ? 'Approval verification succeeded, but sale confirmation failed. No refund was recorded.'
+              : 'Failed to confirm sale. Please try again.',
+          ),
+      });
   }
 
   getSalePaymentMethod(sale: SaleItem): string | null {
@@ -565,17 +583,20 @@ export class SalesComponent implements OnInit {
             : 0;
 
       if (mpesaAmount && mpesaAmount > 0) {
-        const mpesaDialogRef = this.dialog.open(MpesaMessageDialogComponent, {
+        const mpesaDialogRef = this.dialog.open<
+          MpesaMessageDialogComponent,
+          MpesaMessageDialogData,
+          MpesaSelectionResult
+        >(MpesaMessageDialogComponent, {
           data: { requiredAmount: mpesaAmount },
           maxWidth: '600px',
           width: '95vw',
           disableClose: true,
         });
 
-        mpesaDialogRef.afterClosed().subscribe((msg: MpesaMessage[] | undefined) => {
-          if (!msg) return;
-          const messages: string[] = [];
-          msg.map((m) => messages.push(m.mpesaCode));
+        mpesaDialogRef.afterClosed().subscribe((selection) => {
+          if (!selection) return;
+          const messages = selection.messages.map((message) => message.mpesaCode);
           this.finalizeBulkConfirm(ids, result, messages);
         });
       } else {

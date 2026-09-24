@@ -1,0 +1,61 @@
+<div class="refund-dialog">
+  <header class="refund-dialog__header" mat-dialog-title>
+    <app-staff-identity-line [displayName]="data.approverDisplayName" />
+  </header>
+
+  <mat-dialog-content class="refund-dialog__content">
+    <section class="refund-notice" aria-describedby="refund-notice-copy">
+      <mat-icon aria-hidden="true">warning_amber</mat-icon>
+      <div>
+        <p id="refund-notice-copy" class="refund-notice__copy">
+          This payment is higher than the expected amount.
+        </p>
+        <strong class="refund-notice__amount">{{ formatCurrency(data.refundAmount) }}</strong>
+      </div>
+    </section>
+
+    <app-refund-calculation-summary
+      class="refund-dialog__summary"
+      [received]="data.selectedTotal"
+      [expectedAmount]="data.requiredAmount"
+      [refundAmount]="data.refundAmount"
+      [expectedAmountLabel]="data.expectedAmountLabel"
+    />
+
+    <section class="identity-confirmation" aria-labelledby="identity-confirmation-title">
+      <h3 id="identity-confirmation-title">Confirm your identity</h3>
+      <form id="refund-approval-form" (ngSubmit)="approve()" novalidate>
+        <app-password-reauthentication-field
+          [control]="passwordControl"
+          [errorMessage]="passwordError"
+        />
+        @if (requestError) {
+          <p class="refund-dialog__request-error" role="alert">{{ requestError }}</p>
+        }
+      </form>
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="refund-dialog__actions">
+    <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting()">
+      Cancel
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      form="refund-approval-form"
+      class="refund-dialog__approve"
+      [disabled]="passwordControl.invalid || isSubmitting()"
+    >
+      @if (isSubmitting()) {
+        <ng-container>
+          <mat-spinner diameter="16" aria-hidden="true" />
+          <span>Approving refund…</span>
+        </ng-container>
+      } @else {
+        <span>Approve refund</span>
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

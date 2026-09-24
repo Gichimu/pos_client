@@ -5,6 +5,7 @@ import { AuthActions } from '../../store/auth/auth.actions';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment.development';
 import { Observable } from 'rxjs';
+import { ReauthenticationRequest, ReauthenticationResult } from '../models/refund.model';
 
 const AUTH_STORAGE_KEY = 'pos_auth_user';
 
@@ -38,6 +39,13 @@ export class AuthService {
 
   loginWithPin(pin: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/auth/cashier-login`, { pin });
+  }
+
+  reauthenticate(request: ReauthenticationRequest): Observable<ReauthenticationResult> {
+    return this.http.post<ReauthenticationResult>(
+      `${environment.apiUrl}/auth/reauthenticate`,
+      request,
+    );
   }
 
   logout(refresh: string): Observable<any> {

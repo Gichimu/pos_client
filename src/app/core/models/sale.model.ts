@@ -16,6 +16,13 @@ export interface LineItem {
   transactionDate?: Date;
 }
 
+export interface SaleRefundAudit {
+  amount: number;
+  approvedBy?: string;
+  approvedAt?: Date | string;
+  approvalStatus?: 'approved';
+}
+
 export interface SaleItem {
   _id?: string;
   saleId?: string;
@@ -26,6 +33,7 @@ export interface SaleItem {
   totalAmount: number;
   confirmed: boolean;
   mpesaTransactionId?: string[];
+  refund?: SaleRefundAudit;
   createdAt?: Date;
 }
 

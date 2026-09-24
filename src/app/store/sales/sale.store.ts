@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { signalStore, withState, withMethods, patchState, withHooks } from '@ngrx/signals';
 import { PaymentMethod, SaleItem } from '../../core/models/sale.model';
+import { RefundConfirmation } from '../../core/models/refund.model';
 import { SalesService } from '../../core/services/sales-service';
 import { Observable, catchError, forkJoin, tap, throwError } from 'rxjs';
 
@@ -154,10 +155,11 @@ export const saleStore = signalStore(
       paymentMethod: PaymentMethod,
       splitAmounts?: { cashAmount: number; mpesaAmount: number },
       mpesaTransactionId?: string[],
+      refund?: RefundConfirmation,
     ): Observable<void> {
       return new Observable((observer) => {
         salesService
-          .confirmSale(saleId, paymentMethod, splitAmounts, mpesaTransactionId)
+          .confirmSale(saleId, paymentMethod, splitAmounts, mpesaTransactionId, refund)
           .subscribe({
             next: (updatedSale) => {
               patchState(store, {
@@ -165,7 +167,7 @@ export const saleStore = signalStore(
                   .items()
                   .map((s) =>
                     s._id === saleId
-                      ? { ...s, confirmed: true, paymentMethod, mpesaTransactionId }
+                      ? { ...s, ...updatedSale, confirmed: true, paymentMethod, mpesaTransactionId }
                       : s,
                   ),
               });

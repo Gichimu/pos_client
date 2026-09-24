@@ -4,6 +4,7 @@ import { environment } from '../../../environments/environment.development';
 import { Observable } from 'rxjs';
 import { LineItem, PaymentMethod, SaleItem } from '../models/sale.model';
 import { MpesaMessage } from '../models/mpesa-message.model';
+import { RefundConfirmation } from '../models/refund.model';
 
 @Injectable({
   providedIn: 'root',
@@ -66,12 +67,14 @@ export class SalesService {
     paymentMethod: PaymentMethod,
     splitAmounts?: { cashAmount: number; mpesaAmount: number },
     mpesaTransactionId?: string[],
+    refund?: RefundConfirmation,
   ): Observable<SaleItem> {
     return this.http.patch<SaleItem>(`${this.url}/sales/${saleId}/confirm`, {
       paymentMethod,
       confirmed: true,
       mpesaTransactionId,
       ...(splitAmounts ?? {}),
+      ...(refund ? { refund } : {}),
     });
   }
 

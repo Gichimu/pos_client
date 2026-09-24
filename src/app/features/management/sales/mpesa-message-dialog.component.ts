@@ -1,7 +1,7 @@
 import { Component, Inject, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule, MatSelectionListChange } from '@angular/material/list';
@@ -10,10 +10,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MpesaMessage } from '../../../core/models/mpesa-message.model';
 import { SalesService } from '../../../core/services/sales-service';
-
-export interface MpesaMessageDialogData {
-  requiredAmount: number;
-}
+import { authStore } from '../../../store/auth/auth.store';
+import { RefundApprovalDialogComponent } from './refund-approval-dialog/refund-approval-dialog.component';
+import { isExactPaymentAmount, overpaymentAmount } from './refund-approval-dialog/refund-approval.utils';
+import { MpesaMessageDialogData, MpesaSelectionResult } from './refund-approval-dialog/refund-approval.models';
 
 @Component({
   selector: 'app-mpesa-message-dialog',
@@ -189,14 +189,21 @@ export interface MpesaMessageDialogData {
             </div>
           }
 
-          @if (
-            selectionMode() === 'single' &&
-            selectedMessages().length > 0 &&
-            selectedMessages()[0].amount !== data.requiredAmount
-          ) {
-            <div class="mpesa-dialog__error">
+          @if (isOverpaid()) {
+            <div class="mpesa-dialog__refund-notice" role="status">
+              <mat-icon>warning_amber</mat-icon>
+              <span>
+                This payment is higher than the expected amount by
+                <strong>{{ formatCurrency(overpaymentAmount()) }}</strong>.
+              </span>
+            </div>
+            @if (refundActionError()) {
+              <div class="mpesa-dialog__error" role="alert">{{ refundActionError() }}</div>
+            }
+          } @else if (hasUnderpayment()) {
+            <div class="mpesa-dialog__error" role="status">
               <mat-icon>error_outline</mat-icon>
-              <span>Message amount does not match expected amount.</span>
+              <span>Selected amount is below the expected amount.</span>
             </div>
           }
         </div>
@@ -204,14 +211,26 @@ export interface MpesaMessageDialogData {
 
       <mat-dialog-actions align="end" class="mpesa-dialog__actions">
         <button mat-button (click)="cancel()">Cancel</button>
-        <button
-          mat-flat-button
-          color="primary"
-          [disabled]="!isValidSelection()"
-          (click)="confirm()"
-        >
-          Confirm Selection
-        </button>
+        @if (isOverpaid()) {
+          <button
+            mat-flat-button
+            color="primary"
+            class="refund-request-button"
+            (click)="requestRefund()"
+          >
+            <mat-icon>assignment_return</mat-icon>
+            Request refund · {{ formatCurrency(overpaymentAmount()) }}
+          </button>
+        } @else {
+          <button
+            mat-flat-button
+            color="primary"
+            [disabled]="!isValidSelection()"
+            (click)="confirm()"
+          >
+            Confirm Selection
+          </button>
+        }
       </mat-dialog-actions>
     </div>
   `,
@@ -449,6 +468,29 @@ export interface MpesaMessageDialogData {
         border-top: 1px solid var(--color-border);
         flex-shrink: 0;
       }
+      .refund-request-button mat-icon {
+        margin-right: 6px;
+      }
+      .mpesa-dialog__refund-notice {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 10px 12px;
+        border: 1px solid #fed7aa;
+        border-radius: 8px;
+        background: #fff7ed;
+        color: #9a3412;
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+      .mpesa-dialog__refund-notice mat-icon {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 18px;
+        color: #ea580c;
+        font-size: 18px;
+      }
       .mpesa-dialog__option--mismatch {
         opacity: 0.6;
       }
@@ -516,10 +558,13 @@ export interface MpesaMessageDialogData {
 })
 export class MpesaMessageDialogComponent implements OnInit {
   private readonly salesService = inject(SalesService);
+  private readonly dialog = inject(MatDialog);
+  private readonly currentAuth = inject(authStore);
 
   selectionMode = signal<'single' | 'multiple'>('single');
   searchQuery = signal('');
   selectedMessages = signal<MpesaMessage[]>([]);
+  readonly refundActionError = signal('');
 
   // Use a Set for O(1) lookups in the template
   private readonly selectedCodesSet = computed(() => {
@@ -548,13 +593,29 @@ export class MpesaMessageDialogComponent implements OnInit {
     return Math.max(0, remaining);
   });
 
-  isValidSelection = computed(() => {
-    const total = this.totalSelectedAmount();
-    return Math.abs(total - this.data.requiredAmount) < 0.01;
-  });
+  readonly overpaymentAmount = computed(() =>
+    overpaymentAmount(this.totalSelectedAmount(), this.data.requiredAmount),
+  );
+
+  readonly isOverpaid = computed(
+    () =>
+      this.data.allowOverpaymentRefund === true &&
+      this.data.saleId !== undefined &&
+      this.selectedMessages().length > 0 &&
+      this.overpaymentAmount() > 0,
+  );
+
+  readonly hasUnderpayment = computed(
+    () => this.selectedMessages().length > 0 && this.totalSelectedAmount() < this.data.requiredAmount - 0.009,
+  );
+
+  isValidSelection = computed(() =>
+    this.selectedMessages().length > 0 &&
+    isExactPaymentAmount(this.totalSelectedAmount(), this.data.requiredAmount),
+  );
 
   constructor(
-    private readonly dialogRef: MatDialogRef<MpesaMessageDialogComponent, MpesaMessage[]>,
+    private readonly dialogRef: MatDialogRef<MpesaMessageDialogComponent, MpesaSelectionResult>,
     @Inject(MAT_DIALOG_DATA) public readonly data: MpesaMessageDialogData,
   ) {}
 
@@ -565,12 +626,9 @@ export class MpesaMessageDialogComponent implements OnInit {
   getAllMessages() {
     this.salesService.getAllMpesaMessages().subscribe({
       next: (data) => {
-        console.log('1. HTTP Payload arrived safely:', data);
-        data = data.filter((d) => d.Date && !d.isUsed);
-        this.messages.set(data);
-        console.log('2. Signal state after setter assignment:', this.messages());
+        this.messages.set(data.filter((message) => message.Date && !message.isUsed));
       },
-      error: (err) => console.log(err),
+      error: () => this.messages.set([]),
     });
   }
 
@@ -629,19 +687,41 @@ export class MpesaMessageDialogComponent implements OnInit {
     if (this.isValidSelection()) {
       const selected = this.selectedMessages();
       if (selected.length === 0) return;
-
-      // if (this.selectionMode() === 'single') {
-      //   this.dialogRef.close(selected[0]);
-      // } else {
-      //   const compositeMessage: MpesaMessage = {
-      //     ...selected[0],
-      //     mpesaCode: selected.map((m) => m.mpesaCode).join(', '),
-      //     amount: this.totalSelectedAmount(),
-      //   };
-      //   this.dialogRef.close(compositeMessage);
-      // }
-      this.dialogRef.close(selected);
+      this.dialogRef.close({ messages: selected });
     }
+  }
+
+  requestRefund(): void {
+    if (!this.isOverpaid() || !this.data.saleId) return;
+
+    const user = this.currentAuth.user();
+    const displayName = user ? `${user.firstName} ${user.lastName}`.trim() || user.email : '';
+    if (!displayName) {
+      this.refundActionError.set('Unable to identify the signed-in staff member. Please sign in again.');
+      return;
+    }
+
+    this.refundActionError.set('');
+    const refundAmount = this.overpaymentAmount();
+    const refundDialog = this.dialog.open(RefundApprovalDialogComponent, {
+      width: '520px',
+      maxWidth: '95vw',
+      disableClose: false,
+      ariaLabelledBy: 'refund-approval-title',
+      data: {
+        saleId: this.data.saleId,
+        requiredAmount: this.data.requiredAmount,
+        selectedTotal: this.totalSelectedAmount(),
+        refundAmount,
+        expectedAmountLabel: this.data.expectedAmountLabel ?? 'Sale total',
+        approverDisplayName: displayName,
+      },
+    });
+
+    refundDialog.afterClosed().subscribe((refund) => {
+      if (!refund?.approvalToken || this.selectedMessages().length === 0) return;
+      this.dialogRef.close({ messages: this.selectedMessages(), refund });
+    });
   }
 
   cancel() {
