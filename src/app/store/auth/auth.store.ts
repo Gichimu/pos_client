@@ -4,6 +4,7 @@ import { inject } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { tap, catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
+import { ReauthenticationRequest } from '../../core/models/refund.model';
 
 type AuthState = {
   user: User | null;
@@ -44,6 +45,11 @@ export const authStore = signalStore(
           return throwError(() => error);
         }),
       );
+    },
+
+    reauthenticate(request: ReauthenticationRequest) {
+      // Re-authentication must not replace the current user or rotate the active session.
+      return authService.reauthenticate(request);
     },
 
     /** Authenticate a cashier using only their 5-digit PIN. */

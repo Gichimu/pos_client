@@ -24,6 +24,7 @@ describe('AuthService reauthentication', () => {
     service
       .reauthenticate({
         password: 'secret',
+        email: 'sam@example.test',
         purpose: 'mpesa-overpayment-refund',
         saleId: 'sale-1',
         refundAmount: 10,
@@ -34,6 +35,7 @@ describe('AuthService reauthentication', () => {
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({
       password: 'secret',
+      email: 'sam@example.test',
       purpose: 'mpesa-overpayment-refund',
       saleId: 'sale-1',
       refundAmount: 10,

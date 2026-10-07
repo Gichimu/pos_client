@@ -1,10 +1,9 @@
 import { Component, OnDestroy, ViewChild, inject, signal } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { AuthService } from '../../../../core/services/auth.service';
 import { authStore } from '../../../../store/auth/auth.store';
 import { RefundApprovalDialogData, RefundApprovalStatus } from './refund-approval.models';
 import { RefundConfirmation } from '../../../../core/models/refund.model';
@@ -16,6 +15,7 @@ import { PasswordReauthenticationFieldComponent } from './password-reauthenticat
   selector: 'app-refund-approval-dialog',
   standalone: true,
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatDialogModule,
@@ -30,7 +30,6 @@ import { PasswordReauthenticationFieldComponent } from './password-reauthenticat
 })
 export class RefundApprovalDialogComponent implements OnDestroy {
   readonly data = inject<RefundApprovalDialogData>(MAT_DIALOG_DATA);
-  private readonly authService = inject(AuthService);
   private readonly authStore = inject(authStore);
   private readonly dialogRef = inject(
     MatDialogRef<RefundApprovalDialogComponent, RefundConfirmation>,
@@ -77,13 +76,21 @@ export class RefundApprovalDialogComponent implements OnDestroy {
 
     const password = this.passwordControl.value;
     const email = this.authStore.user()?.email;
+    if (!email) {
+      this.passwordControl.reset('');
+      this.status.set('request-error');
+      this.passwordField?.focus();
+      return;
+    }
+
+    this.status.set('submitting');
     this.isSubmitting.set(true);
     this.dialogRef.disableClose = true;
 
-    this.authService
+    this.authStore
       .reauthenticate({
         password,
-        email: email || '',
+        email,
         purpose: 'mpesa-overpayment-refund',
         saleId: this.data.saleId,
         refundAmount: this.data.refundAmount,
@@ -98,7 +105,6 @@ export class RefundApprovalDialogComponent implements OnDestroy {
             this.setIdle();
             return;
           }
-
           this.dialogRef.close({
             amount: this.data.refundAmount,
             approvalToken: result.approvalToken,
@@ -107,6 +113,7 @@ export class RefundApprovalDialogComponent implements OnDestroy {
         },
         error: (error: { status?: number }) => {
           this.passwordControl.reset('');
+          this.passwordControl.markAsTouched();
           this.status.set(error.status === 401 ? 'invalid-password' : 'request-error');
           this.passwordField?.focus();
           this.setIdle();

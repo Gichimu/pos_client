@@ -14,6 +14,7 @@ import autoTable from 'jspdf-autotable';
 import { saleStore } from '../../../../store/sales/sale.store';
 import { userStore } from '../../../../store/users/user.store';
 import { productStore } from '../../../../store/products/product.store';
+import moment from 'moment';
 
 Chart.register(...registerables);
 
@@ -41,10 +42,16 @@ function toISODate(d: Date): string {
   return d.toISOString().split('T')[0];
 }
 
-function computeDateRange(period: 'day' | 'week' | 'month'): { startDate: string; endDate: string } {
-  const now = new Date();
+function computeDateRange(period: 'day' | 'week' | 'month'): {
+  startDate: string;
+  endDate: string;
+} {
+  // const now = new Date();
+  const now = moment().toDate();
+  const startofday = moment(now).startOf(period);
   const end = toISODate(now);
-  if (period === 'day') return { startDate: end, endDate: end };
+  // if (period === 'day') return { startDate: end, endDate: end };
+  if (period === 'day') return { startDate: startofday.format('YYYY-MM-DD'), endDate: end };
   if (period === 'week') {
     const start = new Date(now);
     start.setDate(now.getDate() - 6);
@@ -130,9 +137,7 @@ export class SalesReportCardComponent implements OnInit {
           return d >= weekAgo;
         }
         if (p === 'month') {
-          return (
-            d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-          );
+          return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
         }
         if (p === 'custom') {
           if (!from || !to) return false;
@@ -303,7 +308,8 @@ export class SalesReportCardComponent implements OnInit {
   // ── Lifecycle ──────────────────────────────────────────────
   ngOnInit(): void {
     // Fire the initial API call for the default 'day' period
-    this.fetchForCurrentPeriod();
+    // this.fetchForCurrentPeriod();
+    this.setPeriod('day');
   }
 
   // ── Helpers ────────────────────────────────────────────────
@@ -414,11 +420,16 @@ export class SalesReportCardComponent implements OnInit {
     doc.line(14, 54, 196, 54);
 
     // ── Data table ────────────────────────────────────────
-    const colLabel = this.groupBy() === 'category' ? 'Item'
-      : this.groupBy() === 'cashier' ? 'Cashier'
-      : this.groupBy() === 'product' ? 'Product'
-      : this.groupBy() === 'payment' ? 'Payment Method'
-      : 'Group';
+    const colLabel =
+      this.groupBy() === 'category'
+        ? 'Item'
+        : this.groupBy() === 'cashier'
+          ? 'Cashier'
+          : this.groupBy() === 'product'
+            ? 'Product'
+            : this.groupBy() === 'payment'
+              ? 'Payment Method'
+              : 'Group';
 
     autoTable(doc, {
       startY: 60,

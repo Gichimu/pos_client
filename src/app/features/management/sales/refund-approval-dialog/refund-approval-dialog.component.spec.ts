@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { AuthService } from '../../../../core/services/auth.service';
 import { RefundApprovalDialogComponent } from './refund-approval-dialog.component';
 import { RefundApprovalDialogData } from './refund-approval.models';
+import { authStore } from '../../../../store/auth/auth.store';
 
 const dialogData: RefundApprovalDialogData = {
   saleId: 'sale-1',
@@ -17,19 +17,24 @@ const dialogData: RefundApprovalDialogData = {
 
 describe('RefundApprovalDialogComponent', () => {
   const dialogRef = { close: vi.fn(), disableClose: false };
-  const authService = { reauthenticate: vi.fn() };
+  const auth = {
+    user: () => ({ firstName: 'Sam', lastName: 'Cashier', email: 'sam@example.test' }),
+    isAuthenticated: () => true,
+    pendingUser: () => null,
+    reauthenticate: vi.fn(),
+  };
 
   beforeEach(async () => {
     dialogRef.close.mockReset();
     dialogRef.disableClose = false;
-    authService.reauthenticate.mockReset();
+    auth.reauthenticate.mockReset();
 
     await TestBed.configureTestingModule({
       imports: [RefundApprovalDialogComponent],
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: dialogData },
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: AuthService, useValue: authService },
+        { provide: authStore, useValue: auth },
       ],
     }).compileComponents();
   });
@@ -45,16 +50,31 @@ describe('RefundApprovalDialogComponent', () => {
     fixture.destroy();
   });
 
-  it('does not submit an empty password', () => {
+  it('prevents native form navigation when the approval form is submitted', () => {
+    auth.reauthenticate.mockReturnValue(of({ verified: false }));
+    const fixture = TestBed.createComponent(RefundApprovalDialogComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.passwordControl.setValue('wrong-password');
+
+    const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
+    const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+    form.dispatchEvent(submitEvent);
+
+    expect(submitEvent.defaultPrevented).toBe(true);
+    expect(auth.reauthenticate).toHaveBeenCalledTimes(1);
+    fixture.destroy();
+  });
+
+  it('does not reauthenticate with an empty password', () => {
     const fixture = TestBed.createComponent(RefundApprovalDialogComponent);
     fixture.componentInstance.approve();
 
-    expect(authService.reauthenticate).not.toHaveBeenCalled();
+    expect(auth.reauthenticate).not.toHaveBeenCalled();
     expect(fixture.componentInstance.passwordControl.touched).toBe(true);
   });
 
   it('returns the refund only after server verification supplies a token', () => {
-    authService.reauthenticate.mockReturnValue(
+    auth.reauthenticate.mockReturnValue(
       of({ verified: true, approvalToken: 'short-lived-token' }),
     );
     const fixture = TestBed.createComponent(RefundApprovalDialogComponent);
@@ -62,8 +82,9 @@ describe('RefundApprovalDialogComponent', () => {
 
     fixture.componentInstance.approve();
 
-    expect(authService.reauthenticate).toHaveBeenCalledWith({
+    expect(auth.reauthenticate).toHaveBeenCalledWith({
       password: 'correct-password',
+      email: 'sam@example.test',
       purpose: 'mpesa-overpayment-refund',
       saleId: 'sale-1',
       refundAmount: 10,
@@ -77,7 +98,7 @@ describe('RefundApprovalDialogComponent', () => {
   });
 
   it('keeps the dialog open and clears the password when verification fails', () => {
-    authService.reauthenticate.mockReturnValue(of({ verified: false }));
+    auth.reauthenticate.mockReturnValue(of({ verified: false }));
     const fixture = TestBed.createComponent(RefundApprovalDialogComponent);
     fixture.componentInstance.passwordControl.setValue('wrong-password');
 
@@ -90,7 +111,7 @@ describe('RefundApprovalDialogComponent', () => {
   });
 
   it('shows a recoverable error when the reauthentication service fails', () => {
-    authService.reauthenticate.mockReturnValue(throwError(() => ({ status: 500 })));
+    auth.reauthenticate.mockReturnValue(throwError(() => ({ status: 500 })));
     const fixture = TestBed.createComponent(RefundApprovalDialogComponent);
     fixture.componentInstance.passwordControl.setValue('password');
 

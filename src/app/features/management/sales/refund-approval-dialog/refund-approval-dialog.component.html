@@ -24,7 +24,12 @@
 
     <section class="identity-confirmation" aria-labelledby="identity-confirmation-title">
       <h3 id="identity-confirmation-title">Confirm your identity</h3>
-      <form id="refund-approval-form" (ngSubmit)="approve()" novalidate>
+      <form
+        id="refund-approval-form"
+        #refundApprovalForm="ngForm"
+        (ngSubmit)="approve()"
+        novalidate
+      >
         <app-password-reauthentication-field
           [control]="passwordControl"
           [errorMessage]="passwordError"

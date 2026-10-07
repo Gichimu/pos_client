@@ -6,6 +6,7 @@ import { catchError, switchMap, throwError } from 'rxjs';
 /** Auth endpoints must never trigger the refresh logic — they are the refresh. */
 const AUTH_PATHS = ['/auth/login', '/auth/refresh-token', '/auth/logout', '/auth/confirm-account'];
 const isAuthUrl = (url: string) => AUTH_PATHS.some((p) => url.includes(p));
+const isReauthenticationUrl = (url: string) => url.includes('/auth/reauthenticate');
 
 export const authInterceporInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -46,7 +47,10 @@ export const authInterceporInterceptor: HttpInterceptorFn = (req, next) => {
   // ── 3. React to unexpected 401 (e.g. token revoked server-side) ──────────
   return next(authReq).pipe(
     catchError((error) => {
-      if (error.status !== 401 || !refreshToken) {
+      // A failed password re-authentication is not evidence that the bearer
+      // session is expired. Preserve the active session and let the dialog
+      // show the credential error instead of rotating/clearing auth tokens.
+      if (error.status !== 401 || !refreshToken || isReauthenticationUrl(req.url)) {
         return throwError(() => error);
       }
 

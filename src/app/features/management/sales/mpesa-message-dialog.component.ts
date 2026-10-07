@@ -1,7 +1,12 @@
 import { Component, Inject, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatDialog, MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule, MatSelectionListChange } from '@angular/material/list';
@@ -12,8 +17,14 @@ import { MpesaMessage } from '../../../core/models/mpesa-message.model';
 import { SalesService } from '../../../core/services/sales-service';
 import { authStore } from '../../../store/auth/auth.store';
 import { RefundApprovalDialogComponent } from './refund-approval-dialog/refund-approval-dialog.component';
-import { isExactPaymentAmount, overpaymentAmount } from './refund-approval-dialog/refund-approval.utils';
-import { MpesaMessageDialogData, MpesaSelectionResult } from './refund-approval-dialog/refund-approval.models';
+import {
+  isExactPaymentAmount,
+  overpaymentAmount,
+} from './refund-approval-dialog/refund-approval.utils';
+import {
+  MpesaMessageDialogData,
+  MpesaSelectionResult,
+} from './refund-approval-dialog/refund-approval.models';
 
 @Component({
   selector: 'app-mpesa-message-dialog',
@@ -194,7 +205,8 @@ import { MpesaMessageDialogData, MpesaSelectionResult } from './refund-approval-
               <mat-icon>warning_amber</mat-icon>
               <span>
                 This payment is higher than the expected amount by
-                <strong>{{ formatCurrency(overpaymentAmount()) }}</strong>.
+                <strong>{{ formatCurrency(overpaymentAmount()) }}</strong
+                >.
               </span>
             </div>
             @if (refundActionError()) {
@@ -606,12 +618,15 @@ export class MpesaMessageDialogComponent implements OnInit {
   );
 
   readonly hasUnderpayment = computed(
-    () => this.selectedMessages().length > 0 && this.totalSelectedAmount() < this.data.requiredAmount - 0.009,
+    () =>
+      this.selectedMessages().length > 0 &&
+      this.totalSelectedAmount() < this.data.requiredAmount - 0.009,
   );
 
-  isValidSelection = computed(() =>
-    this.selectedMessages().length > 0 &&
-    isExactPaymentAmount(this.totalSelectedAmount(), this.data.requiredAmount),
+  isValidSelection = computed(
+    () =>
+      this.selectedMessages().length > 0 &&
+      isExactPaymentAmount(this.totalSelectedAmount(), this.data.requiredAmount),
   );
 
   constructor(
@@ -697,7 +712,9 @@ export class MpesaMessageDialogComponent implements OnInit {
     const user = this.currentAuth.user();
     const displayName = user ? `${user.firstName} ${user.lastName}`.trim() || user.email : '';
     if (!displayName) {
-      this.refundActionError.set('Unable to identify the signed-in staff member. Please sign in again.');
+      this.refundActionError.set(
+        'Unable to identify the signed-in staff member. Please sign in again.',
+      );
       return;
     }
 

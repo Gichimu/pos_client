@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { of } from 'rxjs';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MpesaMessage } from '../../../core/models/mpesa-message.model';
 import { SalesService } from '../../../core/services/sales-service';
 import { authStore } from '../../../store/auth/auth.store';
@@ -28,14 +28,15 @@ describe('MpesaMessageDialogComponent refund entry point', () => {
   const auth = {
     user: () => ({ firstName: 'Sam', lastName: 'Cashier', email: 'sam@example.test' }),
   };
-  const nestedDialogRef = { afterClosed: () => of(undefined) };
-  const dialog = { open: vi.fn(() => nestedDialogRef) };
+  let refundResult: { amount: number; approvalToken: string } | undefined;
+  const nestedDialogRef = { afterClosed: () => of(refundResult) };
   const salesService = { getAllMpesaMessages: vi.fn(() => of([message])) };
+
+  afterEach(() => vi.restoreAllMocks());
 
   beforeEach(async () => {
     pickerRef.close.mockReset();
-    dialog.open.mockReset();
-    dialog.open.mockReturnValue(nestedDialogRef);
+    refundResult = undefined;
     salesService.getAllMpesaMessages.mockReturnValue(of([message]));
 
     await TestBed.configureTestingModule({
@@ -43,7 +44,6 @@ describe('MpesaMessageDialogComponent refund entry point', () => {
       providers: [
         { provide: MAT_DIALOG_DATA, useValue: pickerData },
         { provide: MatDialogRef, useValue: pickerRef },
-        { provide: MatDialog, useValue: dialog },
         { provide: authStore, useValue: auth },
         { provide: SalesService, useValue: salesService },
       ],
@@ -63,6 +63,7 @@ describe('MpesaMessageDialogComponent refund entry point', () => {
   });
 
   it('preserves the selected message when refund approval is cancelled', () => {
+    const openDialog = vi.spyOn(MatDialog.prototype, 'open').mockReturnValue(nestedDialogRef as any);
     const fixture = TestBed.createComponent(MpesaMessageDialogComponent);
     const component = fixture.componentInstance;
     component.selectedMessages.set([message]);
@@ -71,7 +72,7 @@ describe('MpesaMessageDialogComponent refund entry point', () => {
     component.requestRefund();
 
     expect(component.refundActionError()).toBe('');
-    expect(dialog.open).toHaveBeenCalledWith(
+    expect(openDialog).toHaveBeenCalledWith(
       expect.any(Function),
       expect.objectContaining({
         data: expect.objectContaining({
@@ -85,6 +86,22 @@ describe('MpesaMessageDialogComponent refund entry point', () => {
     );
     expect(component.selectedMessages()).toEqual([message]);
     expect(pickerRef.close).not.toHaveBeenCalled();
+    fixture.destroy();
+  });
+
+  it('returns the selected M-Pesa message with an approved refund', () => {
+    refundResult = { amount: 10, approvalToken: 'one-use-token' };
+    vi.spyOn(MatDialog.prototype, 'open').mockReturnValue(nestedDialogRef as any);
+    const fixture = TestBed.createComponent(MpesaMessageDialogComponent);
+    const component = fixture.componentInstance;
+    component.selectedMessages.set([message]);
+
+    component.requestRefund();
+
+    expect(pickerRef.close).toHaveBeenCalledWith({
+      messages: [message],
+      refund: refundResult,
+    });
     fixture.destroy();
   });
 

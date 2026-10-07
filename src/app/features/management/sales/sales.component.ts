@@ -19,7 +19,10 @@ import { SaleItem, PaymentMethod } from '../../../core/models/sale.model';
 import { User } from '../../../core/models/user.model';
 import { Shift } from '../../../core/models/shift.model';
 import { RefundConfirmation } from '../../../core/models/refund.model';
-import { MpesaMessageDialogData, MpesaSelectionResult } from './refund-approval-dialog/refund-approval.models';
+import {
+  MpesaMessageDialogData,
+  MpesaSelectionResult,
+} from './refund-approval-dialog/refund-approval.models';
 import { ReceiptService } from '../../../core/services/receipt.service';
 import { SweetAlertService } from '../../../core/services/sweet-alert.service';
 import {
@@ -409,7 +412,8 @@ export class SalesComponent implements OnInit {
             requiredAmount: mpesaAmount,
             saleId: sale._id,
             allowOverpaymentRefund: true,
-            expectedAmountLabel: result.paymentMethod === 'Split' ? 'M-Pesa amount due' : 'Sale total',
+            expectedAmountLabel:
+              result.paymentMethod === 'Split' ? 'M-Pesa amount due' : 'Sale total',
           },
           maxWidth: '600px',
           width: '95vw',
@@ -419,7 +423,7 @@ export class SalesComponent implements OnInit {
         mpesaDialogRef.afterClosed().subscribe((selection) => {
           if (!selection) return;
           const messageCodes = selection.messages.map((message) => message.mpesaCode);
-          this.finalizeConfirm(sale, result, messageCodes, selection.refund);
+          // this.finalizeConfirm(sale, result, messageCodes, selection.refund);
         });
       } else {
         this.finalizeConfirm(sale, result); //show this if no mpesa amount is required
