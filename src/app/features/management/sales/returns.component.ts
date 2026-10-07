@@ -282,7 +282,9 @@ export class ReturnsComponent implements OnInit {
             ),
           });
 
-        this.sweetAlert.success(`Return confirmed. Receipt reprinted.`);
+        this.sweetAlert.success(
+          `Return confirmed.` + (updatedSale.items.length > 0 ? ` Receipt reprinted.` : ''),
+        );
       },
       error: () => this.sweetAlert.error('Failed to confirm return'),
     });
