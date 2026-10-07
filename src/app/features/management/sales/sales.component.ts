@@ -423,7 +423,7 @@ export class SalesComponent implements OnInit {
         mpesaDialogRef.afterClosed().subscribe((selection) => {
           if (!selection) return;
           const messageCodes = selection.messages.map((message) => message.mpesaCode);
-          // this.finalizeConfirm(sale, result, messageCodes, selection.refund);
+          this.finalizeConfirm(sale, result, messageCodes, selection.refund);
         });
       } else {
         this.finalizeConfirm(sale, result); //show this if no mpesa amount is required
