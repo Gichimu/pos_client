@@ -566,7 +566,7 @@ export class SalesComponent implements OnInit {
       PaymentMethodDialogResult
     >(PaymentMethodDialogComponent, {
       data: {
-        saleId: '',
+        saleId: 'bulk',
         saleIdLabel: `${ids.length} sale${ids.length > 1 ? 's' : ''}`,
         totalAmount: combinedTotal,
         isBulk: true,
@@ -592,7 +592,12 @@ export class SalesComponent implements OnInit {
           MpesaMessageDialogData,
           MpesaSelectionResult
         >(MpesaMessageDialogComponent, {
-          data: { requiredAmount: mpesaAmount },
+          data: {
+            requiredAmount: mpesaAmount,
+            saleId: 'bulk',
+            allowOverpaymentRefund: true,
+            expectedAmountLabel: 'M-Pesa amount due',
+          },
           maxWidth: '600px',
           width: '95vw',
           disableClose: true,
