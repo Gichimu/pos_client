@@ -168,7 +168,13 @@
                 autocomplete="email"
                 aria-label="Email address"
                 aria-describedby="email-error"
+                [matAutocomplete]="auto"
               />
+              <mat-autocomplete #auto="matAutocomplete">
+                @for (email of emailSuggestions(); track $index) {
+                  <mat-option [value]="email">{{ email }}</mat-option>
+                }
+              </mat-autocomplete>
             </div>
 
             <!-- Inline email validation errors -->

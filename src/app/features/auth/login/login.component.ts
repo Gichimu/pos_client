@@ -2,6 +2,7 @@ import { Component, inject, Signal, signal, computed, OnInit } from '@angular/co
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
 import { MatRippleModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
@@ -20,7 +21,14 @@ export type PinPadKey = (typeof PIN_PAD_KEYS)[number];
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, ReactiveFormsModule, MatButtonModule, MatIconModule, MatRippleModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatAutocompleteModule,
+    MatIconModule,
+    MatRippleModule,
+  ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
 })
@@ -32,6 +40,12 @@ export class LoginComponent implements OnInit {
 
   store = inject(userStore);
   users = this.store.users as Signal<any[]>;
+  emailSuggestions = computed(() => {
+    return this.users()
+      .filter((u) => u.roles && u.roles.length > 0 && u.roles.includes('superAdmin'))
+      .map((u) => u.email);
+    // .slice(0, 5);
+  });
 
   authStore = inject(authStore);
   authUser = this.authStore.user as Signal<User | null>;
@@ -88,7 +102,6 @@ export class LoginComponent implements OnInit {
       const fromApi = this.users().find(
         (u) => u.roles && u.roles.includes(role) && u.email === emailVal && u.status === 'active',
       );
-      console.log('from api', fromApi);
       return (
         fromApi ??
         MOCK_USERS.find(
@@ -114,7 +127,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     this.store.loadUsers().subscribe({
       error: () => {
-        console.warn('Failed to load users from API. Falling back to mock data.');
+        console.warn('Failed to load users from API.');
       },
     });
 
