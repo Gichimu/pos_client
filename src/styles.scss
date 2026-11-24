@@ -123,6 +123,99 @@ body {
   }
 }
 
+// Staff status filter panel (MatMenu overlay)
+.status-filter-panel.mat-mdc-menu-panel {
+  min-width: 262px !important;
+  max-width: 262px !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  background: #fdfefe !important;
+  box-shadow:
+    0 24px 48px -12px rgba(15, 23, 42, 0.32),
+    0 2px 6px rgba(15, 23, 42, 0.07),
+    inset 0 1px 0 #fff !important;
+  overflow: hidden !important;
+
+  .mat-mdc-menu-content {
+    padding: 8px !important;
+  }
+
+  .status-filter-option.mat-mdc-menu-item {
+    height: 34px !important;
+    min-height: 34px !important;
+    margin-top: 4px;
+    padding: 0 12px !important;
+    border-radius: 999px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    letter-spacing: 0 !important;
+    color: #334155 !important;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    .mat-mdc-menu-item-text {
+      display: flex !important;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+    }
+
+    .mat-mdc-menu-ripple {
+      border-radius: 999px !important;
+    }
+
+    &:hover:not(.status-filter-option--selected) {
+      background: #f1f5f9 !important;
+    }
+  }
+
+  .status-filter-option--selected.mat-mdc-menu-item {
+    background: var(--color-primary) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 8px 16px -6px rgba(37, 99, 235, 0.55);
+
+    .status-filter-option__count {
+      color: #fff !important;
+    }
+
+    .lamp {
+      background: #fff !important;
+    }
+  }
+
+  .lamp {
+    width: 8px;
+    height: 8px;
+    flex: none;
+    border-radius: 50%;
+    display: inline-block;
+
+    &--all { background: #64748b; }
+    &--active { background: #22c55e; }
+    &--inactive { background: #94a3b8; }
+    &--pending { background: #d97706; }
+  }
+
+  .status-filter-option__count {
+    margin-left: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+  }
+
+  .status-filter-option__check {
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+    color: #fff;
+  }
+}
+
 // ─── User profile menu ───────────────────────────────────────────────────────
 .user-menu {
   min-width: 200px !important;

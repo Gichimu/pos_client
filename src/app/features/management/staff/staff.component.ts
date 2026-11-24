@@ -9,7 +9,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { User } from '../../../core/models/user.model';
+import { User, UserStatus } from '../../../core/models/user.model';
 import { userStore } from '../../../store/users/user.store';
 import {
   StaffFormModalComponent,
@@ -45,47 +45,58 @@ export class StaffComponent implements OnInit {
     this.userstore.loadUsers().subscribe();
   }
 
-  readonly adminCount = computed(
-    () => this.userstore.users().filter((u) => u.roles.includes('superAdmin')).length,
-  );
-
-  readonly managerCount = computed(
-    () => this.userstore.users().filter((u) => u.roles.includes('manager')).length,
-  );
-
-  readonly cashierCount = computed(
-    () => this.userstore.users().filter((u) => u.roles.includes('cashier')).length,
-  );
-
-  readonly activeCount = computed(
-    () => this.userstore.users().filter((u) => u.status === 'active').length,
-  );
-
-  readonly pendingCount = computed(
-    () => this.userstore.users().filter((u) => u.status === 'pending').length,
-  );
-
-  readonly inactiveCount = computed(
-    () => this.userstore.users().filter((u) => u.status === 'inactive').length,
-  );
-
   readonly displayedColumns = ['avatar', 'name', 'email', 'roles', 'status', 'actions'];
 
+  /** Options rendered in the status filter menu, in display order. */
+  readonly statusOptions: ReadonlyArray<{
+    value: UserStatus | 'all';
+    label: string;
+    lampClass: string;
+  }> = [
+    { value: 'all', label: 'All', lampClass: 'lamp--all' },
+    { value: 'active', label: 'Active', lampClass: 'lamp--active' },
+    { value: 'inactive', label: 'Inactive', lampClass: 'lamp--inactive' },
+    { value: 'pending', label: 'Pending', lampClass: 'lamp--pending' },
+  ];
+
   searchQuery = signal('');
+  statusFilter = signal<UserStatus | 'all'>('all');
+
+  /** Members matching the search query, before the status filter is applied. */
+  readonly searchedStaff = computed(() => {
+    const q = this.searchQuery().trim().toLowerCase();
+    const users = this.userstore.users();
+    if (!q) return users;
+
+    return users.filter(
+      (u) =>
+        u.firstName.toLowerCase().includes(q) ||
+        u.lastName.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.roles.some((role) => role.toLowerCase().includes(q)),
+    );
+  });
+
+  /** Per-status totals, scoped to the current search results. */
+  readonly statusCounts = computed(() => {
+    const staff = this.searchedStaff();
+    return {
+      all: staff.length,
+      active: staff.filter((u) => u.status === 'active').length,
+      inactive: staff.filter((u) => u.status === 'inactive').length,
+      pending: staff.filter((u) => u.status === 'pending').length,
+    };
+  });
 
   readonly filteredStaff = computed(() => {
-    const q = this.searchQuery().toLowerCase();
-    return q
-      ? this.userstore
-          .users()
-          .filter(
-            (u) =>
-              u.firstName.toLowerCase().includes(q) ||
-              u.lastName.toLowerCase().includes(q) ||
-              u.email.toLowerCase().includes(q) ||
-              u.roles.some((role) => role.toLowerCase().includes(q)),
-          )
-      : this.userstore.users();
+    const status = this.statusFilter();
+    const staff = this.searchedStaff();
+    return status === 'all' ? staff : staff.filter((u) => u.status === status);
+  });
+
+  readonly statusFilterLabel = computed(() => {
+    const status = this.statusFilter();
+    return status === 'all' ? 'All' : this.getStatusLabel(status);
   });
 
   // ── Pagination ────────────────────────────────────────────
@@ -100,6 +111,15 @@ export class StaffComponent implements OnInit {
   onSearch(value: string) {
     this.searchQuery.set(value);
     this.pageIndex.set(0);
+  }
+
+  setStatusFilter(status: UserStatus | 'all'): void {
+    this.statusFilter.set(status);
+    this.pageIndex.set(0);
+  }
+
+  clearStatusFilter(): void {
+    this.setStatusFilter('all');
   }
 
   onPageChange(event: PageEvent): void {
