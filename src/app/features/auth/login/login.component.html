@@ -34,7 +34,7 @@
         </button>
 
         <!-- Manager -->
-        <button
+        <!-- <button
           matRipple
           class="role-card"
           [class.role-card--selected]="selectedRole() === 'manager'"
@@ -49,7 +49,7 @@
           @if (selectedRole() === 'manager') {
             <div class="role-card__check"><mat-icon>check_circle</mat-icon></div>
           }
-        </button>
+        </button> -->
 
         <!-- Cashier -->
         <button
@@ -70,7 +70,7 @@
         </button>
 
         <!-- Store -->
-        <button
+        <!-- <button
           matRipple
           class="role-card"
           [class.role-card--selected]="selectedRole() === 'store'"
@@ -85,7 +85,7 @@
           @if (selectedRole() === 'store') {
             <div class="role-card__check"><mat-icon>check_circle</mat-icon></div>
           }
-        </button>
+        </button> -->
       </div>
 
       <button mat-flat-button class="login-btn" [disabled]="!selectedRole()" (click)="proceed()">
